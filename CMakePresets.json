@@ -1,0 +1,146 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-base",
+            "hidden": true,
+            "description": "Base settings for Windows builds",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/install/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "environment": {
+                "HIP_PATH": "C:/opt/rocm",
+                "HIP_PLATFORM": "amd",
+                "HIP_USE_PERL_SCRIPTS": "0"
+            },
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{HIP_PATH};$env{HIP_PATH}/lib/cmake;$env{CMAKE_PREFIX_PATH}",
+                "CMAKE_MODULE_PATH": "$env{HIP_PATH}/cmake;$env{CMAKE_MODULE_PATH}"
+            }
+        },
+        {
+            "name": "vs2022-debug",
+            "displayName": "Visual Studio 2022 Debug",
+            "description": "Configure with Visual Studio 2022 (Debug)",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "vs2022-release",
+            "displayName": "Visual Studio 2022 Release",
+            "description": "Configure with Visual Studio 2022 (Release)",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "clang-debug",
+            "displayName": "Clang Debug",
+            "description": "Configure with ROCm Clang (Debug)",
+            "inherits": "windows-base",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "$env{HIP_PATH}/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe"
+            }
+        },
+        {
+            "name": "clang-release",
+            "displayName": "Clang Release",
+            "description": "Configure with ROCm Clang (Release)",
+            "inherits": "windows-base",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_C_COMPILER": "$env{HIP_PATH}/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "vs2022-debug",
+            "displayName": "Visual Studio 2022 Debug",
+            "configurePreset": "vs2022-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "vs2022-release",
+            "displayName": "Visual Studio 2022 Release",
+            "configurePreset": "vs2022-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "clang-debug",
+            "displayName": "Clang Debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "displayName": "Clang Release",
+            "configurePreset": "clang-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-base",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true
+            }
+        },
+        {
+            "name": "vs2022-debug",
+            "displayName": "Visual Studio 2022 Debug Tests",
+            "inherits": "test-base",
+            "configurePreset": "vs2022-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "vs2022-release",
+            "displayName": "Visual Studio 2022 Release Tests",
+            "inherits": "test-base",
+            "configurePreset": "vs2022-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "clang-debug",
+            "displayName": "Clang Debug Tests",
+            "inherits": "test-base",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "displayName": "Clang Release Tests",
+            "inherits": "test-base",
+            "configurePreset": "clang-release"
+        }
+    ]
+}
