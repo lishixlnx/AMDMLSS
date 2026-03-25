@@ -23,6 +23,7 @@ namespace mlss
         //---------------------------------------------------------------------
         std::string m_asic;
         std::vector<Op> m_ops;
+        std::error_code m_lastError;
         bool m_wasGetCapsCalled = false;
     };
 

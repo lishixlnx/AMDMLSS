@@ -2,6 +2,7 @@
 
 
 
+#include <cstdint>
 namespace mlss
 {
     // using booltype = bool;  // Replaced with bool
@@ -15,7 +16,7 @@ namespace mlss
     public:
         using object_type = ObjectType;
         using pointer = object_type*;
-        using handle_type = std::uint64_t;  // For storing addresses  
+        using handle_type = std::uintptr_t;  // For storing addresses  
 
         //---------------------------------------------------------------------
         ~ObjectManager() = default;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <amdmlss/amdmlss_api.h>
 
@@ -19,6 +20,73 @@ void checkStatus(MLSSstatus status, int line)
 
 #define CHECK_STATUS(status) checkStatus((status), __LINE__)
 
+static int startsWithIgnoreCase(const char* value, const char* prefix)
+{
+    while (*prefix)
+    {
+        if (*value == '\0' || tolower((unsigned char)*value) != tolower((unsigned char)*prefix))
+        {
+            return 0;
+        }
+        ++value;
+        ++prefix;
+    }
+
+    return 1;
+}
+
+static int formatGfxArgument(const char* arg, char* dest, size_t destSize)
+{
+    if (arg == NULL || dest == NULL || destSize == 0)
+    {
+        return 0;
+    }
+
+    const char* token = arg;
+
+    if (startsWithIgnoreCase(token, "mlss_gfx"))
+    {
+        token += 8;
+    }
+    else if (startsWithIgnoreCase(token, "gfx"))
+    {
+        token += 3;
+    }
+
+    if (*token == '\0')
+    {
+        return 0;
+    }
+
+    char normalized[64] = { 0 };
+    size_t idx = 0;
+
+    while (*token != '\0' && idx < (sizeof(normalized) - 1))
+    {
+        unsigned char ch = (unsigned char)*token;
+        if (!isalnum(ch) && ch != '_')
+        {
+            return 0;
+        }
+
+        normalized[idx++] = (char)toupper(ch);
+        ++token;
+    }
+
+    if (*token != '\0' || idx == 0)
+    {
+        return 0;
+    }
+
+    int written = snprintf(dest, destSize, "MLSS_GFX%s", normalized);
+    if (written < 0 || (size_t)written >= destSize)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
 void printUsage(const char* programName)
 {
     printf("Usage: %s [options]\n", programName);
@@ -30,6 +98,8 @@ void printUsage(const char* programName)
     printf("                         3 = INFO\n");
     printf("                         4 = DEBUG (default)\n");
     printf("                         5 = TRACE\n");
+    printf("  -g, --gfx <name>       Force a specific GFX target (default auto)\n");
+    printf("                         Accepts values like 1100 or gfx1201\n");
     printf("  -h, --help            Show this help message\n");
     printf("\nExample:\n");
     printf("  %s --verbose 4        Run with DEBUG level verbosity\n", programName);
@@ -39,6 +109,8 @@ int main(int argc, char* argv[])
 {
     // Default to DEBUG level verbose mode
     MLSSenum verboseLevel = 4; // DEBUG level
+    MLSSstring asic = MLSS_GFXAUTOFIND;
+    char customAsic[64] = { 0 };
     
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
@@ -58,6 +130,27 @@ int main(int argc, char* argv[])
             else
             {
                 printf("Error: --verbose requires a level argument\n");
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+        }
+        else if (strcmp(argv[i], "-g") == 0 || strcmp(argv[i], "--gfx") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                if (!formatGfxArgument(argv[i + 1], customAsic, sizeof(customAsic)))
+                {
+                    printf("Error: --gfx expects either the gfx number (e.g. 1201) or \"gfx + number\" (eg gfx1201)\n");
+                    printUsage(argv[0]);
+                    return EXIT_FAILURE;
+                }
+
+                asic = customAsic;
+                i++;
+            }
+            else
+            {
+                printf("Error: --gfx requires a name argument\n");
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
@@ -95,10 +188,6 @@ int main(int argc, char* argv[])
     MLSScontext context = 0;
     MLSSbinary* binaries = NULL;
     MLSSsize n = 0;
-    MLSSuint32** constants = NULL;
-    MLSSsize* numConstants = NULL;
-
-    MLSSstring asic = MLSS_GFXAUTOFIND;
     MLSSstring opName = MLSS_MHA;
 
     MLSSstatus* pStatuses = NULL;

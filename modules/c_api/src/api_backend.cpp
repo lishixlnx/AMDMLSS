@@ -16,7 +16,6 @@
 
 // Core includes (which includes amdmlss_api_cdefs.h)
 #include "core/core.hpp"
-#include "core/captions.hpp"
 #include "core/impl/types/verbose_mode.hxx"
 
 // Include shader headers
@@ -42,6 +41,47 @@ namespace mlss
                 ptr = nullptr;
             }
         };
+
+        //=====================================================================================================================
+        // Convert std::error_code (with MLSSErrorCode) to the appropriate MLSSenum
+        MLSSenum errorCodeToMLSSEnum(const std::error_code& ec)
+        {
+            if (!ec)
+            {
+                return MLSS_SUCCESS;
+            }
+
+            // Check if it's from the MLSS error category
+            if (ec.category() == mlss_error_category())
+            {
+                switch (static_cast<MLSSErrorCode>(ec.value()))
+                {
+                case MLSSErrorCode::Success:
+                    return MLSS_SUCCESS;
+                case MLSSErrorCode::ShaderInvalidParameters:
+                    return MLSS_ERROR_SHADER_INVALID_PARAMETERS;
+                case MLSSErrorCode::ShaderUnsupportedOperator:
+                    return MLSS_ERROR_SHADER_UNSUPPORTED_OPERATOR;
+                case MLSSErrorCode::ShaderUnsupportedArchitecture:
+                    return MLSS_ERROR_SHADER_UNSUPPORTED_ARCHITECTURE;
+                case MLSSErrorCode::ShaderUnsupportedConfiguration:
+                    return MLSS_ERROR_SHADER_UNSUPPORTED_CONFIGURATION;
+                case MLSSErrorCode::ShaderFeatureNotYetImplemented:
+                    return MLSS_ERROR_SHADER_FEATURE_NOT_YET_IMPLEMENTED;
+                case MLSSErrorCode::ArchitectureNotSupported:
+                    return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_SUPPORTED;
+                case MLSSErrorCode::ArchitectureNotFound:
+                    return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_FOUND;
+                case MLSSErrorCode::CodenameNotFound:
+                    return MLSS_ERROR_ENUM_CODENAME_NOT_FOUND;
+                default:
+                    return MLSS_ERROR_UNKNOWN_ERROR;
+                }
+            }
+
+            // Unknown error category - return generic failure
+            return MLSS_ERROR_FAILURE;
+        }
 
         //=====================================================================================================================
         template<class FunctorType, class InputOutputType, class... Args>
@@ -325,9 +365,13 @@ namespace mlss
             case MLSS_UINT4:
             case MLSS_FLOAT4:
             case MLSS_FLOAT8:
+            case MLSS_FLOAT8_FNUZ:
+            case MLSS_FLOAT8_OCP:
             case MLSS_FLOAT16:
             case MLSS_BFLOAT4:
             case MLSS_BFLOAT8:
+            case MLSS_BFLOAT8_FNUZ:
+            case MLSS_BFLOAT8_OCP:
             case MLSS_BFLOAT16:
             case MLSS_UNKNOWN_TYPE:
             case MLSS_CUSTOM_TYPE:
@@ -373,9 +417,13 @@ namespace mlss
             case MLSS_UINT4: return "UINT4";
             case MLSS_FLOAT4: return "FLOAT4";
             case MLSS_FLOAT8: return "FLOAT8";
+            case MLSS_FLOAT8_FNUZ: return "FLOAT8_FNUZ";
+            case MLSS_FLOAT8_OCP: return "FLOAT8_OCP";
             case MLSS_FLOAT16: return "FLOAT16";
             case MLSS_BFLOAT4: return "BFLOAT4";
             case MLSS_BFLOAT8: return "BFLOAT8";
+            case MLSS_BFLOAT8_FNUZ: return "BFLOAT8_FNUZ";
+            case MLSS_BFLOAT8_OCP: return "BFLOAT8_OCP";
             case MLSS_BFLOAT16: return "BFLOAT16";
             default: return "INVALID";
             }
@@ -443,9 +491,15 @@ namespace mlss
                 }
             } while (true);
         }
-
-        // Create Context directly (not as unique_ptr)
+        
         Context context_obj(asic, std::move(ops));
+
+        if (context_obj.m_lastError)
+        {
+            // Return the specific error code from context creation
+            MLSSenum specificError = errorCodeToMLSSEnum(context_obj.m_lastError);
+            return std::unexpected<MLSSenum>(specificError);
+        }
 
         if (ctx != 0)  // ctx contains a valid handle
         {
@@ -565,13 +619,15 @@ namespace mlss
         }
 
         // Create comprehensive collection
+        // Each operation produces 4 binaries (rel, nonrel, rel_with_strides, nonrel_with_strides)
+        // Each binary needs 3 strings (operator name, ASIC, kernel name)
         BinaryInfoCollection_t collection;
-        collection.binary_infos.reserve(ctx->m_ops.size());
-        collection.string_storage.reserve(ctx->m_ops.size() * 3);
+        collection.binary_infos.reserve(ctx->m_ops.size() * 4);
+        collection.string_storage.reserve(ctx->m_ops.size() * 4 * 3);
 
         for (const auto& op : ctx->m_ops)
         {
-            std::unique_ptr<Binaries::Blob> shader_blob_ptr;
+            Binaries binaries;
             
             // Set GFX architecture based on ASIC string
             GfxArchitectureFlags gfxArch = GfxArchitectureFlags::Unknown;
@@ -590,12 +646,12 @@ namespace mlss
                 mha_operator.setAttributes(op.m_params);
                 mha_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = mha_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = mha_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else if (op.m_op == "MLSS_CONV")
             {
@@ -603,12 +659,12 @@ namespace mlss
                 conv_operator.setAttributes(op.m_params);
                 conv_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = conv_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = conv_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else if (op.m_op == "MLSS_GEMM")
             {
@@ -616,12 +672,12 @@ namespace mlss
                 gemm_operator.setAttributes(op.m_params);
                 gemm_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = gemm_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = gemm_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else if (op.m_op == "MLSS_GQA")
             {
@@ -629,12 +685,12 @@ namespace mlss
                 gqa_operator.setAttributes(op.m_params);
                 gqa_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = gqa_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = gqa_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else if (op.m_op == "MLSS_MVN")
             {
@@ -642,12 +698,12 @@ namespace mlss
                 mvn_operator.setAttributes(op.m_params);
                 mvn_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = mvn_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = mvn_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else if (op.m_op == "MLSS_QGEMM")
             {
@@ -655,12 +711,12 @@ namespace mlss
                 qgemm_operator.setAttributes(op.m_params);
                 qgemm_operator.setGfxArchitecture(gfxArch);
                 
-                auto blob_result = qgemm_operator.getBlob();
-                if (!blob_result.has_value())
+                auto result = qgemm_operator.getBinaries();
+                if (!result.has_value())
                 {
                     return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
                 }
-                shader_blob_ptr = std::make_unique<Binaries::Blob>(std::move(blob_result.value()));
+                binaries = std::move(result.value());
             }
             else
             {
@@ -668,58 +724,69 @@ namespace mlss
                 return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_FOUND);
             }
 
-            auto& shader_blob = *shader_blob_ptr;
-
-            // Create and populate binary info
-            MLSSbinary binary_info = {};
-
-            // Store strings with proper lifetime management
-            binary_info.m_pOperatorName = collection.addString(op.m_op);
-            binary_info.m_ASIC = collection.addString(ctx->m_asic);
-            binary_info.m_pKernelName = collection.addString(shader_blob.m_name);
-
-            // Set grid and block dimensions from shader blob
-            binary_info.m_grid = shader_blob.m_grid;
-            binary_info.m_blocks = shader_blob.m_blocks;
-            binary_info.m_sharedMemInBytes = 0;
-
-            // Create constants vector
-            if (!shader_blob.m_constants.empty())
+            // Helper lambda to create MLSSbinary from a Blob
+            auto createBinaryInfo = [&collection, &op, &ctx](const Binaries::Blob& shader_blob, bool isRelocatable) -> MLSSbinary
             {
-                binary_info.m_constants = createTypedVector<MLSSuint32>(
-                    shader_blob.m_constants.data(),
-                    shader_blob.m_constants.size()
-                );
-            }
-            else
-            {
-                binary_info.m_constants = {};
-                binary_info.m_constants.m_size = 0;
-                binary_info.m_constants.m_type = MLSS_UINT32;
-                binary_info.m_constants.m_handle = 0;
-            }
+                MLSSbinary binary_info = {};
 
-            // Create arguments vector from shader blob
-            if (!shader_blob.m_argList.empty())
-            {
-                binary_info.m_argList = createTypedVector<MLSSarg>(
-                    shader_blob.m_argList.data(),
-                    shader_blob.m_argList.size()
-                );
-            }
-            else
-            {
-                binary_info.m_argList = {};
-                binary_info.m_argList.m_size = 0;
-                binary_info.m_argList.m_type = MLSS_ARG;
-                binary_info.m_argList.m_handle = 0;
-            }
+                // Store strings with proper lifetime management
+                binary_info.m_pOperatorName = collection.addString(op.m_op);
+                binary_info.m_ASIC = collection.addString(ctx->m_asic);
+                binary_info.m_pKernelName = collection.addString(shader_blob.m_name);
 
-            // Store binary data pointer and size
-            binary_info.m_binaries = const_cast<MLSSvoid*>(shader_blob.m_pBinary);
-            binary_info.m_binarySize = shader_blob.m_size;
+                // Set grid and block dimensions from shader blob
+                binary_info.m_grid = shader_blob.m_grid;
+                binary_info.m_blocks = shader_blob.m_blocks;
+                binary_info.m_sharedMemInBytes = 0;
 
-            collection.binary_infos.emplace_back(binary_info);
+                // Create constants vector
+                if (!shader_blob.m_constants.empty())
+                {
+                    binary_info.m_constants = createTypedVector<MLSSuint32>(
+                        shader_blob.m_constants.data(),
+                        shader_blob.m_constants.size()
+                    );
+                }
+                else
+                {
+                    binary_info.m_constants = {};
+                    binary_info.m_constants.m_size = 0;
+                    binary_info.m_constants.m_type = MLSS_UINT32;
+                    binary_info.m_constants.m_handle = 0;
+                }
+
+                // Create arguments vector from shader blob
+                if (!shader_blob.m_argList.empty())
+                {
+                    binary_info.m_argList = createTypedVector<MLSSarg>(
+                        shader_blob.m_argList.data(),
+                        shader_blob.m_argList.size()
+                    );
+                }
+                else
+                {
+                    binary_info.m_argList = {};
+                    binary_info.m_argList.m_size = 0;
+                    binary_info.m_argList.m_type = MLSS_ARG;
+                    binary_info.m_argList.m_handle = 0;
+                }
+
+                // Store binary data pointer and size
+                binary_info.m_binaries = const_cast<MLSSvoid*>(shader_blob.m_pBinary);
+                binary_info.m_binarySize = shader_blob.m_size;
+                binary_info.m_isRelocatable = isRelocatable;
+
+                return binary_info;
+            };
+
+            // Add all binaries from the result
+            // Convention: first blob is relocatable, remaining are non-relocatable
+            bool isFirst = true;
+            for (const auto& blob : binaries)
+            {
+                collection.binary_infos.emplace_back(createBinaryInfo(blob, isFirst));
+                isFirst = false;
+            }
         }
 
         *n = collection.binary_infos.size();
@@ -1191,7 +1258,7 @@ namespace mlss
                     // Check if architecture is GFX11+ for MHA
                     if (isGfx11Plus(gfxArch))
                     {
-                        supported = shaders::op::OperatorMHA::getCaps(op.m_params);
+                        supported = shaders::op::OperatorMHA::getCaps(op.m_params, gfxArch);
                         
                         if (supported)
                         {
@@ -1212,7 +1279,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_CONV")
                 {
-                    supported = shaders::op::OperatorConv::getCaps(op.m_params);
+                    supported = shaders::op::OperatorConv::getCaps(op.m_params, gfxArch);
                     
                     if (supported)
                     {
@@ -1240,7 +1307,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GQA")
                 {
-                    supported = shaders::op::OperatorGQA::getCaps(op.m_params);
+                    supported = shaders::op::OperatorGQA::getCaps(op.m_params, gfxArch);
                     
                     if (supported)
                     {

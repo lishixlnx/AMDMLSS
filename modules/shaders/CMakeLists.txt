@@ -2,6 +2,7 @@ add_project_module(shaders
     TYPE STATIC
     SOURCES 
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
 
     HEADERS 
         "${CMAKE_CURRENT_SOURCE_DIR}/include/shaders/*.hpp"

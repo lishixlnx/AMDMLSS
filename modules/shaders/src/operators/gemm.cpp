@@ -19,7 +19,7 @@ namespace mlss::shaders::op
         return "AMDMLSS::OperatorGEMM";
     }
 
-    std::expected<OperatorGEMM::blob, std::error_code> OperatorGEMM::getBlob() const
+    std::expected<Binaries, std::error_code> OperatorGEMM::getBinaries() const
     {
         return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
     }

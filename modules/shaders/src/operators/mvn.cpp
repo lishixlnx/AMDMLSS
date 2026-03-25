@@ -19,7 +19,7 @@ namespace mlss::shaders::op
             return "AMDMLSS::OperatorMVN";
         }
 
-        std::expected<OperatorMVN::blob, std::error_code> OperatorMVN::getBlob() const
+        std::expected<Binaries, std::error_code> OperatorMVN::getBinaries() const
         {
             return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
         }

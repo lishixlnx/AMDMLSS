@@ -1,10 +1,12 @@
 /* Copyright (c) 2021-2025 Advanced Micro Devices, Inc. All rights reserved. */
 
 #include "shaders/operators/gqa.hpp"
+#include "impl/gqa/ck/ckShadersOp.hpp"
 
 namespace mlss::shaders::op
 {
-      
+    using namespace mlss::shaders::gqa;
+    
         //=====================================================================================================================
         // OperatorGQA implementation
         //=====================================================================================================================
@@ -19,14 +21,21 @@ namespace mlss::shaders::op
             return "AMDMLSS::OperatorMHA1_t";
         }
 
-        std::expected<OperatorGQA::blob, std::error_code> OperatorGQA::getBlob() const
+        std::expected<Binaries, std::error_code> OperatorGQA::getBinaries() const
         {
-            return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
+            if(ck::CKGqa::getCapsImpl(m_attributes, m_gfxArch))
+            {
+                ck::CKGqa ckGqa(m_attributes, m_gfxArch);
+                m_implName = ckGqa.getOperatorName();
+                return ckGqa.getBinaries();
+            }
+
+            return std::unexpected(std::make_error_code(std::errc::invalid_argument));
         }
 
-        bool OperatorGQA::getCapsImpl(const std::vector<mlss::Attribute>& attributes)
+        bool OperatorGQA::getCapsImpl(const std::vector<mlss::Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
         {
-            return false;
+            return ck::CKGqa::getCapsImpl(attributes, gfxArch);
         }
 
 } // namespace mlss::shaders::op

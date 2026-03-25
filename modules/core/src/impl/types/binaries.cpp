@@ -19,6 +19,32 @@ namespace mlss
         return m_binaries.empty();
     }
 
+    //---------------------------------------------------------------------
+    void Binaries::addBlob(const Blob& blob)
+    {
+        m_binaries.push_back(blob);
+    }
+
+    //---------------------------------------------------------------------
+    void Binaries::addBlob(Blob&& blob)
+    {
+        m_binaries.push_back(std::move(blob));
+    }
+
+    //---------------------------------------------------------------------
+    void Binaries::addBlob(const std::vector<Blob>& binaries)
+    {
+        m_binaries.insert(m_binaries.end(), binaries.begin(), binaries.end());
+    }
+
+    //---------------------------------------------------------------------
+    void Binaries::addBlob(std::vector<Blob>&& binaries)
+    {
+        m_binaries.insert(m_binaries.end(),
+            std::make_move_iterator(binaries.begin()),
+            std::make_move_iterator(binaries.end()));
+    }
+
     //=================================================================================================================
     //                                   Binaries::Blob                                                                   
     //=================================================================================================================

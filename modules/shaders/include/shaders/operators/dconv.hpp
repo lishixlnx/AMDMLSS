@@ -26,8 +26,8 @@ namespace mlss::shaders::op
         // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blob
-        virtual std::expected<blob, std::error_code> getBlob() const override;
+        // Override the pure virtual method to get the binary blobs
+        virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
     private:
 
@@ -56,8 +56,8 @@ namespace mlss::shaders::op
         // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blob
-        virtual std::expected<blob, std::error_code> getBlob() const override;
+        // Override the pure virtual method to get the binary blobs
+        virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
     private:
 

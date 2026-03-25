@@ -1,6 +1,5 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "ckShadersOp.hpp"
-#include "core/captions.hpp"
 #include "core/core.hpp"
 #include "wmma/shadersUtils.hpp"
 
@@ -22,18 +21,15 @@ namespace mlss::shaders::mha::ck
         return "AMDMLSS::CKMha::Wmma";
     }
 
-    std::expected<CKMha::blob, std::error_code> CKMha::getBlob() const
+    std::expected<Binaries, std::error_code> CKMha::getBinaries() const
     {
-        // Copy of getShaderFlag logic
-        std::uint32_t batchSize{ 1 };
-        std::uint32_t headCount{ 1 };
+        std::uint32_t batchSize{ 0 };
+        std::uint32_t headCount{ 0 };
         std::uint32_t sizeHeads{ 0 };
         std::uint32_t kvSequenceLength{ 0 };
         std::uint32_t qSequenceLength{ 0 };
         std::uint32_t packing{ 0 };
         std::uint32_t dataType{ 0 };
-        bool isUnpacked{ false };
-        bool isSelfAttention{ false };
 
         for (const auto& attribute : m_attributes)
         {
@@ -138,4 +134,4 @@ namespace mlss::shaders::mha::ck
         return wmma::isWmmaShadersAvailable(gfxArch, size_heads, q_seq, kv_seq, packing, data_type);
     }
 
-} // namespace mlss::shaders::mha::ck::wmma
+} // namespace mlss::shaders::mha::ck

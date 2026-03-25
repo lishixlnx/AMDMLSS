@@ -4,11 +4,9 @@
 namespace mlss
 {
     //=====================================================================================================================
-    template<std::size_t size>
-    constexpr std::string getKernelName(const std::array<std::uint8_t, size>& arr)
+    inline std::string getKernelName(const std::span<const std::byte>& arr)
     {
         return getKernelName(arr.data(), arr.size());
     }
-
 } // namespace mlss
 

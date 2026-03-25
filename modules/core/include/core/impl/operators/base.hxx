@@ -77,19 +77,23 @@ namespace mlss
 
         static bool getCaps(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxArch)
         {
-            if constexpr (HasGetCapsImplWithGfxArch<Derived>)
+            // Use inline requires so that access checking happens inside the friend context of
+            // OperatorBase<Derived>, allowing private/protected getCapsImpl to be detected.
+            if constexpr (requires { { Derived::getCapsImpl(attributes, gfxArch) } -> std::convertible_to<bool>; })
             {
                 return Derived::getCapsImpl(attributes, gfxArch);
             }
-             else if constexpr (HasGetCapsImplWithoutGfxArch<Derived>)
-             {
+            else if constexpr (requires { { Derived::getCapsImpl(attributes) } -> std::convertible_to<bool>; })
+            {
                 std::ignore = gfxArch;
                 return Derived::getCapsImpl(attributes);
             }
             else
             {
-                static_assert(HasGetCapsImplWithGfxArch<Derived> || HasGetCapsImplWithoutGfxArch<Derived>,
-                             "Derived class must implement getCapsImpl with either (attributes, gfxArch) or (attributes) signature");
+                static_assert(sizeof(Derived) == 0,
+                    "Derived class must implement getCapsImpl with signature "
+                    "'static bool getCapsImpl(const std::vector<Attribute>&)' or "
+                    "'static bool getCapsImpl(const std::vector<Attribute>&, GfxArchitectureFlags)'");
                 return false;
             }
         }
@@ -107,8 +111,8 @@ namespace mlss
 
         virtual ~OperatorBase() = default;
 
-        // Pure virtual method to get the binary blob
-        virtual std::expected<blob, std::error_code> getBlob() const = 0;
+        // Pure virtual method to get the binary blobs
+        virtual std::expected<Binaries, std::error_code> getBinaries() const = 0;
 
         // Register this operator type with the registry
         static bool registerInstance(const std::string& name);

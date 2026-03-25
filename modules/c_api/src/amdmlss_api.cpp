@@ -235,7 +235,7 @@ extern "C"
         return mlss::setLastError(MLSS_SUCCESS);
     }
 
-    MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, MLSSvoid* const value)
+    MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, const MLSSvoid* const value)
     {
 
         if ((context == 0) || (opName == nullptr))
@@ -458,6 +458,14 @@ static std::unordered_map<MLSSenum, MLSScustomtypeinfo> g_customTypeRegistry;
 static MLSSenum g_nextCustomTypeId = MLSS_CUSTOM_TYPE_START;
 static std::mutex g_customTypeRegistryMutex;
 
+// String storage for custom type names and operators (owns the memory)
+struct CustomTypeStringStorage
+{
+    std::string typeName;
+    std::vector<std::string> supportedOperators;
+};
+static std::unordered_map<MLSSenum, CustomTypeStringStorage> g_customTypeStrings;
+
 MLSSenum mlssRegisterCustomType(const MLSSstring typeName,
                                 MLSScustomtypeset setFunc,
                                 MLSScustomtypeget getFunc,
@@ -496,27 +504,29 @@ MLSSenum mlssRegisterCustomType(const MLSSstring typeName,
 
     // Create custom type info
     MLSScustomtypeinfo info;
-    
-    // Store type name (need to allocate and copy)
-    char* typeNameCopy = new char[std::strlen(typeName) + 1];
-    std::strcpy(typeNameCopy, typeName);
-    info.m_typeName = typeNameCopy;
-    
     info.m_typeId = g_nextCustomTypeId++;
     info.m_setFunc = setFunc;
     info.m_getFunc = getFunc;
     info.m_printFunc = nullptr; // Optional, can be added later
     
-    // Store supported operators (need to allocate array)
-    if (!supportedOps.empty())
+    // Store strings in our storage (owns the memory)
+    CustomTypeStringStorage& storage = g_customTypeStrings[info.m_typeId];
+    storage.typeName = typeName;
+    storage.supportedOperators = std::move(supportedOps);
+    
+    // Point the C struct to our owned strings
+    info.m_typeName = storage.typeName.c_str();
+    
+    // Create pointer array for supported operators
+    if (!storage.supportedOperators.empty())
     {
-        info.m_supportedOperators = new char*[supportedOps.size() + 1];
-        for (size_t i = 0; i < supportedOps.size(); ++i)
+        info.m_supportedOperators = new char*[storage.supportedOperators.size() + 1];
+        for (size_t i = 0; i < storage.supportedOperators.size(); ++i)
         {
-            info.m_supportedOperators[i] = new char[supportedOps[i].length() + 1];
-            std::strcpy(info.m_supportedOperators[i], supportedOps[i].c_str());
+            // Cast away const since the C API expects char** but we won't modify
+            info.m_supportedOperators[i] = const_cast<char*>(storage.supportedOperators[i].c_str());
         }
-        info.m_supportedOperators[supportedOps.size()] = nullptr; // NULL-terminate
+        info.m_supportedOperators[storage.supportedOperators.size()] = nullptr; // NULL-terminate
     }
     else
     {
@@ -562,23 +572,14 @@ MLSSstatus mlssUnregisterCustomType(MLSSenum customTypeId)
     // Clean up allocated memory
     MLSScustomtypeinfo& info = it->second;
     
-    // Delete type name
-    if (info.m_typeName)
-    {
-        delete[] info.m_typeName;
-    }
-    
-    // Delete supported operators array
+    // Delete the pointer array (strings are owned by g_customTypeStrings)
     if (info.m_supportedOperators)
     {
-        for (char** op = info.m_supportedOperators; *op != nullptr; ++op)
-        {
-            delete[] *op;
-        }
         delete[] info.m_supportedOperators;
     }
 
-    // Remove from registry
+    // Remove from registries
+    g_customTypeStrings.erase(info.m_typeId);
     g_customTypeRegistry.erase(it);
     
     return mlss::setLastError(MLSS_SUCCESS);

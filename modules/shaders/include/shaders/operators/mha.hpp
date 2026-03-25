@@ -31,13 +31,13 @@ namespace mlss::shaders::op
         // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blob
-        virtual std::expected<blob, std::error_code> getBlob() const override;
-
-    private:
+        // Override the pure virtual method to get the binary blobs
+        virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
         // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+
+    private:
         
     };
 

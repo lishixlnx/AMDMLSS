@@ -20,7 +20,7 @@ namespace mlss::shaders::op
             return "AMDMLSS::OperatorDepthWiseConv";
         }
 
-        std::expected<OperatorDepthWiseConv::blob, std::error_code> OperatorDepthWiseConv::getBlob() const
+        std::expected<Binaries, std::error_code> OperatorDepthWiseConv::getBinaries() const
         {
             return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
         }
@@ -44,7 +44,7 @@ namespace mlss::shaders::op
             return "AMDMLSS::OperatorDilatedConv";
         }
 
-        std::expected<OperatorDilatedConv::blob, std::error_code> OperatorDilatedConv::getBlob() const
+        std::expected<Binaries, std::error_code> OperatorDilatedConv::getBinaries() const
         {
             return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
         }

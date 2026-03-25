@@ -20,7 +20,7 @@ namespace mlss::shaders::op
             return "AMDMLSS::OperatorConv";
         }
 
-        std::expected<OperatorConv::blob, std::error_code> OperatorConv::getBlob() const
+        std::expected<Binaries, std::error_code> OperatorConv::getBinaries() const
         {
             return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
         }

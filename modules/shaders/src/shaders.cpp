@@ -1,39 +1,32 @@
 #include "shaders/shaders.hpp"
 
-// Note: shaderCallHipMha.hpp has been removed
-// #include "shaders/interface/shaderCallHipMha.hpp"
-
-#include <algorithm>
-#include <cctype>
-#include <iterator>
-
-
 namespace mlss::shaders
 {
 
+//=====================================================================================================================
+std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptor& shader)
+{
+    std::string name(shader.m_kernelName);
+    return std::make_unique<Binaries::Blob>(Binaries::Blob{
+        shader.m_binary.data(),
+        shader.m_binary.size(),
+        MLSS_BINARY_TYPE_ELF,
+        0,
+        name
+    });
+}
 
-
-
-    //=====================================================================================================================
-    std::uint32_t convertShaderErrorToEnum(std::error_code error)
-    {
-        if (error.category() == shader_error_category())
-        {
-            switch (static_cast<ShaderErrorCode>(error.value()))
-            {
-            case ShaderErrorCode::InvalidParameters:
-                return MLSS_ERROR_INVALID_PARAMETER;
-            case ShaderErrorCode::UnsupportedOperator:
-                return MLSS_ERROR_OPERATOR_NOT_SUPPORTED;
-            case ShaderErrorCode::UnsupportedArchitecture:
-                return MLSS_ERROR_GRAPHIX_NOT_SUPPORTED;
-            case ShaderErrorCode::FeatureNotYetImplemented:
-                return MLSS_ERROR_NOT_IMPLEMENTED;
-            default:
-                return MLSS_ERROR_FAILURE;
-            }
-        }
-        return MLSS_ERROR_FAILURE;
-    }
+//=====================================================================================================================
+std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptorByte& shader)
+{
+    std::string name(shader.m_kernelName);
+    return std::make_unique<Binaries::Blob>(Binaries::Blob{
+        shader.m_binary.data(),
+        shader.m_binary.size(),
+        MLSS_BINARY_TYPE_ELF,
+        0,
+        name
+    });
+}
 
 } // mlss::shaders

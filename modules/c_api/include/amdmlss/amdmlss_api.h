@@ -148,7 +148,7 @@ extern "C"
      * @return MLSSstatus MLSS_STATUS_SUCCESS on success, error code otherwise
      * @note The value type must match the expected type for the parameter
      */
-    MLSS_API MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, MLSSvoid* const value);
+    MLSS_API MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, const MLSSvoid* const value);
 
     // get caps
 
