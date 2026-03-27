@@ -53,7 +53,7 @@ int main()
 
     // Step 2) Set parameters
     printf("\n--- Setting parameters ---\n");
-    
+
     // Set parameters by enum
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_BATCH, &batch_size));
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_QSEQ, &q_sequence_length));
@@ -66,10 +66,10 @@ int main()
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_SCALE, &scale));
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_DATATYPE, &data_type));
 
-    MLSSuint32 qStrides[4] = { q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
-    MLSSuint32 kStrides[4] = { kv_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
-    MLSSuint32 vStrides[4] = { kv_sequence_length * head_num * head_dim, head_dim, 1, head_num * head_dim };
-    MLSSuint32 outputStrides[4] = { q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
+    MLSSuint32 qStrides[4] = {q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
+    MLSSuint32 kStrides[4] = {kv_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
+    MLSSuint32 vStrides[4] = {kv_sequence_length * head_num * head_dim, head_dim, 1, head_num * head_dim};
+    MLSSuint32 outputStrides[4] = {q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
 
     CHECK_STATUS(mlssSetParameterByName(&context, opName, "qStrides", qStrides));
     CHECK_STATUS(mlssSetParameterByName(&context, opName, "kStrides", kStrides));

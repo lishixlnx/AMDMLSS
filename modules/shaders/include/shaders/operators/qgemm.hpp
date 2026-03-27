@@ -4,7 +4,6 @@
 
 #include "core/core.hpp"
 
-
 namespace mlss::shaders::op
 {
 
@@ -12,12 +11,13 @@ namespace mlss::shaders::op
     {
     private:
 
-    using base = OperatorBase<OperatorQGEMM>;
-    
-    // Friend declaration to allow base class access to private members
-    friend class OperatorBase<OperatorQGEMM>;
+        using base = OperatorBase<OperatorQGEMM>;
 
-    public:    
+        // Friend declaration to allow base class access to private members
+        friend class OperatorBase<OperatorQGEMM>;
+
+    public:
+
         // Default constructor
         OperatorQGEMM() = default;
 
@@ -30,14 +30,13 @@ namespace mlss::shaders::op
         // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blob
-        virtual std::expected<blob, std::error_code> getBlob() const override;
-
+        // Override the pure virtual method to get the binary blobs
+        virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
     private:
 
         // Static method to check capabilities
         static bool getCapsImpl(const std::vector<Attribute>& attributes);
-    }; 
-    
+    };
+
 } // namespace mlss::shaders::op

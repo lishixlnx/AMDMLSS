@@ -56,27 +56,35 @@
             }
         },
         {
-            "name": "clang-debug",
-            "displayName": "Clang Debug",
-            "description": "Configure with ROCm Clang (Debug)",
+            "name": "windows-clang-base",
+            "hidden": true,
+            "description": "Base settings for Clang builds on Windows",
             "inherits": "windows-base",
             "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_C_COMPILER": "$env{HIP_PATH}/bin/clang.exe",
-                "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe"
+                "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe",
+                "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS": "${sourceDir}/tools/clang-scan-deps-wrapper.cmd",
+                "CMAKE_CXX_FLAGS": "-Wno-unused-command-line-argument",
+                "CMAKE_C_FLAGS": "-Wno-unused-command-line-argument"
+            }
+        },
+        {
+            "name": "clang-debug",
+            "displayName": "Clang Debug",
+            "description": "Configure with ROCm Clang (Debug)",
+            "inherits": "windows-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
             "name": "clang-release",
             "displayName": "Clang Release",
             "description": "Configure with ROCm Clang (Release)",
-            "inherits": "windows-base",
-            "generator": "Ninja",
+            "inherits": "windows-clang-base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_C_COMPILER": "$env{HIP_PATH}/bin/clang.exe",
-                "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe"
+                "CMAKE_BUILD_TYPE": "Release"
             }
         }
     ],

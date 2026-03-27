@@ -3,12 +3,12 @@
 namespace mlss
 {
     //=================================================================================================================
-    //                                   Binaries::Blob                                                                   
+    //                                   Binaries::Blob
     //=================================================================================================================
 
     //---------------------------------------------------------------------
-    template<class T, size_t N>
-    requires std::is_same_v<T, uint32_t> || std::is_same_v<T, MLSSarg>
+    template <class T, size_t N>
+        requires std::is_same_v<T, uint32_t> || std::is_same_v<T, MLSSarg>
     Binaries::Blob& Binaries::Blob::operator=(const std::array<T, N>& obj)
     {
         if constexpr (std::is_same_v<T, uint32_t>)
@@ -24,7 +24,7 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename Func, typename... Args>
+    template <typename Func, typename... Args>
     void Binaries::Blob::setGrid(const Func& func, const Args&... args)
     {
         // Check if func returns MLSSdim3 (case 1: MLSSdim3 func(Args...))
@@ -39,14 +39,14 @@ namespace mlss
         }
         else
         {
-            static_assert(std::is_invocable_r_v<MLSSdim3, Func, Args...> || 
-                         std::is_invocable_v<Func, MLSSdim3&, Args...>,
-                         "setGrid requires either: MLSSdim3 func(Args...) or void func(MLSSdim3&, Args...)");
+            static_assert(std::is_invocable_r_v<MLSSdim3, Func, Args...> ||
+                              std::is_invocable_v<Func, MLSSdim3&, Args...>,
+                          "setGrid requires either: MLSSdim3 func(Args...) or void func(MLSSdim3&, Args...)");
         }
     }
 
     //---------------------------------------------------------------------
-    template<typename Func, typename... Args>
+    template <typename Func, typename... Args>
     void Binaries::Blob::setBlocks(const Func& func, const Args&... args)
     {
         // Check if func returns MLSSdim3 (case 1: MLSSdim3 func(Args...))
@@ -61,14 +61,14 @@ namespace mlss
         }
         else
         {
-            static_assert(std::is_invocable_r_v<MLSSdim3, Func, Args...> || 
-                         std::is_invocable_v<Func, MLSSdim3&, Args...>,
-                         "setBlocks requires either: MLSSdim3 func(Args...) or void func(MLSSdim3&, Args...)");
+            static_assert(std::is_invocable_r_v<MLSSdim3, Func, Args...> ||
+                              std::is_invocable_v<Func, MLSSdim3&, Args...>,
+                          "setBlocks requires either: MLSSdim3 func(Args...) or void func(MLSSdim3&, Args...)");
         }
     }
 
     //---------------------------------------------------------------------
-    template<typename Func, typename... Args>
+    template <typename Func, typename... Args>
     void Binaries::Blob::setGridBlocks(const Func& func, const Args&... args)
     {
         // Check if func returns std::pair<MLSSdim3, MLSSdim3>
@@ -85,10 +85,10 @@ namespace mlss
         }
         else
         {
-            static_assert(std::is_invocable_r_v<std::pair<MLSSdim3, MLSSdim3>, Func, Args...> || 
-                         std::is_invocable_v<Func, MLSSdim3&, MLSSdim3&, Args...>,
-                         "setGridBlocks requires either: std::pair<MLSSdim3, MLSSdim3> func(Args...) or void func(MLSSdim3&, MLSSdim3&, Args...)");
+            static_assert(std::is_invocable_r_v<std::pair<MLSSdim3, MLSSdim3>, Func, Args...> ||
+                              std::is_invocable_v<Func, MLSSdim3&, MLSSdim3&, Args...>,
+                          "setGridBlocks requires either: std::pair<MLSSdim3, MLSSdim3> func(Args...) or void func(MLSSdim3&, MLSSdim3&, Args...)");
         }
     }
 
-} // mlss
+} // namespace mlss

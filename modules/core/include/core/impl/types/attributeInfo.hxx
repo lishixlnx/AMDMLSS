@@ -3,6 +3,4 @@
 namespace mlss
 {
 
-    
-
-} // mlss
+} // namespace mlss

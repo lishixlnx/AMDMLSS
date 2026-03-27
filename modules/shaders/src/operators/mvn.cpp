@@ -4,29 +4,29 @@
 
 namespace mlss::shaders::op
 {
-      
-        //=====================================================================================================================
-        // OperatorMVN implementation
-        //=====================================================================================================================
 
-        OperatorMVN::OperatorMVN(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
-            : base(attributes, gfxip)
-        {
-        }
+    //=====================================================================================================================
+    // OperatorMVN implementation
+    //=====================================================================================================================
 
-        std::string OperatorMVN::getOperatorName()
-        {
-            return "AMDMLSS::OperatorMVN";
-        }
+    OperatorMVN::OperatorMVN(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+        : base(attributes, gfxip)
+    {
+    }
 
-        std::expected<OperatorMVN::blob, std::error_code> OperatorMVN::getBlob() const
-        {
-            return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
-        }
+    std::string OperatorMVN::getOperatorName()
+    {
+        return "AMDMLSS::OperatorMVN";
+    }
 
-        bool OperatorMVN::getCapsImpl(const std::vector<mlss::Attribute>& attributes)
-        {
-            return false;
-        }
+    std::expected<Binaries, std::error_code> OperatorMVN::getBinaries() const
+    {
+        return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
+    }
+
+    bool OperatorMVN::getCapsImpl(const std::vector<mlss::Attribute>& attributes)
+    {
+        return false;
+    }
 
 } // namespace mlss::shaders::op

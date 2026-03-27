@@ -1,84 +1,177 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <cassert>
+#include <algorithm>
 #include <array>
-#include <tuple>
-#include <vector>
-#include <memory>
-#include <expected>
-#include <type_traits>
-#include <string>
-
+#include <ranges>
+#include <span>
 #include "core/core.hpp"
 
 #define MLSS_ASSERT_ALWAYS() assert(false);
 #define MLSS_ASSERT(cdt) assert(cdt);
 
+#if 0
 #define MLSS_MAKE_BLOB(var) mlss::shaders::makeBinaryBlob(var, #var)
+#endif
 
 namespace mlss
 {
 
-namespace shaders
-{
-
-//=====================================================================================================================
-template<typename T, std::size_t size>
-requires std::is_same_v<T, std::uint32_t> || std::is_same_v<T, std::uint8_t>
-std::unique_ptr<Binaries::Blob> makeBinaryBlob(const T(&tab)[size], const std::string& name)
-{
-    using Blob = Binaries::Blob;
-
-    if constexpr (std::is_same_v<T, std::uint8_t>)
+    namespace shaders
     {
-        return std::make_unique<Blob>(Blob{ tab, size, MLSS_BINARY_TYPE_ELF, 0, name });
-    }
-    else
-    {
-        return std::make_unique<Blob>(Blob{ tab, size, MLSS_BINARY_TYPE_IL, 0, name });
-    }
-}
 
-//=====================================================================================================================
-template<typename T, std::size_t size>
-requires std::is_same_v<T, std::uint32_t> || std::is_same_v<T, std::uint8_t>
-std::unique_ptr<Binaries::Blob> makeBinaryBlob(const std::array<T, size>& tab, const std::string& name)
-{
-    using Blob = Binaries::Blob;
+        template <typename T, typename... U>
+        concept either = (std::same_as<T, U> || ...);
 
-    if constexpr (std::is_same_v<T, std::uint8_t>)
-    {
-        return std::make_unique<Blob>(Blob{ tab.data(), size, MLSS_BINARY_TYPE_ELF, 0, name });
-    }
-    else
-    {
-        return std::make_unique<Blob>(Blob{ tab.data(), size, MLSS_BINARY_TYPE_IL, 0, name });
-    }
-}
+        template <typename T>
+        concept BinaryElement = std::same_as<T, std::byte> || std::same_as<T, std::uint8_t>;
 
-//=====================================================================================================================
-std::uint32_t convertShaderErrorToEnum(std::error_code error);
+        template <typename R>
+        concept BinaryType = std::ranges::range<R> && either<std::ranges::range_value_t<R>, std::byte, std::uint8_t>;
 
+        template <typename T>
+        using CacheAlignedVector = std::vector<T, mlss::CacheAlignedAllocator<T>>;
 
-} // shaders
+        template <typename R>
+        concept BinaryTypeRange = std::ranges::contiguous_range<R> && BinaryElement<std::ranges::range_value_t<R>>;
 
+        template <typename T>
+        inline constexpr bool is_shader_range_v = false;
 
+        template <BinaryElement B, std::size_t N>
+        inline constexpr bool is_shader_range_v<std::array<B, N>> = true;
 
+        template <BinaryElement B>
+        inline constexpr bool is_shader_range_v<std::span<const B>> = true;
 
-namespace math
-{
-//=====================================================================================================================
+        template <BinaryElement B>
+        inline constexpr bool is_shader_range_v<CacheAlignedVector<B>> = true;
 
-    template<class D, class S>
-    constexpr D reinterpret_as(S v)
-    {
-        return reinterpret_cast<D&>(v);
-    }
+        /// Contiguous shader binary storage: std::array of byte/uint8_t, spans, or cache-aligned vectors (see is_shader_range_v).
+        template <class T>
+        concept ShaderTypeRange = is_shader_range_v<T>;
 
-} // math
+        //=====================================================================================================================
+        template <BinaryTypeRange T>
+        struct ShaderType
+        {
+#if MLSS_ENABLE_SHADER_DESCRIPTOR_ONLY
+            using string_type = std::string_view;
+#else
+            using string_type = std::string;
+#endif
 
-} // mlss
+            using element_type = std::ranges::range_value_t<T>;
+            using storage_type = T;
 
+            storage_type m_binary = {};
+            string_type m_kernelName = {};
+            std::string_view m_compilerVersion = {};
+            std::uint32_t m_codeObjectVersion = 0;
+            bool m_isRelocatable = false;
+            ShaderTypesFlags m_shaderType = ShaderTypesFlags::UNKNOWN;
+        };
+
+        template <std::size_t M>
+        using StaticShaderType = ShaderType<std::array<std::uint8_t, M>>;
+
+        template <std::size_t M>
+        using StaticShaderByteType = ShaderType<std::array<std::byte, M>>;
+
+        using DynamicShaderType = ShaderType<std::vector<std::uint8_t, mlss::CacheAlignedAllocator<std::uint8_t>>>;
+
+        using DynamicShaderByteType = ShaderType<std::vector<std::byte, mlss::CacheAlignedAllocator<std::byte>>>;
+
+        //=====================================================================================================================
+        /// A non-owning view over binary shader data, borrowing from StaticShaderType or DynamicShaderType.
+        using ShaderDescriptorType = ShaderType<std::span<const std::uint8_t>>;
+
+        using ShaderDescriptorByteType = ShaderType<std::span<const std::byte>>;
+
+        using ShaderDescriptor = ShaderDescriptorType;
+        using ShaderDescriptorByte = ShaderDescriptorByteType;
+
+        //=====================================================================================================================
+        template <std::ranges::contiguous_range T, std::size_t M = std::dynamic_extent>
+            requires BinaryType<T>
+        ShaderType<T> make_shader_type(
+            std::span<const std::ranges::range_value_t<T>, M> binary,
+            std::string_view kernelName,
+            std::string_view compilerVersion,
+            std::uint32_t codeObjectVersion,
+            bool isRelocatable,
+            ShaderTypesFlags shaderType);
+
+        //=====================================================================================================================
+        /// Fixed-size shader blob; `std::byte` and `std::uint8_t` element spans share one implementation.
+        template <std::size_t M, BinaryElement E>
+        StaticShaderType<M> make_static_shader_type(
+            std::span<const E, M> binary,
+            std::string_view kernelName,
+            std::string_view compilerVersion,
+            std::uint32_t codeObjectVersion,
+            bool isRelocatable,
+            ShaderTypesFlags shaderType);
+
+        //=====================================================================================================================
+        /// Runtime-sized shader blob; defined in shaders.inl.hpp.
+        DynamicShaderType make_dynamic_shader_type(
+            std::span<const std::byte> binary,
+            std::string_view kernelName,
+            std::string_view compilerVersion,
+            std::uint32_t codeObjectVersion,
+            bool isRelocatable,
+            ShaderTypesFlags shaderType);
+
+        //=====================================================================================================================
+        /// Non-owning view from raw bytes (`std::byte` or `std::uint8_t`); implementation in shaders.inl.hpp.
+        template <BinaryElement E>
+        ShaderDescriptor make_shader_descriptor(
+            std::span<const E> binary,
+            std::string_view kernelName,
+            std::string_view compilerVersion,
+            std::uint32_t codeObjectVersion,
+            bool isRelocatable,
+            ShaderTypesFlags shaderType);
+
+        //=====================================================================================================================
+        /// Non-owning view from any `ShaderType` storage (element layout matches uint8_t for ELF).
+        template <std::ranges::contiguous_range T>
+            requires BinaryType<T>
+        ShaderDescriptor make_shader_descriptor(const ShaderType<T>& shader);
+
+        //=====================================================================================================================
+        template <std::ranges::contiguous_range T>
+            requires BinaryType<T>
+        std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderType<T>& shader);
+
+        //=====================================================================================================================
+        std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptor& shader);
+
+        std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptorByte& shader);
+
+        //=====================================================================================================================
+        template <typename>
+        struct is_library_shader_type : std::false_type
+        {
+        };
+        template <BinaryTypeRange R>
+        struct is_library_shader_type<ShaderType<R>> : std::true_type
+        {
+        };
+
+        /// Generic overload for external shader types (e.g. C++20 module ShaderType<N>) that expose
+        /// m_binary (with .data()/.size()) and m_kernelName but aren't mlss::shaders::ShaderType<T>.
+        template <typename T>
+            requires(!is_library_shader_type<std::remove_cvref_t<T>>::value) && requires(const T& t) {
+                { t.m_binary.data() } -> std::convertible_to<const void*>;
+                { t.m_binary.size() } -> std::convertible_to<std::size_t>;
+                { t.m_kernelName } -> std::convertible_to<std::string_view>;
+            }
+        std::unique_ptr<Binaries::Blob> make_binary_blob(const T& shader);
+
+    } // namespace shaders
+
+} // namespace mlss
+
+#include "shaders.inl.hpp"

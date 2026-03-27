@@ -3,17 +3,6 @@
 namespace mlss
 {
 
-
-
-
-
-
-
-
-
-
-
-
     //=====================================================================================================================
     // MLSSvector Function Pointer
     //=====================================================================================================================
@@ -23,8 +12,7 @@ namespace mlss
     {
         std::construct_at(
             static_cast<MLSSvector*>(dst),
-            copyVector(*static_cast<const MLSSvector*>(src))
-        );
+            copyVector(*static_cast<const MLSSvector*>(src)));
     }
 
     //=====================================================================================================================
@@ -32,8 +20,7 @@ namespace mlss
     {
         std::construct_at(
             static_cast<MLSSvector*>(dst),
-            moveVector(std::move(*static_cast<MLSSvector*>(src)))
-        );
+            moveVector(std::move(*static_cast<MLSSvector*>(src))));
     }
 
     //=====================================================================================================================
@@ -54,8 +41,7 @@ namespace mlss
     {
         std::construct_at(
             static_cast<MLSSbinary*>(dst),
-            copyBinary(*static_cast<const MLSSbinary*>(src))
-        );
+            copyBinary(*static_cast<const MLSSbinary*>(src)));
     }
 
     //=====================================================================================================================
@@ -63,8 +49,7 @@ namespace mlss
     {
         std::construct_at(
             static_cast<MLSSbinary*>(dst),
-            moveBinary(std::move(*static_cast<MLSSbinary*>(src)))
-        );
+            moveBinary(std::move(*static_cast<MLSSbinary*>(src))));
     }
 
     //=====================================================================================================================
@@ -223,8 +208,8 @@ namespace mlss
         src.m_pOperatorName = nullptr;
         src.m_ASIC = nullptr;
         src.m_pKernelName = nullptr;
-        src.m_grid = { 0, 0, 0 };
-        src.m_blocks = { 0, 0, 0 };
+        src.m_grid = {0, 0, 0};
+        src.m_blocks = {0, 0, 0};
         src.m_sharedMemInBytes = 0;
         src.m_binaries = nullptr;
 
@@ -244,8 +229,8 @@ namespace mlss
         destroyVectorObject(bin.m_argList);
 
         // Reset other fields
-        bin.m_grid = { 0, 0, 0 };
-        bin.m_blocks = { 0, 0, 0 };
+        bin.m_grid = {0, 0, 0};
+        bin.m_blocks = {0, 0, 0};
         bin.m_sharedMemInBytes = 0;
         bin.m_binaries = nullptr;
     }
@@ -255,7 +240,7 @@ namespace mlss
     //=====================================================================================================================
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     MLSSvector createTypedVectorInAny(const T* data, size_t count)
     {
         MLSSvector vec;
@@ -286,7 +271,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<>
+    template <>
     MLSSvector createTypedVector<bool>(const bool* data, size_t count)
     {
         MLSSvector vec;
@@ -323,4 +308,4 @@ namespace mlss
         return vec.m_handle != 0 && vec.m_size > 0;
     }
 
-} // mlss
+} // namespace mlss

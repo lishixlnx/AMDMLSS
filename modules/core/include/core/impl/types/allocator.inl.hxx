@@ -8,11 +8,11 @@ namespace mlss
     using size_t = std::size_t;
 
     //=====================================================================================================================
-    //                                   CacheAlignedAllocator                                                                   
+    //                                   CacheAlignedAllocator
     //=====================================================================================================================
 
     //---------------------------------------------------------------------
-    template<typename T, size_t cache_line_size_>
+    template <typename T, size_t cache_line_size_>
     typename CacheAlignedAllocator<T, cache_line_size_>::pointer CacheAlignedAllocator<T, cache_line_size_>::allocate(std::size_t n)
     {
         if (n == 0)
@@ -47,7 +47,7 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename T, std::size_t cache_line_size_>
+    template <typename T, std::size_t cache_line_size_>
     void CacheAlignedAllocator<T, cache_line_size_>::deallocate(pointer ptr, std::size_t) noexcept
     {
         if (ptr)
@@ -60,4 +60,4 @@ namespace mlss
         }
     }
 
-} // mlss
+} // namespace mlss

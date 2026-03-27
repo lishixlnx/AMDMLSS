@@ -10,7 +10,7 @@ namespace mlss
     /// @brief Copy constructor function for MLSSvector
     void copyConstructVector(void* dst, const void* src);
 
-    /// @brief Move constructor function for MLSSvector  
+    /// @brief Move constructor function for MLSSvector
     void moveConstructVector(void* dst, void* src);
 
     /// @brief Destructor function for MLSSvector
@@ -50,7 +50,7 @@ namespace mlss
     void destroyVectorObject(MLSSvector& vec);
 
     //=====================================================================================================================
-    // MLSSbinary Functions  
+    // MLSSbinary Functions
     //=====================================================================================================================
 
     MLSSbinary copyBinary(const MLSSbinary& src);
@@ -63,26 +63,25 @@ namespace mlss
     //=====================================================================================================================
     // Template function declarations
     //=====================================================================================================================
-    
-    template<typename T>
+
+    template <typename T>
     MLSSvector createTypedVector(const T* data, size_t count);
 
     //=====================================================================================================================
     // Template function specializations
     //=====================================================================================================================
 
-    template<>
+    template <>
     MLSSvector createTypedVector<bool>(const bool* data, size_t count);
 
     //=====================================================================================================================
     // Template helper functions
     //=====================================================================================================================
 
-    template<typename T>
+    template <typename T>
     const T* getVectorData(const MLSSvector& vec);
 
-    template<typename T>
+    template <typename T>
     T* getVectorDataMutable(const MLSSvector& vec);
 
 } // namespace mlss
-

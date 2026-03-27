@@ -25,9 +25,6 @@ namespace mlss
     //=====================================================================================================================
     MLSSenum returnLastError();
 
-
-
-
     //=====================================================================================================================
     MLSSstatus createContext(MLSScontext& context, std::string_view asic, std::string_view opName, va_list* lst);
 
@@ -51,10 +48,10 @@ namespace mlss
     MLSSstatus printBinaries(const MLSSbinary* const binaries, const MLSSsize n);
 
     MLSSstatus retrieveVectorData(const MLSSvector vector,
-        MLSSvoid** const data,
-        MLSSsize* const n,
-        MLSSenum* const type);
+                                  MLSSvoid** const data,
+                                  MLSSsize* const n,
+                                  MLSSenum* const type);
 
     MLSSstatus getCaps(const MLSScontext& context, MLSSstatus** const pStatuses, MLSSsize* const nStatuses);
 
-} // mlss
+} // namespace mlss

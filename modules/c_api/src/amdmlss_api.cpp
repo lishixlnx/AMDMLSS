@@ -3,7 +3,6 @@
 #include "core/core.hpp"
 #include "shaders/shaders.hpp"
 
-
 #include <string_view>
 #include <memory>
 #include <format>
@@ -15,7 +14,6 @@
 #include <mutex>
 #include <cstring>
 #include <vector>
-
 
 #ifndef MLSS_VERSION_MAJOR
 #define MLSS_VERSION_MAJOR 0
@@ -29,29 +27,26 @@
 #define MLSS_VERSION_MINOR 0
 #endif
 
-
-
 namespace
 {
-    const char* const ERROR_STRINGS[] = 
-    {
-        "Success",
-        "Failure",
-        "Configuration not supported",
-        "Graphix not supported",
-        "Operator not supported",
-        "Invalid parameter",
-        "Parameter not found",
-        "Operator not found",
-        "Bad memory allocation",
-        "Context update failed",
-        "Context not created",
-        "Unknown attribute",
-        "Context already existing"
-    };
+    const char* const ERROR_STRINGS[] =
+        {
+            "Success",
+            "Failure",
+            "Configuration not supported",
+            "Graphix not supported",
+            "Operator not supported",
+            "Invalid parameter",
+            "Parameter not found",
+            "Operator not found",
+            "Bad memory allocation",
+            "Context update failed",
+            "Context not created",
+            "Unknown attribute",
+            "Context already existing"};
 
     constexpr size_t ERROR_STRINGS_SIZE = sizeof(ERROR_STRINGS) / sizeof(ERROR_STRINGS[0]);
-}
+} // namespace
 
 extern "C"
 {
@@ -78,7 +73,7 @@ extern "C"
         return const_cast<MLSSstring>("Unknown error");
     }
 
-    // Version functions  
+    // Version functions
     MLSSstatus mlssGetVersion(MLSSuint32* const major, MLSSuint32* const median, MLSSuint32* const minor, MLSSstringref flavor)
     {
         if (major != nullptr)
@@ -106,7 +101,7 @@ extern "C"
 
     MLSSstring mlssGetVersionAsString()
     {
-        // Static buffer for thread safety concerns  
+        // Static buffer for thread safety concerns
         static thread_local char buffer[64];
 
         MLSSuint32 minor = 0, median = 0, major = 0;
@@ -123,9 +118,6 @@ extern "C"
 
         return buffer;
     }
-
-
-
 
     // Context management
 
@@ -165,8 +157,7 @@ extern "C"
         return mlss::setLastError(mlss::getCaps(context, pStatuses, nStatuses));
     }
 
-
-    // Binary management  
+    // Binary management
 
     MLSSstatus mlssGetBinaries(const MLSScontext context, MLSSbinary** const binaries, MLSSsize* const numBinaries)
     {
@@ -179,46 +170,38 @@ extern "C"
         return mlss::setLastError(mlss::createBinaries(*binaries, context, numBinaries));
     }
 
-    
-
-
-
-
-    // Operator management  
+    // Operator management
 
     MLSSvoid mlssEnumerateOperators(MLSSstringarray operators, MLSSint32* count)
     {
-        (MLSSvoid)operators;
-        (MLSSvoid)count;
+        (MLSSvoid) operators;
+        (MLSSvoid) count;
 
         mlss::not_implemented_as_a_warning();
         mlss::setLastError(MLSS_WARNING_NOT_IMPLEMENTED);
     }
 
-
     // Parameter management for binary creation
-
 
     MLSSstatus mlssGetParameterByName(const MLSScontext context, const MLSSstring opName, const MLSSstring parameterName, MLSSvoid* value)
     {
-        (MLSSvoid)context;
-        (MLSSvoid)opName;
-        (MLSSvoid)parameterName;
-        (MLSSvoid)value;
+        (MLSSvoid) context;
+        (MLSSvoid) opName;
+        (MLSSvoid) parameterName;
+        (MLSSvoid) value;
         mlss::not_implemented_as_a_warning();
         return mlss::setLastError(MLSS_WARNING_NOT_IMPLEMENTED);
     }
 
     MLSSstatus mlssGetParameterByEnum(const MLSScontext context, const MLSSstring opName, const MLSSenum parameterFlag, MLSSvoid* value)
     {
-        (MLSSvoid)context;
-        (MLSSvoid)opName;
-        (MLSSvoid)parameterFlag;
-        (MLSSvoid)value;
+        (MLSSvoid) context;
+        (MLSSvoid) opName;
+        (MLSSvoid) parameterFlag;
+        (MLSSvoid) value;
         mlss::not_implemented_as_a_warning();
         return mlss::setLastError(MLSS_WARNING_NOT_IMPLEMENTED);
     }
-
 
     MLSSstatus mlssSetParameterByName(MLSScontext* const context, const MLSSstring opName, const MLSSstring parameterName, const MLSSvoid* const value)
     {
@@ -235,7 +218,7 @@ extern "C"
         return mlss::setLastError(MLSS_SUCCESS);
     }
 
-    MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, MLSSvoid* const value)
+    MLSSstatus mlssSetParameterByEnum(MLSScontext* const context, const MLSSstring opName, const MLSSenum parameterFlag, const MLSSvoid* const value)
     {
 
         if ((context == 0) || (opName == nullptr))
@@ -251,9 +234,6 @@ extern "C"
         return mlss::setLastError(MLSS_SUCCESS);
     }
 
-
-    
-
     MLSSstatus mlssPrintParameters(const MLSScontext context, const MLSSstring opName)
     {
         return mlss::printParams(context, opName);
@@ -265,13 +245,12 @@ extern "C"
     }
 
     MLSSstatus mlssVectorRetrieveData(const MLSSvector vector,
-        MLSSvoid** const data,
-        MLSSsize* const n,
-        MLSSenum* const type)
+                                      MLSSvoid** const data,
+                                      MLSSsize* const n,
+                                      MLSSenum* const type)
     {
         return mlss::retrieveVectorData(vector, data, n, type);
     }
-
 
     MLSSbool mlssVectorIsValid(const MLSSvector vector)
     {
@@ -284,31 +263,31 @@ extern "C"
     {
         // Convert MLSSenum to VerboseLevel
         mlss::VerboseLevel verboseLevel = mlss::VerboseLevel::NONE;
-        
+
         switch (level)
         {
-        case 0:
-            verboseLevel = mlss::VerboseLevel::NONE;
-            break;
-        case 1:
-            verboseLevel = mlss::VerboseLevel::ERROR;
-            break;
-        case 2:
-            verboseLevel = mlss::VerboseLevel::WARNING;
-            break;
-        case 3:
-            verboseLevel = mlss::VerboseLevel::INFO;
-            break;
-        case 4:
-            verboseLevel = mlss::VerboseLevel::DEBUG;
-            break;
-        case 5:
-            verboseLevel = mlss::VerboseLevel::TRACE;
-            break;
-        default:
-            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+            case 0:
+                verboseLevel = mlss::VerboseLevel::NONE;
+                break;
+            case 1:
+                verboseLevel = mlss::VerboseLevel::ERROR;
+                break;
+            case 2:
+                verboseLevel = mlss::VerboseLevel::WARNING;
+                break;
+            case 3:
+                verboseLevel = mlss::VerboseLevel::INFO;
+                break;
+            case 4:
+                verboseLevel = mlss::VerboseLevel::DEBUG;
+                break;
+            case 5:
+                verboseLevel = mlss::VerboseLevel::TRACE;
+                break;
+            default:
+                return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
-        
+
         mlss::VerboseManager::getInstance().setLevel(verboseLevel);
         return mlss::setLastError(MLSS_SUCCESS);
     }
@@ -331,292 +310,292 @@ extern "C"
         return mlss::setLastError(MLSS_SUCCESS);
     }
 
-// Device query functions
+    // Device query functions
 
-MLSSstatus mlssGetDeviceFeatures(MLSSdevicefeatures** devices, MLSSsize* numDevices)
-{
-    if (!devices || !numDevices)
+    MLSSstatus mlssGetDeviceFeatures(MLSSdevicefeatures** devices, MLSSsize* numDevices)
     {
-        return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
-    }
+        if (!devices || !numDevices)
+        {
+            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        }
 
-    auto result = mlss::getDeviceFeatures();
-    if (!result.has_value())
-    {
-        *devices = nullptr;
-        *numDevices = 0;
-        return mlss::setLastError(MLSS_ERROR_FAILURE);
-    }
+        auto result = mlss::getDeviceFeatures();
+        if (!result.has_value())
+        {
+            *devices = nullptr;
+            *numDevices = 0;
+            return mlss::setLastError(MLSS_ERROR_FAILURE);
+        }
 
-    const auto& deviceVector = result.value();
-    *numDevices = deviceVector.size();
-    
-    if (*numDevices == 0)
-    {
-        *devices = nullptr;
+        const auto& deviceVector = result.value();
+        *numDevices = deviceVector.size();
+
+        if (*numDevices == 0)
+        {
+            *devices = nullptr;
+            return mlss::setLastError(MLSS_SUCCESS);
+        }
+
+        // Create a collection to store device features with proper lifetime management
+        struct DeviceFeatureCollection_t
+        {
+            std::vector<MLSSdevicefeatures> devices;
+            std::vector<std::string> gfxStrings;
+        };
+
+        auto collection = std::make_unique<DeviceFeatureCollection_t>();
+        collection->devices.reserve(deviceVector.size());
+        collection->gfxStrings.reserve(deviceVector.size());
+
+        // Copy device features
+        for (const auto& device : deviceVector)
+        {
+            collection->devices.push_back(device);
+            collection->gfxStrings.push_back(device.m_gfx);
+
+            // Update the pointer to point to our stored string
+            collection->devices.back().m_gfx = collection->gfxStrings.back().c_str();
+        }
+
+        // Store the collection in MemoryManager using Any
+        mlss::Any collection_any = std::move(collection);
+        MLSShandle handle = mlss::MemoryManager::addObject(std::move(collection_any));
+
+        // Mark as initialized
+        mlss::Any* stored_any = mlss::MemoryManager::template getPointer<mlss::Any>(handle);
+        if (!stored_any)
+        {
+            *devices = nullptr;
+            *numDevices = 0;
+            return mlss::setLastError(MLSS_ERROR_BAD_MEMORY_ALLOCATION);
+        }
+
+        mlss::MemoryManager::markAsInitialized(&stored_any);
+
+        // Get the stored collection to return pointer to its data
+        if (mlss::anyIs<std::unique_ptr<DeviceFeatureCollection_t>>(*stored_any))
+        {
+            auto& stored_collection = mlss::anyCast<std::unique_ptr<DeviceFeatureCollection_t>&>(*stored_any);
+            *devices = stored_collection->devices.data();
+        }
+        else
+        {
+            *devices = nullptr;
+            *numDevices = 0;
+            return mlss::setLastError(MLSS_ERROR_BAD_MEMORY_ALLOCATION);
+        }
+
         return mlss::setLastError(MLSS_SUCCESS);
     }
 
-    // Create a collection to store device features with proper lifetime management
-    struct DeviceFeatureCollection_t
+    MLSSstatus mlssGetOptimalDeviceFeatures(MLSSdevicefeatures* device)
     {
-        std::vector<MLSSdevicefeatures> devices;
-        std::vector<std::string> gfxStrings;
-    };
-
-    auto collection = std::make_unique<DeviceFeatureCollection_t>();
-    collection->devices.reserve(deviceVector.size());
-    collection->gfxStrings.reserve(deviceVector.size());
-
-    // Copy device features
-    for (const auto& device : deviceVector)
-    {
-        collection->devices.push_back(device);
-        collection->gfxStrings.push_back(device.m_gfx);
-        
-        // Update the pointer to point to our stored string
-        collection->devices.back().m_gfx = collection->gfxStrings.back().c_str();
-    }
-
-    // Store the collection in MemoryManager using Any
-    mlss::Any collection_any = std::move(collection);
-    MLSShandle handle = mlss::MemoryManager::addObject(std::move(collection_any));
-
-    // Mark as initialized
-    mlss::Any* stored_any = mlss::MemoryManager::template getPointer<mlss::Any>(handle);
-    if (!stored_any)
-    {
-        *devices = nullptr;
-        *numDevices = 0;
-        return mlss::setLastError(MLSS_ERROR_BAD_MEMORY_ALLOCATION);
-    }
-
-    mlss::MemoryManager::markAsInitialized(&stored_any);
-
-    // Get the stored collection to return pointer to its data
-    if (mlss::anyIs<std::unique_ptr<DeviceFeatureCollection_t>>(*stored_any))
-    {
-        auto& stored_collection = mlss::anyCast<std::unique_ptr<DeviceFeatureCollection_t>&>(*stored_any);
-        *devices = stored_collection->devices.data();
-    }
-    else
-    {
-        *devices = nullptr;
-        *numDevices = 0;
-        return mlss::setLastError(MLSS_ERROR_BAD_MEMORY_ALLOCATION);
-    }
-
-    return mlss::setLastError(MLSS_SUCCESS);
-}
-
-MLSSstatus mlssGetOptimalDeviceFeatures(MLSSdevicefeatures* device)
-{
-    if (!device)
-    {
-        return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
-    }
-
-    auto result = mlss::getOptimalDeviceFeatures();
-    if (!result.has_value())
-    {
-        return mlss::setLastError(MLSS_ERROR_FAILURE);
-    }
-
-    // Create a structure to hold the device and its string
-    struct OptimalDeviceHolder_t
-    {
-        MLSSdevicefeatures device;
-        std::string gfxString;
-    };
-
-    auto holder = std::make_unique<OptimalDeviceHolder_t>();
-    holder->device = result.value();
-    holder->gfxString = result.value().m_gfx;
-    holder->device.m_gfx = holder->gfxString.c_str();
-
-    // Copy to output
-    *device = holder->device;
-
-    // Store the holder in MemoryManager to keep the string alive
-    mlss::Any holder_any = std::move(holder);
-    MLSShandle handle = mlss::MemoryManager::addObject(std::move(holder_any));
-
-    // Mark as initialized
-    mlss::Any* stored_any = mlss::MemoryManager::template getPointer<mlss::Any>(handle);
-    if (stored_any)
-    {
-        mlss::MemoryManager::markAsInitialized(&stored_any);
-    }
-
-    return mlss::setLastError(MLSS_SUCCESS);
-}
-
-// Custom Type Registration Functions
-
-// Global registry for custom types
-static std::unordered_map<MLSSenum, MLSScustomtypeinfo> g_customTypeRegistry;
-static MLSSenum g_nextCustomTypeId = MLSS_CUSTOM_TYPE_START;
-static std::mutex g_customTypeRegistryMutex;
-
-MLSSenum mlssRegisterCustomType(const MLSSstring typeName,
-                                MLSScustomtypeset setFunc,
-                                MLSScustomtypeget getFunc,
-                                ...)
-{
-    if (!typeName || !setFunc || !getFunc)
-    {
-        mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-
-    std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
-
-    // Check if type name already exists
-    for (const auto& [id, info] : g_customTypeRegistry)
-    {
-        if (info.m_typeName && std::strcmp(info.m_typeName, typeName) == 0)
+        if (!device)
         {
-            mlss::setLastError(MLSS_ERROR_ALREADY_EXISTING_CONTEXT);
+            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        }
+
+        auto result = mlss::getOptimalDeviceFeatures();
+        if (!result.has_value())
+        {
+            return mlss::setLastError(MLSS_ERROR_FAILURE);
+        }
+
+        // Create a structure to hold the device and its string
+        struct OptimalDeviceHolder_t
+        {
+            MLSSdevicefeatures device;
+            std::string gfxString;
+        };
+
+        auto holder = std::make_unique<OptimalDeviceHolder_t>();
+        holder->device = result.value();
+        holder->gfxString = result.value().m_gfx;
+        holder->device.m_gfx = holder->gfxString.c_str();
+
+        // Copy to output
+        *device = holder->device;
+
+        // Store the holder in MemoryManager to keep the string alive
+        mlss::Any holder_any = std::move(holder);
+        MLSShandle handle = mlss::MemoryManager::addObject(std::move(holder_any));
+
+        // Mark as initialized
+        mlss::Any* stored_any = mlss::MemoryManager::template getPointer<mlss::Any>(handle);
+        if (stored_any)
+        {
+            mlss::MemoryManager::markAsInitialized(&stored_any);
+        }
+
+        return mlss::setLastError(MLSS_SUCCESS);
+    }
+
+    // Custom Type Registration Functions
+
+    // Global registry for custom types
+    static std::unordered_map<MLSSenum, MLSScustomtypeinfo> g_customTypeRegistry;
+    static MLSSenum g_nextCustomTypeId = MLSS_CUSTOM_TYPE_START;
+    static std::mutex g_customTypeRegistryMutex;
+
+    // String storage for custom type names and operators (owns the memory)
+    struct CustomTypeStringStorage
+    {
+        std::string typeName;
+        std::vector<std::string> supportedOperators;
+    };
+    static std::unordered_map<MLSSenum, CustomTypeStringStorage> g_customTypeStrings;
+
+    MLSSenum mlssRegisterCustomType(const MLSSstring typeName,
+                                    MLSScustomtypeset setFunc,
+                                    MLSScustomtypeget getFunc,
+                                    ...)
+    {
+        if (!typeName || !setFunc || !getFunc)
+        {
+            mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
             return 0;
         }
-    }
 
-    // Collect supported operators from variadic arguments
-    std::vector<std::string> supportedOps;
-    va_list args;
-    va_start(args, getFunc);
-    
-    const char* op = va_arg(args, const char*);
-    while (op && std::strcmp(op, MLSS_END_LIST) != 0)
-    {
-        supportedOps.push_back(op);
-        op = va_arg(args, const char*);
-    }
-    va_end(args);
+        std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
 
-    // Create custom type info
-    MLSScustomtypeinfo info;
-    
-    // Store type name (need to allocate and copy)
-    char* typeNameCopy = new char[std::strlen(typeName) + 1];
-    std::strcpy(typeNameCopy, typeName);
-    info.m_typeName = typeNameCopy;
-    
-    info.m_typeId = g_nextCustomTypeId++;
-    info.m_setFunc = setFunc;
-    info.m_getFunc = getFunc;
-    info.m_printFunc = nullptr; // Optional, can be added later
-    
-    // Store supported operators (need to allocate array)
-    if (!supportedOps.empty())
-    {
-        info.m_supportedOperators = new char*[supportedOps.size() + 1];
-        for (size_t i = 0; i < supportedOps.size(); ++i)
+        // Check if type name already exists
+        for (const auto& [id, info] : g_customTypeRegistry)
         {
-            info.m_supportedOperators[i] = new char[supportedOps[i].length() + 1];
-            std::strcpy(info.m_supportedOperators[i], supportedOps[i].c_str());
+            if (info.m_typeName && std::strcmp(info.m_typeName, typeName) == 0)
+            {
+                mlss::setLastError(MLSS_ERROR_ALREADY_EXISTING_CONTEXT);
+                return 0;
+            }
         }
-        info.m_supportedOperators[supportedOps.size()] = nullptr; // NULL-terminate
-    }
-    else
-    {
-        info.m_supportedOperators = nullptr;
-    }
 
-    // Register the type
-    g_customTypeRegistry[info.m_typeId] = info;
-    
-    mlss::setLastError(MLSS_SUCCESS);
-    return info.m_typeId;
-}
+        // Collect supported operators from variadic arguments
+        std::vector<std::string> supportedOps;
+        va_list args;
+        va_start(args, getFunc);
 
-MLSSstatus mlssGetCustomTypeInfo(MLSSenum customTypeId, MLSScustomtypeinfo* info)
-{
-    if (!info)
-    {
-        return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
-    }
-
-    std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
-    
-    auto it = g_customTypeRegistry.find(customTypeId);
-    if (it == g_customTypeRegistry.end())
-    {
-        return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
-    }
-
-    *info = it->second;
-    return mlss::setLastError(MLSS_SUCCESS);
-}
-
-MLSSstatus mlssUnregisterCustomType(MLSSenum customTypeId)
-{
-    std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
-    
-    auto it = g_customTypeRegistry.find(customTypeId);
-    if (it == g_customTypeRegistry.end())
-    {
-        return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
-    }
-
-    // Clean up allocated memory
-    MLSScustomtypeinfo& info = it->second;
-    
-    // Delete type name
-    if (info.m_typeName)
-    {
-        delete[] info.m_typeName;
-    }
-    
-    // Delete supported operators array
-    if (info.m_supportedOperators)
-    {
-        for (char** op = info.m_supportedOperators; *op != nullptr; ++op)
+        const char* op = va_arg(args, const char*);
+        while (op && std::strcmp(op, MLSS_END_LIST) != 0)
         {
-            delete[] *op;
+            supportedOps.push_back(op);
+            op = va_arg(args, const char*);
         }
-        delete[] info.m_supportedOperators;
+        va_end(args);
+
+        // Create custom type info
+        MLSScustomtypeinfo info;
+        info.m_typeId = g_nextCustomTypeId++;
+        info.m_setFunc = setFunc;
+        info.m_getFunc = getFunc;
+        info.m_printFunc = nullptr; // Optional, can be added later
+
+        // Store strings in our storage (owns the memory)
+        CustomTypeStringStorage& storage = g_customTypeStrings[info.m_typeId];
+        storage.typeName = typeName;
+        storage.supportedOperators = std::move(supportedOps);
+
+        // Point the C struct to our owned strings
+        info.m_typeName = storage.typeName.c_str();
+
+        // Create pointer array for supported operators
+        if (!storage.supportedOperators.empty())
+        {
+            info.m_supportedOperators = new char*[storage.supportedOperators.size() + 1];
+            for (size_t i = 0; i < storage.supportedOperators.size(); ++i)
+            {
+                // Cast away const since the C API expects char** but we won't modify
+                info.m_supportedOperators[i] = const_cast<char*>(storage.supportedOperators[i].c_str());
+            }
+            info.m_supportedOperators[storage.supportedOperators.size()] = nullptr; // NULL-terminate
+        }
+        else
+        {
+            info.m_supportedOperators = nullptr;
+        }
+
+        // Register the type
+        g_customTypeRegistry[info.m_typeId] = info;
+
+        mlss::setLastError(MLSS_SUCCESS);
+        return info.m_typeId;
     }
 
-    // Remove from registry
-    g_customTypeRegistry.erase(it);
-    
-    return mlss::setLastError(MLSS_SUCCESS);
-}
-
-MLSSbool mlssIsCustomType(MLSSenum typeId)
-{
-    std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
-    return g_customTypeRegistry.find(typeId) != g_customTypeRegistry.end();
-}
-
-MLSSstatus mlssSetParameterByNameTyped(MLSScontext* const context,
-                                       const MLSSstring opName,
-                                       const MLSSstring parameterName,
-                                       MLSSenum valueType,
-                                       const MLSSvoid* const value)
-{
-    if (!context || !opName || !parameterName || !value)
+    MLSSstatus mlssGetCustomTypeInfo(MLSSenum customTypeId, MLSScustomtypeinfo* info)
     {
-        return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        if (!info)
+        {
+            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        }
+
+        std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
+
+        auto it = g_customTypeRegistry.find(customTypeId);
+        if (it == g_customTypeRegistry.end())
+        {
+            return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
+        }
+
+        *info = it->second;
+        return mlss::setLastError(MLSS_SUCCESS);
     }
 
-    // Check if it's a custom type
-    if (mlssIsCustomType(valueType))
+    MLSSstatus mlssUnregisterCustomType(MLSSenum customTypeId)
     {
         std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
-        
-        auto it = g_customTypeRegistry.find(valueType);
-        if (it != g_customTypeRegistry.end() && it->second.m_setFunc)
+
+        auto it = g_customTypeRegistry.find(customTypeId);
+        if (it == g_customTypeRegistry.end())
         {
-            // Use the custom type's set function
-            return it->second.m_setFunc(context, opName, value);
+            return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
         }
+
+        // Clean up allocated memory
+        MLSScustomtypeinfo& info = it->second;
+
+        // Delete the pointer array (strings are owned by g_customTypeStrings)
+        if (info.m_supportedOperators)
+        {
+            delete[] info.m_supportedOperators;
+        }
+
+        // Remove from registries
+        g_customTypeStrings.erase(info.m_typeId);
+        g_customTypeRegistry.erase(it);
+
+        return mlss::setLastError(MLSS_SUCCESS);
     }
 
-    // Fall back to regular parameter setting for built-in types
-    return mlssSetParameterByName(context, opName, parameterName, value);
-}
+    MLSSbool mlssIsCustomType(MLSSenum typeId)
+    {
+        std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
+        return g_customTypeRegistry.find(typeId) != g_customTypeRegistry.end();
+    }
 
+    MLSSstatus mlssSetParameterByNameTyped(MLSScontext* const context,
+                                           const MLSSstring opName,
+                                           const MLSSstring parameterName,
+                                           MLSSenum valueType,
+                                           const MLSSvoid* const value)
+    {
+        if (!context || !opName || !parameterName || !value)
+        {
+            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        }
+
+        // Check if it's a custom type
+        if (mlssIsCustomType(valueType))
+        {
+            std::lock_guard<std::mutex> lock(g_customTypeRegistryMutex);
+
+            auto it = g_customTypeRegistry.find(valueType);
+            if (it != g_customTypeRegistry.end() && it->second.m_setFunc)
+            {
+                // Use the custom type's set function
+                return it->second.m_setFunc(context, opName, value);
+            }
+        }
+
+        // Fall back to regular parameter setting for built-in types
+        return mlssSetParameterByName(context, opName, parameterName, value);
+    }
 
 } // extern "C"
