@@ -2,12 +2,6 @@
 
 #pragma once
 
-#include "gfx1100/shaderBinRel.hpp"
-#include "gfx1100/shaderBinNonRel.hpp"
-#include "gfx1150/shaderBinRel.hpp"
-#include "gfx1150/shaderBinNonRel.hpp"
-#include "gfx1201/shaderBinRel.hpp"
-#include "gfx1201/shaderBinNonRel.hpp"
 
 namespace mlss::shaders::gqa::ck::wmma::fp16
 {

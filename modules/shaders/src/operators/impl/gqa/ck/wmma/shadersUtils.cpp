@@ -1,9 +1,30 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
-#include "fp16/shadersConstants.hpp"
+#include "shadersConstants.hpp"
+
+import grouped_query_attention_shaders_gfx1100_reloc;
+import grouped_query_attention_shaders_gfx1100_non_reloc;
+import grouped_query_attention_shaders_gfx1150_reloc;
+import grouped_query_attention_shaders_gfx1150_non_reloc;
+import grouped_query_attention_shaders_gfx1201_reloc;
+import grouped_query_attention_shaders_gfx1201_non_reloc;
 
 namespace mlss::shaders::gqa::ck::wmma
 {
+    namespace fp16 {
+        namespace gfx1100 {
+            namespace rel    = ::gqa::wmma::gfx1100::rel;
+            namespace nonrel = ::gqa::wmma::gfx1100::nonrel;
+        }
+        namespace gfx1150 {
+            namespace rel    = ::gqa::wmma::gfx1150::rel;
+            namespace nonrel = ::gqa::wmma::gfx1150::nonrel;
+        }
+        namespace gfx1201 {
+            namespace rel    = ::gqa::wmma::gfx1201::rel;
+            namespace nonrel = ::gqa::wmma::gfx1201::nonrel;
+        }
+    }
     using mlss::isGfx110x;
     using mlss::isGfx115x;
     using mlss::isGfx120x;
@@ -271,10 +292,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -283,10 +304,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -295,10 +316,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -307,10 +328,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -319,10 +340,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -331,10 +352,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -343,10 +364,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -355,10 +376,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -367,10 +388,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -379,10 +400,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -391,10 +412,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -403,10 +424,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -415,10 +436,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -427,10 +448,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -439,10 +460,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -451,10 +472,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
-                    fp16::gfx1100::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
-                    fp16::gfx1100::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1100,
+                    fp16::gfx1100::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
+                    fp16::gfx1100::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1100,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -471,10 +492,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -483,10 +504,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -495,10 +516,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -507,10 +528,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -519,10 +540,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -531,10 +552,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -543,10 +564,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -555,10 +576,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -567,10 +588,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -579,10 +600,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -591,10 +612,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -603,10 +624,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -615,10 +636,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -627,10 +648,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -639,10 +660,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -651,10 +672,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
-                    fp16::gfx1150::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
-                    fp16::gfx1150::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1150,
+                    fp16::gfx1150::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
+                    fp16::gfx1150::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1150,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -671,10 +692,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -683,10 +704,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -695,10 +716,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -707,10 +728,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qk_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qk_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -719,10 +740,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -731,10 +752,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -743,10 +764,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -755,10 +776,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_kv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_kv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_kv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -767,10 +788,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -779,10 +800,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -791,10 +812,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -803,10 +824,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::packed_qkv_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::packed_qkv_double_pointer_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -815,10 +836,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
             {
                 setBlobs.template operator()<64, 80, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x128x80_64x80x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -827,10 +848,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x192x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -839,10 +860,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
             {
                 setBlobs.template operator()<64, 48, 128>(
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_128_64x64x48_64x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);
@@ -851,10 +872,10 @@ namespace mlss::shaders::gqa::ck::wmma
             case GQAAsmShaderWmma::unpacked_64_32x64x48_32x48x64:
             {
                 setBlobs.template operator()<32, 48, 64>(
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
-                    fp16::gfx1201::rel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
-                    fp16::gfx1201::nonrel::grouped_query_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_no_strides_fp16_gfx1201,
+                    fp16::gfx1201::rel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
+                    fp16::gfx1201::nonrel::grouped_query_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_wmma_with_strides_fp16_gfx1201,
                     fp16::gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,
                     fp16::unpacked_double_pointer_ARGS_CONSTANTS,
                     fp16::unpacked_with_strides_double_pointer_ARGS_CONSTANTS);

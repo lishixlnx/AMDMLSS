@@ -1,22 +1,20 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-// Note: The shader binaries are currently in the gqa namespace due to a build issue
-// TODO: Fix the shader generation to use the correct mha namespace
-#include "fp16/gfx1100/shaderBinRel.hpp"
-#include "fp16/gfx1100/shaderBinNonRel.hpp"
-#include "fp16/gfx1150/shaderBinRel.hpp"
-#include "fp16/gfx1150/shaderBinNonRel.hpp"
-#include "fp16/gfx1201/shaderBinRel.hpp"
-#include "fp16/gfx1201/shaderBinNonRel.hpp"
 
-// Alias the GQA shader namespaces where MHA shaders are located
-namespace gfx1100_rel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1100::rel;
-namespace gfx1100_nonrel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1100::nonrel;
-namespace gfx1150_rel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1150::rel;
-namespace gfx1150_nonrel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1150::nonrel;
-namespace gfx1201_rel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1201::rel;
-namespace gfx1201_nonrel = ::mlss::shaders::gqa::ck::wmma::fp16::gfx1201::nonrel;
+import multi_head_attention_shaders_gfx1100_reloc;
+import multi_head_attention_shaders_gfx1100_non_reloc;
+import multi_head_attention_shaders_gfx1150_reloc;
+import multi_head_attention_shaders_gfx1150_non_reloc;
+import multi_head_attention_shaders_gfx1201_reloc;
+import multi_head_attention_shaders_gfx1201_non_reloc;
+
+namespace gfx1100_rel    = ::mha::wmma::gfx1100::rel;
+namespace gfx1100_nonrel = ::mha::wmma::gfx1100::nonrel;
+namespace gfx1150_rel    = ::mha::wmma::gfx1150::rel;
+namespace gfx1150_nonrel = ::mha::wmma::gfx1150::nonrel;
+namespace gfx1201_rel    = ::mha::wmma::gfx1201::rel;
+namespace gfx1201_nonrel = ::mha::wmma::gfx1201::nonrel;
 namespace fp16_constants = ::mlss::shaders::mha::ck::wmma::fp16;
 
 namespace mlss::shaders::mha::ck::wmma
@@ -211,160 +209,160 @@ namespace mlss::shaders::mha::ck::wmma
             {
             case MHAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1100_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1100_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1100_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1100_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
-                    gfx1100_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
-                    gfx1100_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1100,
+                    gfx1100_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
+                    gfx1100_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1100,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
@@ -379,160 +377,160 @@ namespace mlss::shaders::mha::ck::wmma
             {
             case MHAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1150_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1150_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1150_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1150_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
-                    gfx1150_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
-                    gfx1150_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1150,
+                    gfx1150_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
+                    gfx1150_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1150,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
@@ -547,160 +545,160 @@ namespace mlss::shaders::mha::ck::wmma
             {
             case MHAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_self_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::unpacked_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1201_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_unpacked_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::unpacked_q_k_v_cross_attention_ARGS_CONSTANT,
                     fp16::unpacked_q_k_v_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_kv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1201_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_kv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_q_kv_cross_attention_ARGS_CONSTANTS,
                     fp16::packed_q_kv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qk_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1201_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qk_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qk_ARGS_CONSTANTS,
                     fp16::packed_qk_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:
                 setBlobs.template operator()<64, 80, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x128x80_64x80x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x192x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:
                 setBlobs.template operator()<64, 48, 128>(
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_128_64x64x48_64x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);
                 break;
             case MHAAsmShaderWmma::packed_qkv_fallback_64_32x64x48_32x48x64:
                 setBlobs.template operator()<32, 48, 64>(
-                    gfx1201_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
-                    gfx1201_rel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
-                    gfx1201_nonrel::multi_head_attention_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_no_strides_fp16_gfx1201,
+                    gfx1201_rel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
+                    gfx1201_nonrel::multi_head_attention_typed_double_pointer_packed_qkv_fallback_64_32x64x48_32x48x64_forward_with_strides_fp16_gfx1201,
                     fp16::fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,
                     fp16::packed_qkv_self_attention_ARGS_CONSTANTS,
                     fp16::packed_qkv_with_strides_ARGS_CONSTANTS);

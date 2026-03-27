@@ -26,15 +26,15 @@ namespace shaders
     template<typename T>
     concept BinaryElement = std::same_as<T, std::byte> || std::same_as<T, std::uint8_t>;
 
-    template<std::ranges::range R>
-    concept BinaryType = either<std::ranges::range_value_t<R>, std::byte, std::uint8_t>;
+    template<typename R>
+    concept BinaryType = std::ranges::range<R> && either<std::ranges::range_value_t<R>, std::byte, std::uint8_t>;
 
     template<typename T>
     using CacheAlignedVector = std::vector<T, mlss::CacheAlignedAllocator<T>>;
 
 
-    template<std::ranges::range R>
-    concept BinaryTypeRange = std::ranges::contiguous_range<R> && BinaryType<R>;
+    template<typename R>
+    concept BinaryTypeRange = std::ranges::contiguous_range<R> && BinaryElement<std::ranges::range_value_t<R>>;
 
     template<typename T>
     inline constexpr bool is_shader_range_v = false;
@@ -90,6 +90,10 @@ using DynamicShaderByteType = ShaderType<std::vector<std::byte, mlss::CacheAlign
 using ShaderDescriptorType = ShaderType<std::span<const std::uint8_t>>;
 
 using ShaderDescriptorByteType = ShaderType<std::span<const std::byte>>;
+
+using ShaderDescriptor     = ShaderDescriptorType;
+using ShaderDescriptorByte = ShaderDescriptorByteType;
+
 //=====================================================================================================================
 template<std::ranges::contiguous_range T, std::size_t M = std::dynamic_extent>
 requires BinaryType<T>
@@ -148,6 +152,21 @@ std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderType<T>& shader);
 std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptor& shader);
 
 std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderDescriptorByte& shader);
+
+//=====================================================================================================================
+template<typename> struct is_library_shader_type : std::false_type {};
+template<BinaryTypeRange R> struct is_library_shader_type<ShaderType<R>> : std::true_type {};
+
+/// Generic overload for external shader types (e.g. C++20 module ShaderType<N>) that expose
+/// m_binary (with .data()/.size()) and m_kernelName but aren't mlss::shaders::ShaderType<T>.
+template<typename T>
+requires (!is_library_shader_type<std::remove_cvref_t<T>>::value)
+      && requires(const T& t) {
+             { t.m_binary.data() } -> std::convertible_to<const void*>;
+             { t.m_binary.size() } -> std::convertible_to<std::size_t>;
+             { t.m_kernelName }    -> std::convertible_to<std::string_view>;
+         }
+std::unique_ptr<Binaries::Blob> make_binary_blob(const T& shader);
 
 } // shaders
 

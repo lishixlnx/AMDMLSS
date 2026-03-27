@@ -154,6 +154,26 @@ std::unique_ptr<Binaries::Blob> make_binary_blob(const ShaderType<T>& shader)
     });
 }
 
+//=====================================================================================================================
+template<typename T>
+requires (!is_library_shader_type<std::remove_cvref_t<T>>::value)
+      && requires(const T& t) {
+             { t.m_binary.data() } -> std::convertible_to<const void*>;
+             { t.m_binary.size() } -> std::convertible_to<std::size_t>;
+             { t.m_kernelName }    -> std::convertible_to<std::string_view>;
+         }
+std::unique_ptr<Binaries::Blob> make_binary_blob(const T& shader)
+{
+    std::string name(shader.m_kernelName);
+    return std::make_unique<Binaries::Blob>(Binaries::Blob{
+        shader.m_binary.data(),
+        shader.m_binary.size(),
+        MLSS_BINARY_TYPE_ELF,
+        0,
+        name
+    });
+}
+
 } // shaders
 
 } // mlss

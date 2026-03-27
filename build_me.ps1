@@ -93,7 +93,7 @@ function Deploy-Amdmlss {
     }
     
     # Install using CMake with the correct configuration
-    cmake --install "build/$Preset" --config $buildConfigCapitalized --prefix $DeployPath
+    cmake --install "build/$Preset" --config $buildConfigCapitalized --prefix $DeployPath | Out-Host
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Deployment failed for $Preset!"
@@ -116,7 +116,7 @@ function Build-Single {
     
     # Configure with CMake preset
     Write-Host "Configuring with CMake preset: $Preset..."
-    cmake --preset $Preset
+    cmake --preset $Preset | Out-Host
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "CMake configuration failed for $Preset!"
@@ -125,7 +125,7 @@ function Build-Single {
     
     # Build the project
     Write-Host "Building project..."
-    cmake --build "build/$Preset" --config $buildConfigCapitalized
+    cmake --build "build/$Preset" --config $buildConfigCapitalized | Out-Host
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Build failed for $Preset!"
@@ -138,7 +138,7 @@ function Build-Single {
     if ($BuildSampleTests -or $RunSampleTests) {
         Write-Host ""
         Write-Host "Reconfiguring with BUILD_SAMPLES=ON for $Preset..."
-        cmake --preset $Preset -DBUILD_SAMPLES=ON
+        cmake --preset $Preset -DBUILD_SAMPLES=ON | Out-Host
         
         if ($LASTEXITCODE -ne 0) {
             Write-Host "CMake reconfiguration failed for $Preset!"
@@ -146,7 +146,7 @@ function Build-Single {
         }
         
         Write-Host "Building sample tests for $Preset..."
-        cmake --build "build/$Preset" --config $buildConfigCapitalized
+        cmake --build "build/$Preset" --config $buildConfigCapitalized | Out-Host
         
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Sample tests build failed for $Preset!"
