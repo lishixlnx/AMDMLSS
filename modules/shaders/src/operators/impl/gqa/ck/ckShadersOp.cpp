@@ -24,14 +24,14 @@ namespace mlss::shaders::gqa::ck
     std::expected<Binaries, std::error_code> CKGqa::getBinaries() const
     {
         // Extract GQA parameters from attributes
-        std::uint32_t batchSize{ 1 };
-        std::uint32_t qHeadCount{ 1 };
-        std::uint32_t kvHeadCount{ 1 };
-        std::uint32_t sizeHeads{ 0 };
-        std::uint32_t kvSequenceLength{ 0 };
-        std::uint32_t qSequenceLength{ 0 };
-        std::uint32_t dataType{ 0 };
-        std::uint32_t packing{ MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED };
+        std::uint32_t batchSize{1};
+        std::uint32_t qHeadCount{1};
+        std::uint32_t kvHeadCount{1};
+        std::uint32_t sizeHeads{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t dataType{0};
+        std::uint32_t packing{MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED};
         bool useStrides = false;
 
         for (const auto& attribute : m_attributes)
@@ -149,4 +149,3 @@ namespace mlss::shaders::gqa::ck
     }
 
 } // namespace mlss::shaders::gqa::ck
-

@@ -6,7 +6,7 @@ namespace mlss
     //=================================================================================================================
     class Attribute
     {
-    
+
     public:
 
         struct AttributeInfo;
@@ -22,7 +22,7 @@ namespace mlss
         Attribute& operator=(const Attribute&) = default;
 
         //=============================================================================================================
-        template<class T, typename = std::enable_if_t<std::is_copy_constructible_v<T>>>
+        template <class T, typename = std::enable_if_t<std::is_copy_constructible_v<T>>>
         Attribute(const T& obj, const AttributeInfo& info)
             : m_info(std::make_shared<AttributeInfo>(info))
         {
@@ -70,11 +70,11 @@ namespace mlss
         [[nodiscard]] size_t num_elements() const;
 
         //=============================================================================================================
-        template<class T>
+        template <class T>
         T& value();
-        
+
         //=============================================================================================================
-        template<class T>
+        template <class T>
         const T& value() const;
 
         //=============================================================================================================
@@ -84,15 +84,12 @@ namespace mlss
         const uint8_t* data() const;
 
         //=============================================================================================================
-        template<class T>
+        template <class T>
         T* data();
-        
 
         //=============================================================================================================
-        template<class T>
+        template <class T>
         const T* data() const;
-        
-
 
         //=============================================================================================================
         bool is(const std::string& name) const;
@@ -107,10 +104,10 @@ namespace mlss
         bool is(const std::uint32_t& flag) const;
 
     private:
+
         std::vector<uint8_t> m_attr;
         std::shared_ptr<AttributeInfo> m_info;
     };
-
 
     //=================================================================================================================
     // Operator overloads
@@ -120,7 +117,7 @@ namespace mlss
     bool operator==(const Attribute& lhs, const std::string& rhs);
 
     //=================================================================================================================
-    bool operator ==(const std::string& lhs, const Attribute& rhs);
+    bool operator==(const std::string& lhs, const Attribute& rhs);
 
     //=================================================================================================================
     bool operator!=(const Attribute& lhs, const std::string& rhs);
@@ -132,14 +129,13 @@ namespace mlss
     bool operator==(const Attribute& lhs, const uint32_t& rhs);
 
     //=================================================================================================================
-    bool operator ==(const uint32_t& lhs, const Attribute& rhs);
+    bool operator==(const uint32_t& lhs, const Attribute& rhs);
 
     //=================================================================================================================
     bool operator!=(const Attribute& lhs, const uint32_t& rhs);
 
     //=================================================================================================================
     bool operator!=(const uint32_t& lhs, const Attribute& rhs);
-
 
     //=================================================================================================================
     struct Attribute::AttributeInfo
@@ -195,7 +191,7 @@ namespace mlss
         const enum64& type_enum() const;
 
         //=============================================================================================================
-            bool isArray() const;
+        bool isArray() const;
 
         //=============================================================================================================
         std::uint32_t element_type_enum() const;
@@ -204,4 +200,4 @@ namespace mlss
         size_t num_elements() const;
     };
 
-} // mlss
+} // namespace mlss

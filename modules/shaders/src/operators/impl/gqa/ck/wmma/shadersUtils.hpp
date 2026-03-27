@@ -26,4 +26,3 @@ namespace mlss::shaders::gqa::ck::wmma
         const std::uint32_t& dataType);
 
 } // namespace mlss::shaders::gqa::ck::wmma
-

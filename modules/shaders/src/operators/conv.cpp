@@ -4,30 +4,30 @@
 
 namespace mlss::shaders::op
 {
-      
-        //=====================================================================================================================
-        // OperatorConv implementation
-        //=====================================================================================================================
 
-        OperatorConv::OperatorConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
-            : base(attributes, gfxip)
-        {
-            this->m_implName = "HipConv";
-        }
+    //=====================================================================================================================
+    // OperatorConv implementation
+    //=====================================================================================================================
 
-        std::string OperatorConv::getOperatorName()
-        {
-            return "AMDMLSS::OperatorConv";
-        }
+    OperatorConv::OperatorConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+        : base(attributes, gfxip)
+    {
+        this->m_implName = "HipConv";
+    }
 
-        std::expected<Binaries, std::error_code> OperatorConv::getBinaries() const
-        {
-            return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
-        }
+    std::string OperatorConv::getOperatorName()
+    {
+        return "AMDMLSS::OperatorConv";
+    }
 
-        bool OperatorConv::getCapsImpl(const std::vector<mlss::Attribute>& attributes)
-        {
-            return false;
-        }
+    std::expected<Binaries, std::error_code> OperatorConv::getBinaries() const
+    {
+        return std::unexpected(std::make_error_code(std::errc::operation_not_supported));
+    }
+
+    bool OperatorConv::getCapsImpl(const std::vector<mlss::Attribute>& attributes)
+    {
+        return false;
+    }
 
 } // namespace mlss::shaders::op

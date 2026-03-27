@@ -1,7 +1,6 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-
 namespace mlss
 {
     //=====================================================================================================================
@@ -19,4 +18,3 @@ namespace mlss
     inline std::string getKernelName(const std::span<const std::byte>& arr);
 
 } // namespace mlss
-

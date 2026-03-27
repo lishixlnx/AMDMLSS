@@ -4,16 +4,16 @@
 
 #include "core/core.hpp"
 
-
 namespace mlss::shaders::op
 {
     class OperatorDepthWiseConv : public mlss::OperatorBase<OperatorDepthWiseConv>
     {
     private:
 
-    using base = mlss::OperatorBase<OperatorDepthWiseConv>;
+        using base = mlss::OperatorBase<OperatorDepthWiseConv>;
 
-    public:    
+    public:
+
         // Default constructor
         OperatorDepthWiseConv() = default;
 
@@ -34,16 +34,15 @@ namespace mlss::shaders::op
         // Static method to check capabilities
         static bool getCapsImpl(const std::vector<mlss::Attribute>& attributes);
     };
- 
-    
 
     class OperatorDilatedConv : public mlss::OperatorBase<OperatorDilatedConv>
     {
     private:
 
-    using base = mlss::OperatorBase<OperatorDilatedConv>;
+        using base = mlss::OperatorBase<OperatorDilatedConv>;
 
-    public:    
+    public:
+
         // Default constructor
         OperatorDilatedConv() = default;
 
@@ -64,6 +63,5 @@ namespace mlss::shaders::op
         // Static method to check capabilities
         static bool getCapsImpl(const std::vector<mlss::Attribute>& attributes);
     };
-
 
 } // namespace mlss::shaders::op

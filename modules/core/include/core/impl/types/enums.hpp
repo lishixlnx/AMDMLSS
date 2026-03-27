@@ -292,4 +292,4 @@ namespace mlss
         HLSL
     };
 
-} // mlss
+} // namespace mlss

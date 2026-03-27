@@ -6,9 +6,9 @@
 namespace mlss
 {
     //=================================================================================================================
-    //                                   CacheAlignedAllocator                                                                   
+    //                                   CacheAlignedAllocator
     //=================================================================================================================
-    template<typename T, std::size_t cache_line_size_ = std::hardware_constructive_interference_size>
+    template <typename T, std::size_t cache_line_size_ = std::hardware_constructive_interference_size>
     class CacheAlignedAllocator
     {
     public:
@@ -22,7 +22,7 @@ namespace mlss
         using const_pointer = const T*;
 
         //---------------------------------------------------------------------
-        template<typename U>
+        template <typename U>
         struct rebind
         {
             using other = CacheAlignedAllocator<U>;
@@ -32,7 +32,7 @@ namespace mlss
         constexpr CacheAlignedAllocator() noexcept = default;
 
         //---------------------------------------------------------------------
-        template<typename U>
+        template <typename U>
         constexpr inline CacheAlignedAllocator(const CacheAlignedAllocator<U>&) noexcept {}
 
         //---------------------------------------------------------------------
@@ -42,18 +42,18 @@ namespace mlss
         void deallocate(pointer ptr, std::size_t) noexcept;
 
         //---------------------------------------------------------------------
-        template<typename U>
+        template <typename U>
         constexpr inline bool operator==(const CacheAlignedAllocator<U>&) const noexcept
         {
             return true;
         }
 
         //---------------------------------------------------------------------
-        template<typename U>
+        template <typename U>
         constexpr inline bool operator!=(const CacheAlignedAllocator<U>&) const noexcept
         {
             return false;
         }
     };
 
-} // mlss
+} // namespace mlss

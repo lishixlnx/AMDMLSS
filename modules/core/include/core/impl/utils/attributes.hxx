@@ -14,19 +14,18 @@ namespace mlss
     void createAttributes(const std::string& opName, std::vector<Attribute>& attributes);
 
     /// @brief Create attribute with specific range and type
-    template<class T>
+    template <class T>
     Attribute makeAttribute(const std::string& range, const std::uint32_t& attr_enum, const std::uint32_t& type_enum);
 
     /// @brief Create attribute with specific range and type (enum64 version)
-    template<class T>
+    template <class T>
     Attribute makeAttribute(const std::string& range, const std::uint32_t& attr_enum, const enum64& type_enum);
 
     //=====================================================================================================================
     // Stream operator for Attribute
     //=====================================================================================================================
 
-    template<class CharT, class Traits>
+    template <class CharT, class Traits>
     std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os, const Attribute& obj);
 
 } // namespace mlss
-

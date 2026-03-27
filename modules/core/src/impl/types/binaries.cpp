@@ -4,12 +4,11 @@ namespace mlss
 {
 
     //=================================================================================================================
-    //                                   Binaries                                                                   
+    //                                   Binaries
     //=================================================================================================================
 
-//---------------------------------------------------------------------
-    Binaries::Binaries(std::vector<Blob>&& binaries) :
-        m_binaries(std::move(binaries))
+    //---------------------------------------------------------------------
+    Binaries::Binaries(std::vector<Blob>&& binaries) : m_binaries(std::move(binaries))
     {
     }
 
@@ -41,25 +40,24 @@ namespace mlss
     void Binaries::addBlob(std::vector<Blob>&& binaries)
     {
         m_binaries.insert(m_binaries.end(),
-            std::make_move_iterator(binaries.begin()),
-            std::make_move_iterator(binaries.end()));
+                          std::make_move_iterator(binaries.begin()),
+                          std::make_move_iterator(binaries.end()));
     }
 
     //=================================================================================================================
-    //                                   Binaries::Blob                                                                   
+    //                                   Binaries::Blob
     //=================================================================================================================
 
     //---------------------------------------------------------------------
     Binaries::Blob::Blob(const void* ptr,
-        const size_t& size,
-        const std::uint32_t& type,
-        const uint32_t& priority,
-        const std::string& name) :
-        m_pBinary(ptr),
-        m_size(size),
-        m_type(type),
-        m_priority(priority),
-        m_name(name)
+                         const size_t& size,
+                         const std::uint32_t& type,
+                         const uint32_t& priority,
+                         const std::string& name) : m_pBinary(ptr),
+                                                    m_size(size),
+                                                    m_type(type),
+                                                    m_priority(priority),
+                                                    m_name(name)
     {
     }
 
@@ -82,4 +80,4 @@ namespace mlss
         m_blocks = blocks;
     }
 
-} // mlss
+} // namespace mlss

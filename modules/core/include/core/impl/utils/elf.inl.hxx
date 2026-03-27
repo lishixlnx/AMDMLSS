@@ -9,4 +9,3 @@ namespace mlss
         return getKernelName(arr.data(), arr.size());
     }
 } // namespace mlss
-

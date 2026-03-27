@@ -58,7 +58,7 @@ static int formatGfxArgument(const char* arg, char* dest, size_t destSize)
         return 0;
     }
 
-    char normalized[64] = { 0 };
+    char normalized[64] = {0};
     size_t idx = 0;
 
     while (*token != '\0' && idx < (sizeof(normalized) - 1))
@@ -110,8 +110,8 @@ int main(int argc, char* argv[])
     // Default to DEBUG level verbose mode
     MLSSenum verboseLevel = 4; // DEBUG level
     MLSSstring asic = MLSS_GFXAUTOFIND;
-    char customAsic[64] = { 0 };
-    
+    char customAsic[64] = {0};
+
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
     {
@@ -167,10 +167,10 @@ int main(int argc, char* argv[])
             return EXIT_FAILURE;
         }
     }
-    
+
     // Set the verbose level
     CHECK_STATUS(mlssSetVerboseLevel(verboseLevel));
-    
+
     printf("=== MHA Simple Example ===\n");
     printf("Verbose level set to: %d\n\n", verboseLevel);
 
@@ -184,7 +184,6 @@ int main(int argc, char* argv[])
     MLSSenum data_type = MLSS_FLOAT16;
     MLSSuint32 kvDim = 0;
 
-
     MLSScontext context = 0;
     MLSSbinary* binaries = NULL;
     MLSSsize n = 0;
@@ -197,18 +196,18 @@ int main(int argc, char* argv[])
     CHECK_STATUS(mlssCreateContext(&context, asic, opName));
 
     // Step 2) Set parameters
-    
+
     // Set the parameters by name...
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "batchSize", &batch_size));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "qSeqLength", &q_sequence_length));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "kvSeqLength", &kv_sequence_length));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "kDim", &kvDim));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "vDim", &kvDim));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "sizeHeads", &head_dim));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "packing", &packing));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "headCount", &head_num));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "scale", &scale));
-    //CHECK_STATUS(mlssSetParameterByName(&context, opName, "dataType", &data_type));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "batchSize", &batch_size));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "qSeqLength", &q_sequence_length));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kvSeqLength", &kv_sequence_length));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kDim", &kvDim));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "vDim", &kvDim));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "sizeHeads", &head_dim));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "packing", &packing));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "headCount", &head_num));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "scale", &scale));
+    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "dataType", &data_type));
 
     // ... or by enum
 
@@ -223,10 +222,10 @@ int main(int argc, char* argv[])
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_SCALE, &scale));
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_MHA_DATATYPE, &data_type));
 
-    MLSSuint32 qStrides[4] = { q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
-    MLSSuint32 kStrides[4] = { kv_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
-    MLSSuint32 vStrides[4] = { kv_sequence_length * head_num * head_dim, head_dim, 1, head_num * head_dim };
-    MLSSuint32 outputStrides[4] = { q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1 };
+    MLSSuint32 qStrides[4] = {q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
+    MLSSuint32 kStrides[4] = {kv_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
+    MLSSuint32 vStrides[4] = {kv_sequence_length * head_num * head_dim, head_dim, 1, head_num * head_dim};
+    MLSSuint32 outputStrides[4] = {q_sequence_length * head_num * head_dim, head_dim, head_num * head_dim, 1};
 
     CHECK_STATUS(mlssSetParameterByName(&context, opName, "qStrides", qStrides));
     CHECK_STATUS(mlssSetParameterByName(&context, opName, "kStrides", kStrides));

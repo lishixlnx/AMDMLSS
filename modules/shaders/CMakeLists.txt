@@ -23,7 +23,13 @@ if(SHADER_CPPM_FILES)
     )
     target_compile_features(shader_modules PRIVATE cxx_std_23)
     if(MSVC)
-        target_compile_options(shader_modules PRIVATE /MP1)
+        target_compile_options(shader_modules PRIVATE
+            /MP1
+            /bigobj
+        )
+        set_target_properties(shader_modules PROPERTIES
+            MSVC_DEBUG_INFORMATION_FORMAT ""
+        )
     endif()
     target_link_libraries(shaders PUBLIC shader_modules)
     set_target_properties(shaders PROPERTIES CXX_SCAN_FOR_MODULES ON)

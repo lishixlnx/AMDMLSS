@@ -1,14 +1,13 @@
 #pragma once
 
-
 namespace mlss
 {
     //=====================================================================================================================
-    //                                   Any                                                                   
+    //                                   Any
     //=====================================================================================================================
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     void Any::defaultCopyConstruct(void* dst, const void* src)
     {
         if constexpr (std::copy_constructible<T>)
@@ -18,7 +17,7 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     void Any::defaultMoveConstruct(void* dst, void* src)
     {
         if constexpr (std::move_constructible<T>)
@@ -28,7 +27,7 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     void Any::defaultDestroy(void* ptr)
     {
         if constexpr (!std::is_trivially_destructible_v<T>)
@@ -38,63 +37,60 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     constexpr bool Any::isRangeV()
     {
-        return requires(T & t)
-        {
+        return requires(T& t) {
             std::begin(t);
             std::end(t);
         };
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     const Any::TypeInfo& Any::getTypeInfo()
     {
         static const TypeInfo info =
-        {
-            sizeof(T),
-            alignof(T),
-            isRangeV<T>(),
-            &defaultCopyConstruct<T>,
-            &defaultMoveConstruct<T>,
-            &defaultDestroy<T>
-        };
+            {
+                sizeof(T),
+                alignof(T),
+                isRangeV<T>(),
+                &defaultCopyConstruct<T>,
+                &defaultMoveConstruct<T>,
+                &defaultDestroy<T>};
         return info;
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     std::unique_ptr<Any::TypeInfo> Any::createCustomTypeInfo(
-        void(*copyConstruct)(void*, const void*),
-        void(*moveConstruct)(void*, void*),
-        void(*destroy)(void*)
-    ) {
+        void (*copyConstruct)(void*, const void*),
+        void (*moveConstruct)(void*, void*),
+        void (*destroy)(void*))
+    {
         return std::make_unique<TypeInfo>(TypeInfo{
             sizeof(T),
             alignof(T),
             isRangeV<T>(),
             copyConstruct ? copyConstruct : &defaultCopyConstruct<T>,
             moveConstruct ? moveConstruct : &defaultMoveConstruct<T>,
-            destroy ? destroy : &defaultDestroy<T>
-            });
+            destroy ? destroy : &defaultDestroy<T>});
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
-        requires (!std::same_as<std::remove_cvref_t<T>, Any>)
+    template <typename T>
+        requires(!std::same_as<std::remove_cvref_t<T>, Any>)
     Any::Any(T&& value)
     {
         emplace<std::remove_cvref_t<T>>(std::forward<T>(value));
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
+    template <typename T>
     Any::Any(T&& value,
-        void(*copyConstruct)(void*, const void*),
-        void(*moveConstruct)(void*, void*),
-        void(*destroy)(void*))
+             void (*copyConstruct)(void*, const void*),
+             void (*moveConstruct)(void*, void*),
+             void (*destroy)(void*))
     {
         using DecayedT = std::remove_cvref_t<T>;
 
@@ -109,15 +105,16 @@ namespace mlss
             {
                 m_typeInfo->moveConstruct(storagePtr, &value);
             }
-            else {
+            else
+            {
                 m_typeInfo->copyConstruct(storagePtr, &value);
             }
         }
     }
 
     //---------------------------------------------------------------------
-    template<typename T>
-        requires (!std::same_as<std::remove_cvref_t<T>, Any>)
+    template <typename T>
+        requires(!std::same_as<std::remove_cvref_t<T>, Any>)
     Any& Any::operator=(T&& value)
     {
         emplace<std::remove_cvref_t<T>>(std::forward<T>(value));
@@ -125,7 +122,7 @@ namespace mlss
     }
 
     //---------------------------------------------------------------------
-    template<typename T, typename... Args>
+    template <typename T, typename... Args>
     T& Any::emplace(Args&&... args)
     {
         reset();
@@ -148,11 +145,10 @@ namespace mlss
         return *objPtr;
     }
 
-
     //=====================================================================================================================
-    //                                   anyIs                                                                   
+    //                                   anyIs
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     bool anyIs(const Any& any) noexcept
     {
         using DecayedT = std::remove_cvref_t<T>;
@@ -166,15 +162,15 @@ namespace mlss
         // Compare with standard type info
         const auto& stdTypeInfo = Any::getTypeInfo<DecayedT>();
         return any.m_typeInfo->size == stdTypeInfo.size &&
-            any.m_typeInfo->alignment == stdTypeInfo.alignment;
+               any.m_typeInfo->alignment == stdTypeInfo.alignment;
     }
 
     //=====================================================================================================================
-    //                                   anyCast                                                                   
+    //                                   anyCast
     //=====================================================================================================================
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     T* anyCast(Any* any) noexcept
     {
         using DecayedT = std::remove_cvref_t<T>;
@@ -187,7 +183,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     const T* anyCast(const Any* any) noexcept
     {
         using DecayedT = std::remove_cvref_t<T>;
@@ -200,7 +196,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     T anyCast(Any& any)
     {
         using DecayedT = std::remove_cvref_t<T>;
@@ -221,33 +217,35 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     T anyCast(const Any& any)
     {
         using DecayedT = std::remove_cvref_t<T>;
         auto result = anyCast<DecayedT>(&any);
-        if (!result) {
+        if (!result)
+        {
             throw std::bad_cast();
         }
         return static_cast<T>(*result);
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     T anyCast(Any&& any)
     {
         using DecayedT = std::remove_cvref_t<T>;
         auto result = anyCast<DecayedT>(&any);
-        if (!result) {
+        if (!result)
+        {
             throw std::bad_cast();
         }
         return static_cast<T>(std::move(*result));
     }
 
     //=====================================================================================================================
-    //                                   anyCastExpected                                                                   
+    //                                   anyCastExpected
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     std::expected<T, std::error_code> anyCastExpected(const Any& any) noexcept
     {
         using DecayedT = std::remove_cvref_t<T>;
@@ -259,4 +257,4 @@ namespace mlss
         return static_cast<T>(*result);
     }
 
-} // mlss
+} // namespace mlss

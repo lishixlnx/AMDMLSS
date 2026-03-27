@@ -5,7 +5,7 @@ namespace mlss
     //=================================================================================================================
     // OperatorRegistry implementation
     //=================================================================================================================
-    
+
     // Static member definition
     std::unordered_map<std::string, FactoryFunction> OperatorRegistry::registry;
 

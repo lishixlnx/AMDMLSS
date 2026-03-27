@@ -4,7 +4,7 @@ namespace mlss
 {
 
     //=====================================================================================================================
-    template<class T>
+    template <class T>
     T& Attribute::value()
     {
         if (getTypeFlag<T>() != m_info->type_enum())
@@ -14,7 +14,7 @@ namespace mlss
         return *reinterpret_cast<T*>(m_attr.data());
     }
     //=====================================================================================================================
-    template<class T>
+    template <class T>
     const T& Attribute::value() const
     {
 
@@ -27,7 +27,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<class T>
+    template <class T>
     T* Attribute::data()
     {
         if (getTypeFlag<T>() != makeArrayEnum(m_info->element_type_enum()))
@@ -38,7 +38,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<class T>
+    template <class T>
     const T* Attribute::data() const
     {
         if (getTypeFlag<T>() != makeArrayEnum(m_info->element_type_enum()))
@@ -48,4 +48,4 @@ namespace mlss
         return reinterpret_cast<const T*>(m_attr.data());
     }
 
-} // mlss
+} // namespace mlss

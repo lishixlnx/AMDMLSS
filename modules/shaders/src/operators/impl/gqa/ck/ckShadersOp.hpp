@@ -33,32 +33,34 @@ namespace mlss::shaders::gqa::ck
     class CKGqa final : public OperatorBase<CKGqa, OperatorRegistration::Disabled>
     {
     private:
+
         using base = OperatorBase<CKGqa, OperatorRegistration::Disabled>;
-        
+
         // Friend declaration to allow base class access to private members
         friend class OperatorBase<CKGqa, OperatorRegistration::Disabled>;
         friend class mlss::shaders::op::OperatorGQA;
-        
-    public:    
+
+    public:
+
         // Default constructor
         CKGqa() = default;
-        
+
         // Constructor
         CKGqa(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip);
-        
+
         // Destructor
         virtual ~CKGqa() = default;
-        
+
         // Static method to get the type name for registration
         static std::string getOperatorName();
-        
+
         // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
-        
+
     private:
+
         // Static method to check capabilities
         static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
     };
 
 } // namespace mlss::shaders::gqa::ck
-

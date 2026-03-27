@@ -23,7 +23,7 @@ namespace mlss
     };
 
     // Forward declare template class
-    template<class Derived, OperatorRegistration Mode = OperatorRegistration::Enabled>
+    template <class Derived, OperatorRegistration Mode = OperatorRegistration::Enabled>
     class OperatorBase;
 
     using FactoryFunction = std::function<std::unique_ptr<OperatorBase<void, OperatorRegistration::Enabled>>()>;
@@ -45,23 +45,21 @@ namespace mlss
     private:
 
         static std::unordered_map<std::string, FactoryFunction> registry;
-
     };
-    
 
     // Concept to check if Derived has getCapsImpl with gfxArch parameter
-    template<typename T>
+    template <typename T>
     concept HasGetCapsImplWithGfxArch = requires(const std::vector<Attribute>& attrs, GfxArchitectureFlags arch) {
         { T::getCapsImpl(attrs, arch) } -> std::convertible_to<bool>;
     };
 
     // Concept to check if Derived has getCapsImpl without gfxArch parameter
-    template<typename T>
+    template <typename T>
     concept HasGetCapsImplWithoutGfxArch = requires(const std::vector<Attribute>& attrs) {
         { T::getCapsImpl(attrs) } -> std::convertible_to<bool>;
     };
 
-    template<class Derived, OperatorRegistration Mode>
+    template <class Derived, OperatorRegistration Mode>
     class OperatorBase
     {
     public:
@@ -91,9 +89,9 @@ namespace mlss
             else
             {
                 static_assert(sizeof(Derived) == 0,
-                    "Derived class must implement getCapsImpl with signature "
-                    "'static bool getCapsImpl(const std::vector<Attribute>&)' or "
-                    "'static bool getCapsImpl(const std::vector<Attribute>&, GfxArchitectureFlags)'");
+                              "Derived class must implement getCapsImpl with signature "
+                              "'static bool getCapsImpl(const std::vector<Attribute>&)' or "
+                              "'static bool getCapsImpl(const std::vector<Attribute>&, GfxArchitectureFlags)'");
                 return false;
             }
         }
@@ -132,21 +130,19 @@ namespace mlss
 
         // Protected constructors
         constexpr inline OperatorBase() : m_gfxArch(GfxArchitectureFlags::Unknown) {}
-        
+
         OperatorBase(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip);
 
         std::vector<mlss::Attribute> m_attributes;
         GfxArchitectureFlags m_gfxArch;
         std::unique_ptr<OperatorID> m_op;
         mutable std::string m_implName;
-        
 
     private:
 
         static bool registered;
-
     };
 
-} // mlss
+} // namespace mlss
 
 #include "base.inl.hxx"

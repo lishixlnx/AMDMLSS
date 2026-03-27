@@ -5,17 +5,18 @@
 #include "core/core.hpp"
 
 namespace mlss::shaders::op
-{ 
+{
     class OperatorConv : public OperatorBase<OperatorConv>
     {
     private:
 
-    using base = OperatorBase<OperatorConv>;
-    
-    // Friend declaration to allow base class access to private members
-    friend class OperatorBase<OperatorConv>;
+        using base = OperatorBase<OperatorConv>;
 
-    public:    
+        // Friend declaration to allow base class access to private members
+        friend class OperatorBase<OperatorConv>;
+
+    public:
+
         // Default constructor
         OperatorConv() = default;
 
@@ -30,7 +31,6 @@ namespace mlss::shaders::op
 
         // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
-
 
     private:
 

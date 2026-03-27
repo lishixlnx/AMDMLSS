@@ -10,17 +10,17 @@ namespace mlss
     //---------------------------------------------------------------------------------------------------------------------
     // Divide value by divisor and round up to the nearest integer
     // Example: integer_divide_ceil(10, 3) = 4 (since 10/3 = 3.33... rounds up to 4)
-    template<class T>
-    requires std::is_integral_v<T>
+    template <class T>
+        requires std::is_integral_v<T>
     T integer_divide_ceil(const T& value, const std::type_identity_t<T>& divisor)
     {
         const T& div = divisor;
-        
+
         if (div == 0)
         {
             return 0; // Avoid division by zero
         }
-        
+
         if constexpr (std::is_unsigned_v<T>)
         {
             // For unsigned: (value + divisor - 1) / divisor
@@ -44,17 +44,17 @@ namespace mlss
     //---------------------------------------------------------------------------------------------------------------------
     // Floor value to the nearest multiple of divisor (round down)
     // Example: integer_device_floor(10, 3) = 9 (largest multiple of 3 that's <= 10)
-    template<class T>
-    requires std::is_integral_v<T>
+    template <class T>
+        requires std::is_integral_v<T>
     T integer_divide_floor(const T& value, const std::type_identity_t<T>& divisor)
     {
         const T& div = divisor;
-        
+
         if (div == 0)
         {
             return value; // No alignment possible
         }
-        
+
         if constexpr (std::is_unsigned_v<T>)
         {
             // For unsigned: (value / divisor) * divisor
@@ -84,23 +84,23 @@ namespace mlss
     //---------------------------------------------------------------------------------------------------------------------
     // Round value to the nearest multiple of divisor
     // Example: integer_device_round(10, 3) = 9, integer_device_round(11, 3) = 12
-    template<class T>
-    requires std::is_integral_v<T>
+    template <class T>
+        requires std::is_integral_v<T>
     T integer_divide_round(const T& value, const std::type_identity_t<T>& divisor)
     {
         const T& div = divisor;
-        
+
         if (div == 0)
         {
             return value; // No alignment possible
         }
-        
+
         if constexpr (std::is_unsigned_v<T>)
         {
             // For unsigned: round to nearest multiple
             T remainder = value % div;
             T half = div / 2;
-            
+
             if (remainder >= half + (div % 2)) // Handle odd divisors correctly
             {
                 // Round up
@@ -119,7 +119,7 @@ namespace mlss
             {
                 T remainder = value % div;
                 T half = div / 2;
-                
+
                 if (remainder >= half + (div % 2))
                 {
                     return value + (div - remainder);
@@ -135,7 +135,7 @@ namespace mlss
                 T abs_value = -value;
                 T remainder = abs_value % div;
                 T half = div / 2;
-                
+
                 if (remainder >= half + (div % 2))
                 {
                     return -(abs_value + (div - remainder));
@@ -149,4 +149,3 @@ namespace mlss
     }
 
 } // namespace mlss
-

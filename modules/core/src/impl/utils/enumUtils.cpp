@@ -24,7 +24,6 @@ namespace mlss
             std::vector<std::int32_t> numCUs = {};
         };
 
-
         template <typename T>
         concept AsicQueryType =
             std::same_as<std::decay_t<T>, AsicInfo> || std::same_as<std::decay_t<T>, GfxArchitectureFlags> ||
@@ -296,7 +295,7 @@ namespace mlss
               .asic = AsicsTypesFlags::APU,
               .elfAscicCode = 0x04C,
               .isSupportedHardware = false,
-              .numCUs = {64,80, 228,304}}, // 228 is for some gfx942A1, other A1 variants had 304 CUs
+              .numCUs = {64, 80, 228, 304}}, // 228 is for some gfx942A1, other A1 variants had 304 CUs
              {.archFlag = GfxArchitectureFlags::Gfx950,
               .codenamesFlags = {GpuCodenameFlags::MI350},
               .archName = MLSS_GFX950,
@@ -409,7 +408,7 @@ namespace mlss
               .asic = AsicsTypesFlags::dGPU,
               .elfAscicCode = 0x041,
               .isSupportedHardware = true,
-              .numCUs = {24, 96, 70, 84}}, //Navi31 XTX and XT-W had 24/96 CUs, XLW had 70CUs
+              .numCUs = {24, 96, 70, 84}}, // Navi31 XTX and XT-W had 24/96 CUs, XLW had 70CUs
              {.archFlag = GfxArchitectureFlags::Gfx1101,
               .codenamesFlags = {GpuCodenameFlags::Navi32},
               .archName = MLSS_GFX1101,
@@ -679,8 +678,7 @@ namespace mlss
     //=====================================================================================================================
     enum64 makeArrayEnum(const std::uint32_t& type, const size_t& size)
     {
-        return { (static_cast<uint64_t>((size > 1) && !(type & MLSS_ARRAY) ?
-            type | MLSS_ARRAY : type) << 32) | size };
+        return {(static_cast<uint64_t>((size > 1) && !(type & MLSS_ARRAY) ? type | MLSS_ARRAY : type) << 32) | size};
     }
 
     //=====================================================================================================================
@@ -802,7 +800,6 @@ namespace mlss
         }
     }
 
-
     //=====================================================================================================================
     std::expected<GfxArchitectureFlags, std::error_code> gpuCodenameToArchitectureFlag(GpuCodenameFlags codename) noexcept
     {
@@ -865,7 +862,8 @@ namespace mlss
     //=====================================================================================================================
     std::expected<GfxArchitectureFlags, std::error_code> architechtureStringToFlag(std::string_view gfx) noexcept
     {
-        auto trim = [](std::string_view value) -> std::string_view {
+        auto trim = [](std::string_view value) -> std::string_view
+        {
             const auto first = value.find_first_not_of(" \t\r\n");
             if (first == std::string_view::npos)
             {
@@ -879,9 +877,8 @@ namespace mlss
         if (auto trimmed = trim(gfx); !trimmed.empty())
         {
             normalized.reserve(trimmed.size() + 10);
-            std::ranges::transform(trimmed, std::back_inserter(normalized), [](unsigned char ch) {
-                return static_cast<char>(std::toupper(ch));
-            });
+            std::ranges::transform(trimmed, std::back_inserter(normalized), [](unsigned char ch)
+                                   { return static_cast<char>(std::toupper(ch)); });
 
             if (!normalized.starts_with("MLSS_"))
             {
@@ -901,9 +898,8 @@ namespace mlss
             return std::unexpected(make_error_code(MLSSErrorCode::ArchitectureNotFound));
         }
 
-        auto it = std::ranges::find_if(asicInfo, [&](const AsicInfo& info) {
-            return info.archName == normalized;
-        });
+        auto it = std::ranges::find_if(asicInfo, [&](const AsicInfo& info)
+                                       { return info.archName == normalized; });
 
         if (it == asicInfo.end())
         {
@@ -944,7 +940,7 @@ namespace mlss
     //=====================================================================================================================
     std::expected<GfxArchitectureFlags, std::error_code> elfMatchToArchitectureFlag(const std::uint8_t& elfMatch) noexcept
     {
-        for(const auto& info : asicInfo)
+        for (const auto& info : asicInfo)
         {
             if (info.elfAscicCode == elfMatch)
             {
@@ -983,25 +979,25 @@ namespace mlss
     {
         switch (shaderType)
         {
-        case ShaderTypesFlags::WMMA:
-            // WMMA supported on RDNA3 (Gfx110x), RDNA3.5 (Gfx115x), and RDNA4 (Gfx120x)
-            return ((archFlag >= GfxArchitectureFlags::Gfx1100) && (archFlag <= GfxArchitectureFlags::Gfx1103)) ||
-                   ((archFlag >= GfxArchitectureFlags::Gfx1150) && (archFlag <= GfxArchitectureFlags::Gfx1154)) ||
-                   ((archFlag >= GfxArchitectureFlags::Gfx1200) && (archFlag <= GfxArchitectureFlags::Gfx1201));
+            case ShaderTypesFlags::WMMA:
+                // WMMA supported on RDNA3 (Gfx110x), RDNA3.5 (Gfx115x), and RDNA4 (Gfx120x)
+                return ((archFlag >= GfxArchitectureFlags::Gfx1100) && (archFlag <= GfxArchitectureFlags::Gfx1103)) ||
+                       ((archFlag >= GfxArchitectureFlags::Gfx1150) && (archFlag <= GfxArchitectureFlags::Gfx1154)) ||
+                       ((archFlag >= GfxArchitectureFlags::Gfx1200) && (archFlag <= GfxArchitectureFlags::Gfx1201));
 
-        case ShaderTypesFlags::XDL:
-            // XDL supported on CDNA/MI accelerators (Gfx908, Gfx90a, Gfx940-942, Gfx950)
-            return (archFlag == GfxArchitectureFlags::Gfx908) ||
-                   (archFlag == GfxArchitectureFlags::Gfx90a) ||
-                   ((archFlag >= GfxArchitectureFlags::Gfx940) && (archFlag <= GfxArchitectureFlags::Gfx942)) ||
-                   (archFlag == GfxArchitectureFlags::Gfx950);
+            case ShaderTypesFlags::XDL:
+                // XDL supported on CDNA/MI accelerators (Gfx908, Gfx90a, Gfx940-942, Gfx950)
+                return (archFlag == GfxArchitectureFlags::Gfx908) ||
+                       (archFlag == GfxArchitectureFlags::Gfx90a) ||
+                       ((archFlag >= GfxArchitectureFlags::Gfx940) && (archFlag <= GfxArchitectureFlags::Gfx942)) ||
+                       (archFlag == GfxArchitectureFlags::Gfx950);
 
-        case ShaderTypesFlags::DL:
-            // DL (dot product) supported on Vega20+ (Gfx906 and newer)
-            return (archFlag >= GfxArchitectureFlags::Gfx906);
+            case ShaderTypesFlags::DL:
+                // DL (dot product) supported on Vega20+ (Gfx906 and newer)
+                return (archFlag >= GfxArchitectureFlags::Gfx906);
 
-        default:
-            return false;
+            default:
+                return false;
         }
     }
 
@@ -1153,4 +1149,4 @@ namespace mlss
         return std::unexpected(make_error_code(MLSSErrorCode::ArchitectureNotSupported));
     }
 
-} // mlss
+} // namespace mlss

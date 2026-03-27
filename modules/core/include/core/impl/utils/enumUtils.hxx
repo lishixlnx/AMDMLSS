@@ -23,12 +23,12 @@ namespace mlss
     [[nodiscard]] enum64 getFlagFromString(const std::string& src);
 
     /// @brief Get type flag for a given C++ type
-    template<class T>
+    template <class T>
     [[nodiscard]] enum64 getTypeFlag();
 
     //=====================================================================================================================
     [[nodiscard]] std::expected<OperatorFlag, std::error_code> getOperatorFlagsFromString(std::string_view src) noexcept;
- 
+
     //=====================================================================================================================
     [[nodiscard]] std::expected<GfxArchitectureFlags, std::error_code> gpuCodenameToArchitectureFlag(GpuCodenameFlags codename) noexcept;
 
@@ -60,12 +60,10 @@ namespace mlss
     // Stream operators for flags
     //=====================================================================================================================
 
-    template<class T, class Traits>
+    template <class T, class Traits>
     std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& os, const GfxArchitectureFlags& flag);
 
-    template<class T, class Traits>
+    template <class T, class Traits>
     std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& os, const GpuCodenameFlags& flag);
 
-
 } // namespace mlss
-

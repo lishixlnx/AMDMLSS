@@ -11,12 +11,13 @@ namespace mlss::shaders::op
     {
     private:
 
-    using base = OperatorBase<OperatorGQA>;
-    
-    // Friend declaration to allow base class access to private members
-    friend class OperatorBase<OperatorGQA>;
+        using base = OperatorBase<OperatorGQA>;
 
-    public:    
+        // Friend declaration to allow base class access to private members
+        friend class OperatorBase<OperatorGQA>;
+
+    public:
+
         // Default constructor
         OperatorGQA() = default;
 
@@ -32,11 +33,10 @@ namespace mlss::shaders::op
         // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-
         // Static method to check capabilities
         static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
 
     private:
-    }; 
-    
+    };
+
 } // namespace mlss::shaders::op

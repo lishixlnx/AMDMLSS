@@ -23,13 +23,13 @@ namespace mlss::shaders::mha::ck
 
     std::expected<Binaries, std::error_code> CKMha::getBinaries() const
     {
-        std::uint32_t batchSize{ 0 };
-        std::uint32_t headCount{ 0 };
-        std::uint32_t sizeHeads{ 0 };
-        std::uint32_t kvSequenceLength{ 0 };
-        std::uint32_t qSequenceLength{ 0 };
-        std::uint32_t packing{ 0 };
-        std::uint32_t dataType{ 0 };
+        std::uint32_t batchSize{0};
+        std::uint32_t headCount{0};
+        std::uint32_t sizeHeads{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t packing{0};
+        std::uint32_t dataType{0};
 
         for (const auto& attribute : m_attributes)
         {

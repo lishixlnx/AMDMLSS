@@ -25,7 +25,6 @@
 
 #include "amdmlss/amdmlss_api_cdefs.h"
 
-
 #include "types/enums.hpp"
 #include "types/enum64.hxx"
 #include "types/context.hxx"
@@ -52,7 +51,6 @@
 #include "utils/adapters.inl.hxx"
 #include "utils/compile.inl.hxx"
 #include "utils/attributes.inl.hxx"
-
 
 // Type implementation headers (after utils since they depend on them)
 #include "types/binaries.inl.hxx"

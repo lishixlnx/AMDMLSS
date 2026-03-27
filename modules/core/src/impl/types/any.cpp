@@ -3,10 +3,10 @@
 namespace mlss
 {
     //=====================================================================================================================
-//                                   Any                                                                   
-//=====================================================================================================================
+    //                                   Any
+    //=====================================================================================================================
 
-//---------------------------------------------------------------------
+    //---------------------------------------------------------------------
     void* Any::allocateStorage(size_t size, size_t alignment)
     {
         if (size == 0)
@@ -37,7 +37,8 @@ namespace mlss
         if (!m_storage.empty() && m_typeInfo)
         {
             void* objPtr = getStoragePtr();
-            if (objPtr) {
+            if (objPtr)
+            {
                 m_typeInfo->destroy(objPtr);
             }
         }
@@ -147,7 +148,6 @@ namespace mlss
         return m_typeInfo ? m_typeInfo->isRange : false;
     }
 
-
     size_t Any::size() const noexcept
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -174,4 +174,4 @@ namespace mlss
         return (addr % CacheAlignedStorage::allocator_type::CACHE_LINE_SIZE) == 0;
     }
 
-}
+} // namespace mlss

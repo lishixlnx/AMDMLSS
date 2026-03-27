@@ -33,7 +33,7 @@ namespace mlss
     namespace
     {
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         struct NoDeallocation
         {
             constexpr void operator()(T* ptr)
@@ -56,26 +56,26 @@ namespace mlss
             {
                 switch (static_cast<MLSSErrorCode>(ec.value()))
                 {
-                case MLSSErrorCode::Success:
-                    return MLSS_SUCCESS;
-                case MLSSErrorCode::ShaderInvalidParameters:
-                    return MLSS_ERROR_SHADER_INVALID_PARAMETERS;
-                case MLSSErrorCode::ShaderUnsupportedOperator:
-                    return MLSS_ERROR_SHADER_UNSUPPORTED_OPERATOR;
-                case MLSSErrorCode::ShaderUnsupportedArchitecture:
-                    return MLSS_ERROR_SHADER_UNSUPPORTED_ARCHITECTURE;
-                case MLSSErrorCode::ShaderUnsupportedConfiguration:
-                    return MLSS_ERROR_SHADER_UNSUPPORTED_CONFIGURATION;
-                case MLSSErrorCode::ShaderFeatureNotYetImplemented:
-                    return MLSS_ERROR_SHADER_FEATURE_NOT_YET_IMPLEMENTED;
-                case MLSSErrorCode::ArchitectureNotSupported:
-                    return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_SUPPORTED;
-                case MLSSErrorCode::ArchitectureNotFound:
-                    return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_FOUND;
-                case MLSSErrorCode::CodenameNotFound:
-                    return MLSS_ERROR_ENUM_CODENAME_NOT_FOUND;
-                default:
-                    return MLSS_ERROR_UNKNOWN_ERROR;
+                    case MLSSErrorCode::Success:
+                        return MLSS_SUCCESS;
+                    case MLSSErrorCode::ShaderInvalidParameters:
+                        return MLSS_ERROR_SHADER_INVALID_PARAMETERS;
+                    case MLSSErrorCode::ShaderUnsupportedOperator:
+                        return MLSS_ERROR_SHADER_UNSUPPORTED_OPERATOR;
+                    case MLSSErrorCode::ShaderUnsupportedArchitecture:
+                        return MLSS_ERROR_SHADER_UNSUPPORTED_ARCHITECTURE;
+                    case MLSSErrorCode::ShaderUnsupportedConfiguration:
+                        return MLSS_ERROR_SHADER_UNSUPPORTED_CONFIGURATION;
+                    case MLSSErrorCode::ShaderFeatureNotYetImplemented:
+                        return MLSS_ERROR_SHADER_FEATURE_NOT_YET_IMPLEMENTED;
+                    case MLSSErrorCode::ArchitectureNotSupported:
+                        return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_SUPPORTED;
+                    case MLSSErrorCode::ArchitectureNotFound:
+                        return MLSS_ERROR_ENUM_ARCHITECTURE_NOT_FOUND;
+                    case MLSSErrorCode::CodenameNotFound:
+                        return MLSS_ERROR_ENUM_CODENAME_NOT_FOUND;
+                    default:
+                        return MLSS_ERROR_UNKNOWN_ERROR;
                 }
             }
 
@@ -84,12 +84,12 @@ namespace mlss
         }
 
         //=====================================================================================================================
-        template<class FunctorType, class InputOutputType, class... Args>
+        template <class FunctorType, class InputOutputType, class... Args>
         constexpr MLSSenum createObj(InputOutputType& ref, Args&&... args)
         {
             FunctorType obj;
 
-            //return obj(ptr, std::forward<Args>(args)...).error_or(MLSS_SUCCESS);
+            // return obj(ptr, std::forward<Args>(args)...).error_or(MLSS_SUCCESS);
 
             auto tmp = obj(ref, std::forward<Args>(args)...);
 
@@ -97,7 +97,7 @@ namespace mlss
         }
 
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         MLSSvoid destroyObj(MLSSvoid* obj)
         {
             if (obj == nullptr)
@@ -111,21 +111,21 @@ namespace mlss
         }
 
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         constexpr auto getShared(MLSSvoid* const ptr)
         {
             return std::shared_ptr<T>(static_cast<T*>(ptr), NoDeallocation<T>());
         }
 
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         constexpr auto getShared(const MLSSvoid* const ptr)
         {
             return std::shared_ptr<T>(static_cast<T*>(const_cast<MLSSvoid* const>(ptr)), NoDeallocation<T>());
         }
 
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         constexpr MLSSbool setParams(Context* const context, std::string_view opName, T paramName, const MLSSvoid* const value)
         {
 
@@ -152,7 +152,7 @@ namespace mlss
             Error
         };
 
-        template<NotImplementedType err>
+        template <NotImplementedType err>
         void not_implemented()
         {
             VerboseManager::getInstance().log(std::clog, VerboseLevel::DEBUG) << "Function or Method: " << __func__ << " Not implemented!" << std::endl;
@@ -169,7 +169,7 @@ namespace mlss
         }
 
         //=====================================================================================================================
-        template<class T>
+        template <class T>
         T* getTypeFromHandle(MLSShandle handle)
         {
             Any* any_obj = MemoryManager::template getPointer<Any>(handle);
@@ -188,7 +188,6 @@ namespace mlss
             return getTypeFromHandle<Context>(ctx_handle);
         }
 
-
         //=====================================================================================================================
         void* getVectorDataByType(const MLSSvector& vec)
         {
@@ -205,180 +204,180 @@ namespace mlss
 
             switch (vec.m_type)
             {
-                // Basic integer types
-            case MLSS_BOOL:
-            case MLSS_UINT8:
-                if (anyIs<std::vector<uint8_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<uint8_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                    // Basic integer types
+                case MLSS_BOOL:
+                case MLSS_UINT8:
+                    if (anyIs<std::vector<uint8_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<uint8_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_INT8:
-                if (anyIs<std::vector<int8_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<int8_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_INT8:
+                    if (anyIs<std::vector<int8_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<int8_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_UINT16:
-                if (anyIs<std::vector<uint16_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<uint16_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_UINT16:
+                    if (anyIs<std::vector<uint16_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<uint16_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_INT16:
-                if (anyIs<std::vector<int16_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<int16_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_INT16:
+                    if (anyIs<std::vector<int16_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<int16_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_UINT32:
-                if (anyIs<std::vector<uint32_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<uint32_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_UINT32:
+                    if (anyIs<std::vector<uint32_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<uint32_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_INT32:
-                if (anyIs<std::vector<int32_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<int32_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_INT32:
+                    if (anyIs<std::vector<int32_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<int32_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_UINT64:
-                if (anyIs<std::vector<uint64_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<uint64_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_UINT64:
+                    if (anyIs<std::vector<uint64_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<uint64_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_INT64:
-                if (anyIs<std::vector<int64_t>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<int64_t>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_INT64:
+                    if (anyIs<std::vector<int64_t>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<int64_t>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-                // Floating point types
-            case MLSS_FLOAT32:
-                if (anyIs<std::vector<float>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<float>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                    // Floating point types
+                case MLSS_FLOAT32:
+                    if (anyIs<std::vector<float>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<float>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_FLOAT64:
-                if (anyIs<std::vector<double>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<double>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_FLOAT64:
+                    if (anyIs<std::vector<double>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<double>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-                // Enum types
-            case MLSS_ENUM:
-                if (anyIs<std::vector<MLSSenum>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSenum>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                    // Enum types
+                case MLSS_ENUM:
+                    if (anyIs<std::vector<MLSSenum>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSenum>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_ENUM64:
-                if (anyIs<std::vector<enum64>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<enum64>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_ENUM64:
+                    if (anyIs<std::vector<enum64>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<enum64>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-                // Structured types
-            case MLSS_ARG:
-                if (anyIs<std::vector<MLSSarg>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSarg>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                    // Structured types
+                case MLSS_ARG:
+                    if (anyIs<std::vector<MLSSarg>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSarg>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_DIM3:
-                if (anyIs<std::vector<MLSSdim3>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSdim3>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_DIM3:
+                    if (anyIs<std::vector<MLSSdim3>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSdim3>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_VECTOR:
-                if (anyIs<std::vector<MLSSvector>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSvector>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_VECTOR:
+                    if (anyIs<std::vector<MLSSvector>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSvector>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_BINARY:
-                if (anyIs<std::vector<MLSSbinary>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSbinary>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_BINARY:
+                    if (anyIs<std::vector<MLSSbinary>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSbinary>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_CONTEXT:
-                if (anyIs<std::vector<Context>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<Context>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_CONTEXT:
+                    if (anyIs<std::vector<Context>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<Context>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-            case MLSS_STRING:
-                if (anyIs<std::vector<MLSSstring>>(*any_obj))
-                {
-                    auto& storage = anyCast<std::vector<MLSSstring>&>(*any_obj);
-                    return storage.data();
-                }
-                break;
+                case MLSS_STRING:
+                    if (anyIs<std::vector<MLSSstring>>(*any_obj))
+                    {
+                        auto& storage = anyCast<std::vector<MLSSstring>&>(*any_obj);
+                        return storage.data();
+                    }
+                    break;
 
-                // Note: The following types might not have direct C++ equivalents or might need special handling:
-                // MLSS_INT4, MLSS_UINT4 - These are typically packed types, not directly supported as standalone types
-                // MLSS_FLOAT4, MLSS_FLOAT8, MLSS_FLOAT16 - These might need special vector types or be represented differently
-                // MLSS_BFLOAT4, MLSS_BFLOAT8, MLSS_BFLOAT16 - Brain floating point formats
+                    // Note: The following types might not have direct C++ equivalents or might need special handling:
+                    // MLSS_INT4, MLSS_UINT4 - These are typically packed types, not directly supported as standalone types
+                    // MLSS_FLOAT4, MLSS_FLOAT8, MLSS_FLOAT16 - These might need special vector types or be represented differently
+                    // MLSS_BFLOAT4, MLSS_BFLOAT8, MLSS_BFLOAT16 - Brain floating point formats
 
-                // Handle unsupported or unknown types
-            case MLSS_NONE_TYPE:
-            case MLSS_INT4:
-            case MLSS_UINT4:
-            case MLSS_FLOAT4:
-            case MLSS_FLOAT8:
-            case MLSS_FLOAT8_FNUZ:
-            case MLSS_FLOAT8_OCP:
-            case MLSS_FLOAT16:
-            case MLSS_BFLOAT4:
-            case MLSS_BFLOAT8:
-            case MLSS_BFLOAT8_FNUZ:
-            case MLSS_BFLOAT8_OCP:
-            case MLSS_BFLOAT16:
-            case MLSS_UNKNOWN_TYPE:
-            case MLSS_CUSTOM_TYPE:
-            case MLSS_UNSET_TYPE:
-            default:
-                // These types are either not implemented or don't have direct C++ equivalents
-                return nullptr;
+                    // Handle unsupported or unknown types
+                case MLSS_NONE_TYPE:
+                case MLSS_INT4:
+                case MLSS_UINT4:
+                case MLSS_FLOAT4:
+                case MLSS_FLOAT8:
+                case MLSS_FLOAT8_FNUZ:
+                case MLSS_FLOAT8_OCP:
+                case MLSS_FLOAT16:
+                case MLSS_BFLOAT4:
+                case MLSS_BFLOAT8:
+                case MLSS_BFLOAT8_FNUZ:
+                case MLSS_BFLOAT8_OCP:
+                case MLSS_BFLOAT16:
+                case MLSS_UNKNOWN_TYPE:
+                case MLSS_CUSTOM_TYPE:
+                case MLSS_UNSET_TYPE:
+                default:
+                    // These types are either not implemented or don't have direct C++ equivalents
+                    return nullptr;
             }
 
             return nullptr;
@@ -387,49 +386,84 @@ namespace mlss
         const char* getTypeString(MLSSenum type)
         {
 
-
             switch (type)
             {
-            case MLSS_NONE_TYPE: return "NONE";
-            case MLSS_BOOL: return "BOOL";
-            case MLSS_INT8: return "INT8";
-            case MLSS_UINT8: return "UINT8";
-            case MLSS_INT16: return "INT16";
-            case MLSS_UINT16: return "UINT16";
-            case MLSS_INT32: return "INT32";
-            case MLSS_UINT32: return "UINT32";
-            case MLSS_INT64: return "INT64";
-            case MLSS_UINT64: return "UINT64";
-            case MLSS_FLOAT32: return "FLOAT32";
-            case MLSS_FLOAT64: return "FLOAT64";
-            case MLSS_ENUM: return "ENUM";
-            case MLSS_ENUM64: return "ENUM64";
-            case MLSS_CONTEXT: return "CONTEXT";
-            case MLSS_ARG: return "ARG";
-            case MLSS_VECTOR: return "VECTOR";
-            case MLSS_DIM3: return "DIM3";
-            case MLSS_BINARY: return "BINARY";
-            case MLSS_STRING: return "STRING";
-            case MLSS_UNKNOWN_TYPE: return "UNKNOWN";
-            case MLSS_CUSTOM_TYPE: return "CUSTOM";
-            case MLSS_UNSET_TYPE: return "UNSET";
-            case MLSS_INT4: return "INT4";
-            case MLSS_UINT4: return "UINT4";
-            case MLSS_FLOAT4: return "FLOAT4";
-            case MLSS_FLOAT8: return "FLOAT8";
-            case MLSS_FLOAT8_FNUZ: return "FLOAT8_FNUZ";
-            case MLSS_FLOAT8_OCP: return "FLOAT8_OCP";
-            case MLSS_FLOAT16: return "FLOAT16";
-            case MLSS_BFLOAT4: return "BFLOAT4";
-            case MLSS_BFLOAT8: return "BFLOAT8";
-            case MLSS_BFLOAT8_FNUZ: return "BFLOAT8_FNUZ";
-            case MLSS_BFLOAT8_OCP: return "BFLOAT8_OCP";
-            case MLSS_BFLOAT16: return "BFLOAT16";
-            default: return "INVALID";
+                case MLSS_NONE_TYPE:
+                    return "NONE";
+                case MLSS_BOOL:
+                    return "BOOL";
+                case MLSS_INT8:
+                    return "INT8";
+                case MLSS_UINT8:
+                    return "UINT8";
+                case MLSS_INT16:
+                    return "INT16";
+                case MLSS_UINT16:
+                    return "UINT16";
+                case MLSS_INT32:
+                    return "INT32";
+                case MLSS_UINT32:
+                    return "UINT32";
+                case MLSS_INT64:
+                    return "INT64";
+                case MLSS_UINT64:
+                    return "UINT64";
+                case MLSS_FLOAT32:
+                    return "FLOAT32";
+                case MLSS_FLOAT64:
+                    return "FLOAT64";
+                case MLSS_ENUM:
+                    return "ENUM";
+                case MLSS_ENUM64:
+                    return "ENUM64";
+                case MLSS_CONTEXT:
+                    return "CONTEXT";
+                case MLSS_ARG:
+                    return "ARG";
+                case MLSS_VECTOR:
+                    return "VECTOR";
+                case MLSS_DIM3:
+                    return "DIM3";
+                case MLSS_BINARY:
+                    return "BINARY";
+                case MLSS_STRING:
+                    return "STRING";
+                case MLSS_UNKNOWN_TYPE:
+                    return "UNKNOWN";
+                case MLSS_CUSTOM_TYPE:
+                    return "CUSTOM";
+                case MLSS_UNSET_TYPE:
+                    return "UNSET";
+                case MLSS_INT4:
+                    return "INT4";
+                case MLSS_UINT4:
+                    return "UINT4";
+                case MLSS_FLOAT4:
+                    return "FLOAT4";
+                case MLSS_FLOAT8:
+                    return "FLOAT8";
+                case MLSS_FLOAT8_FNUZ:
+                    return "FLOAT8_FNUZ";
+                case MLSS_FLOAT8_OCP:
+                    return "FLOAT8_OCP";
+                case MLSS_FLOAT16:
+                    return "FLOAT16";
+                case MLSS_BFLOAT4:
+                    return "BFLOAT4";
+                case MLSS_BFLOAT8:
+                    return "BFLOAT8";
+                case MLSS_BFLOAT8_FNUZ:
+                    return "BFLOAT8_FNUZ";
+                case MLSS_BFLOAT8_OCP:
+                    return "BFLOAT8_OCP";
+                case MLSS_BFLOAT16:
+                    return "BFLOAT16";
+                default:
+                    return "INVALID";
             }
         }
 
-    } // anonymous
+    } // namespace
 
     //=====================================================================================================================
     MLSSenum lastError = MLSS_SUCCESS;
@@ -463,9 +497,9 @@ namespace mlss
         using pointer = value_type*;
 
         std::expected<MLSSbool, MLSSenum> operator()(MLSScontext& ctx,
-            std::string_view asic,
-            std::string_view opName,
-            va_list* lst) const;
+                                                     std::string_view asic,
+                                                     std::string_view opName,
+                                                     va_list* lst) const;
     };
 
     //=====================================================================================================================
@@ -491,7 +525,7 @@ namespace mlss
                 }
             } while (true);
         }
-        
+
         Context context_obj(asic, std::move(ops));
 
         if (context_obj.m_lastError)
@@ -501,7 +535,7 @@ namespace mlss
             return std::unexpected<MLSSenum>(specificError);
         }
 
-        if (ctx != 0)  // ctx contains a valid handle
+        if (ctx != 0) // ctx contains a valid handle
         {
             // Get the Any from MemoryManager
             Any* existing_any = MemoryManager::template getPointer<Any>(ctx);
@@ -550,8 +584,8 @@ namespace mlss
     struct BinaryInfoCollection_t
     {
         std::vector<MLSSbinary> binary_infos;
-        std::vector<std::string> string_storage;  // Keep strings alive
-        std::vector<std::vector<MLSSuint32>> constants_storage;  // Keep constants alive
+        std::vector<std::string> string_storage;                // Keep strings alive
+        std::vector<std::vector<MLSSuint32>> constants_storage; // Keep constants alive
 
         // Helper to add a string and return a MLSSstring (i.e. a char*)
         MLSSstring addString(const std::string& str);
@@ -584,7 +618,7 @@ namespace mlss
         using value_type = Binaries;
         using pointer = value_type*;
 
-        //std::unique_ptr<Binaries> operator()(const Context& context, MLSSsize* const n) const;
+        // std::unique_ptr<Binaries> operator()(const Context& context, MLSSsize* const n) const;
 
         std::expected<MLSSbool, MLSSenum> operator()(MLSSbinary*& bin, const MLSScontext& context, MLSSsize* const n) const;
     };
@@ -628,24 +662,29 @@ namespace mlss
         for (const auto& op : ctx->m_ops)
         {
             Binaries binaries;
-            
+
             // Set GFX architecture based on ASIC string
             GfxArchitectureFlags gfxArch = GfxArchitectureFlags::Unknown;
-            if (ctx->m_asic == "MLSS_GFX1100") {
+            if (ctx->m_asic == "MLSS_GFX1100")
+            {
                 gfxArch = GfxArchitectureFlags::Gfx1100;
-            } else if (ctx->m_asic == "MLSS_GFX1150") {
+            }
+            else if (ctx->m_asic == "MLSS_GFX1150")
+            {
                 gfxArch = GfxArchitectureFlags::Gfx1150;
-            } else if (ctx->m_asic == "MLSS_GFX1201") {
+            }
+            else if (ctx->m_asic == "MLSS_GFX1201")
+            {
                 gfxArch = GfxArchitectureFlags::Gfx1201;
             }
-            
+
             // Use operator classes for all operations
             if (op.m_op == "MLSS_MHA")
             {
                 shaders::op::OperatorMHA mha_operator;
                 mha_operator.setAttributes(op.m_params);
                 mha_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = mha_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -658,7 +697,7 @@ namespace mlss
                 shaders::op::OperatorConv conv_operator;
                 conv_operator.setAttributes(op.m_params);
                 conv_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = conv_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -671,7 +710,7 @@ namespace mlss
                 shaders::op::OperatorGEMM gemm_operator;
                 gemm_operator.setAttributes(op.m_params);
                 gemm_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = gemm_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -684,7 +723,7 @@ namespace mlss
                 shaders::op::OperatorGQA gqa_operator;
                 gqa_operator.setAttributes(op.m_params);
                 gqa_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = gqa_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -697,7 +736,7 @@ namespace mlss
                 shaders::op::OperatorMVN mvn_operator;
                 mvn_operator.setAttributes(op.m_params);
                 mvn_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = mvn_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -710,7 +749,7 @@ namespace mlss
                 shaders::op::OperatorQGEMM qgemm_operator;
                 qgemm_operator.setAttributes(op.m_params);
                 qgemm_operator.setGfxArchitecture(gfxArch);
-                
+
                 auto result = qgemm_operator.getBinaries();
                 if (!result.has_value())
                 {
@@ -744,8 +783,7 @@ namespace mlss
                 {
                     binary_info.m_constants = createTypedVector<MLSSuint32>(
                         shader_blob.m_constants.data(),
-                        shader_blob.m_constants.size()
-                    );
+                        shader_blob.m_constants.size());
                 }
                 else
                 {
@@ -760,8 +798,7 @@ namespace mlss
                 {
                     binary_info.m_argList = createTypedVector<MLSSarg>(
                         shader_blob.m_argList.data(),
-                        shader_blob.m_argList.size()
-                    );
+                        shader_blob.m_argList.size());
                 }
                 else
                 {
@@ -830,8 +867,6 @@ namespace mlss
         return true;
     }
 
-
-
     //=====================================================================================================================
     MLSSstatus createContext(MLSScontext& context, std::string_view asic, std::string_view opName, va_list* lst)
     {
@@ -867,7 +902,6 @@ namespace mlss
         }
         return false;
     }
-
 
     //=====================================================================================================================
     MLSSvoid not_implemented_as_a_warning()
@@ -921,7 +955,8 @@ namespace mlss
                     size_t param_index = 0;
                     for (const auto& param : op.m_params)
                     {
-                        try {
+                        try
+                        {
                             info_log << "[" << param_index << "] " << param << std::endl;
 
                             // Add additional parameter metadata
@@ -929,15 +964,16 @@ namespace mlss
                             info_log << "    Enum: " << param.attr_enum() << std::endl;
                             info_log << "    Type: " << getTypeString(param.element_type_enum()) << std::endl;
                             info_log << "    IsArray: " << (param.isArray() ? "Yes" : "No") << std::endl;
-                            if (param.isArray()) {
+                            if (param.isArray())
+                            {
                                 info_log << "    Elements: " << param.num_elements() << std::endl;
                             }
                             info_log << "" << std::endl;
-
                         }
-                        catch (const std::exception& e) {
+                        catch (const std::exception& e)
+                        {
                             error_log << "[" << param_index << "] Error printing parameter '"
-                                << param.name() << "': " << e.what() << std::endl;
+                                      << param.name() << "': " << e.what() << std::endl;
                         }
                         param_index++;
                     }
@@ -954,7 +990,7 @@ namespace mlss
             {
                 const auto& op = ctx->m_ops[i];
                 info_log << "  [" << i << "] " << op.m_op
-                    << " (" << op.m_params.size() << " parameters)" << std::endl;
+                         << " (" << op.m_params.size() << " parameters)" << std::endl;
             }
             info_log << "========================================" << std::endl;
             info_log << "" << std::endl;
@@ -966,10 +1002,6 @@ namespace mlss
 
         return setLastError(MLSS_SUCCESS);
     }
-
-
-
-
 
     //=====================================================================================================================
     MLSSstatus printBinaries(const MLSSbinary* const binaries, const MLSSsize n)
@@ -1063,22 +1095,20 @@ namespace mlss
                             const std::string_view typeName = typeCStr ? std::string_view(typeCStr) : std::string_view("UNKNOWN");
 
                             info_log << std::format(
-                                "    [{}] Name: {}, Place: {}, Type: {}, IsPointer: {}, IndirectionLevel: {}, IsConst: {}",
-                                index,
-                                arg.m_name ? arg.m_name : "NULL",
-                                arg.m_place,
-                                typeName,
-                                arg.m_isPointer,
-                                arg.m_indirectionLevel,
-                                arg.m_isConst)
-                                      << std::endl;
+                                            "    [{}] Name: {}, Place: {}, Type: {}, IsPointer: {}, IndirectionLevel: {}, IsConst: {}",
+                                            index,
+                                            arg.m_name ? arg.m_name : "NULL",
+                                            arg.m_place,
+                                            typeName,
+                                            arg.m_isPointer,
+                                            arg.m_indirectionLevel,
+                                            arg.m_isConst)
+                                     << std::endl;
                         }
 
                         // Build the complete signature as a string first to avoid multiple INFO: prefixes
                         const auto returnIt = std::ranges::find_if(args_span, [](const MLSSarg& arg)
-                        {
-                            return arg.m_isReturn;
-                        });
+                                                                   { return arg.m_isReturn; });
 
                         std::string returnSegment;
                         if (returnIt != args_span.end())
@@ -1138,10 +1168,10 @@ namespace mlss
 
                         std::format_to(std::back_inserter(signature), "\n  )");
                         info_log << signature << std::endl;
-                        //if (binary.m_argList.m_size > 5)
+                        // if (binary.m_argList.m_size > 5)
                         //{
-                        //    std::cout << "    ... (" << (binary.m_argList.m_size - 5) << " more arguments)" << std::endl;
-                        //}
+                        //     std::cout << "    ... (" << (binary.m_argList.m_size - 5) << " more arguments)" << std::endl;
+                        // }
                     }
                 }
             }
@@ -1164,12 +1194,11 @@ namespace mlss
         return setLastError(MLSS_SUCCESS);
     }
 
-
     //=====================================================================================================================
     MLSSstatus retrieveVectorData(const MLSSvector vector,
-        MLSSvoid** const data,
-        MLSSsize* const n,
-        MLSSenum* const type)
+                                  MLSSvoid** const data,
+                                  MLSSsize* const n,
+                                  MLSSenum* const type)
     {
         // Set size if requested
         if (n != nullptr)
@@ -1177,7 +1206,7 @@ namespace mlss
             *n = vector.m_size;
         }
 
-        // Set type if requested  
+        // Set type if requested
         if (type != nullptr)
         {
             *type = vector.m_type;
@@ -1242,24 +1271,29 @@ namespace mlss
             {
                 // Get GFX architecture
                 GfxArchitectureFlags gfxArch = GfxArchitectureFlags::Unknown;
-                if (ctx->m_asic == "MLSS_GFX1100") {
+                if (ctx->m_asic == "MLSS_GFX1100")
+                {
                     gfxArch = GfxArchitectureFlags::Gfx1100;
-                } else if (ctx->m_asic == "MLSS_GFX1150") {
+                }
+                else if (ctx->m_asic == "MLSS_GFX1150")
+                {
                     gfxArch = GfxArchitectureFlags::Gfx1150;
-                } else if (ctx->m_asic == "MLSS_GFX1201") {
+                }
+                else if (ctx->m_asic == "MLSS_GFX1201")
+                {
                     gfxArch = GfxArchitectureFlags::Gfx1201;
                 }
-                
+
                 // Use OperatorBase::getCaps for each operator type
                 MLSSbool supported = false;
-                
+
                 if (op.m_op == "MLSS_MHA")
                 {
                     // Check if architecture is GFX11+ for MHA
                     if (isGfx11Plus(gfxArch))
                     {
                         supported = shaders::op::OperatorMHA::getCaps(op.m_params, gfxArch);
-                        
+
                         if (supported)
                         {
                             error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1280,7 +1314,7 @@ namespace mlss
                 else if (op.m_op == "MLSS_CONV")
                 {
                     supported = shaders::op::OperatorConv::getCaps(op.m_params, gfxArch);
-                    
+
                     if (supported)
                     {
                         error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1294,7 +1328,7 @@ namespace mlss
                 else if (op.m_op == "MLSS_GEMM")
                 {
                     supported = shaders::op::OperatorGEMM::getCaps(op.m_params);
-                    
+
                     if (supported)
                     {
                         error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1308,7 +1342,7 @@ namespace mlss
                 else if (op.m_op == "MLSS_GQA")
                 {
                     supported = shaders::op::OperatorGQA::getCaps(op.m_params, gfxArch);
-                    
+
                     if (supported)
                     {
                         error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1322,7 +1356,7 @@ namespace mlss
                 else if (op.m_op == "MLSS_MVN")
                 {
                     supported = shaders::op::OperatorMVN::getCaps(op.m_params);
-                    
+
                     if (supported)
                     {
                         error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1336,7 +1370,7 @@ namespace mlss
                 else if (op.m_op == "MLSS_QGEMM")
                 {
                     supported = shaders::op::OperatorQGEMM::getCaps(op.m_params);
-                    
+
                     if (supported)
                     {
                         error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
@@ -1403,7 +1437,7 @@ namespace mlss
             for (size_t i = 0; i < stored_collection.statuses.size(); ++i)
             {
                 debug_log << "  [" << i << "] " << stored_collection.error_messages[i]
-                    << " (Status: " << stored_collection.statuses[i] << ")" << std::endl;
+                          << " (Status: " << stored_collection.statuses[i] << ")" << std::endl;
             }
         }
         else
@@ -1419,5 +1453,4 @@ namespace mlss
         return setLastError(op_status);
     }
 
-
-} //mlss
+} // namespace mlss

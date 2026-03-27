@@ -17,7 +17,6 @@ namespace mlss
         return this->m_info->name();
     }
 
-
     //=====================================================================================================================
     std::string Attribute::range() const
     {
@@ -35,7 +34,6 @@ namespace mlss
     {
         return m_info->m_type_enum;
     }
-
 
     //=====================================================================================================================
     bool Attribute::isArray() const
@@ -86,7 +84,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    bool operator ==(const std::string& lhs, const Attribute& rhs)
+    bool operator==(const std::string& lhs, const Attribute& rhs)
     {
         return rhs.is(lhs);
     }
@@ -110,7 +108,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    bool operator ==(const uint32_t& lhs, const Attribute& rhs)
+    bool operator==(const uint32_t& lhs, const Attribute& rhs)
     {
         return rhs.is(lhs);
     }
@@ -127,10 +125,8 @@ namespace mlss
         return !rhs.is(lhs);
     }
 
-
-
     //=================================================================================================================
-    //                                   AttributeInfo                                                                   
+    //                                   AttributeInfo
     //=================================================================================================================
 
     //=====================================================================================================================
@@ -138,11 +134,10 @@ namespace mlss
         const std::string& name,
         const std::string& range,
         const std::uint32_t& attr_enum,
-        const enum64& type_enum) :
-        m_name(name),
-        m_range(range),
-        m_attr_enum(attr_enum),
-        m_type_enum(type_enum)
+        const enum64& type_enum) : m_name(name),
+                                   m_range(range),
+                                   m_attr_enum(attr_enum),
+                                   m_type_enum(type_enum)
     {
     }
 
@@ -212,4 +207,4 @@ namespace mlss
         return getArrayEnumSize(this->m_type_enum);
     }
 
-} // mlss
+} // namespace mlss

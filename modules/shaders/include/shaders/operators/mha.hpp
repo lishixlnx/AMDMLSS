@@ -8,20 +8,21 @@
 
 namespace mlss::shaders::op
 {
-        // MHA Operator implementation
+    // MHA Operator implementation
     class OperatorMHA : public OperatorBase<OperatorMHA>
     {
     private:
 
-    using base = OperatorBase<OperatorMHA>;
+        using base = OperatorBase<OperatorMHA>;
 
-    // Friend declaration to allow base class access to private members
-    friend class OperatorBase<OperatorMHA>;
+        // Friend declaration to allow base class access to private members
+        friend class OperatorBase<OperatorMHA>;
 
-    public:    
+    public:
+
         // Default constructor
         OperatorMHA() = default;
-        
+
         // Constructor
         OperatorMHA(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
 
@@ -38,7 +39,6 @@ namespace mlss::shaders::op
         static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
 
     private:
-        
     };
 
 } // namespace mlss::shaders::op

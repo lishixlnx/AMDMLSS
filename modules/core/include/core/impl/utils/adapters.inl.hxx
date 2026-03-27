@@ -4,50 +4,50 @@
 namespace mlss
 {
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     constexpr std::uint32_t getMLSSTypeEnum()
     {
-        if constexpr (std::is_same_v<T, bool>) 
+        if constexpr (std::is_same_v<T, bool>)
         {
             return MLSS_BOOL;
         }
-        else if constexpr (std::is_same_v<T, std::int8_t>) 
+        else if constexpr (std::is_same_v<T, std::int8_t>)
         {
             return MLSS_INT8;
         }
-        else if constexpr (std::is_same_v<T, std::uint8_t>) 
+        else if constexpr (std::is_same_v<T, std::uint8_t>)
         {
             return MLSS_UINT8;
         }
-        else if constexpr (std::is_same_v<T, std::int16_t>) 
+        else if constexpr (std::is_same_v<T, std::int16_t>)
         {
             return MLSS_INT16;
         }
-        else if constexpr (std::is_same_v<T, std::uint16_t>) 
+        else if constexpr (std::is_same_v<T, std::uint16_t>)
         {
             return MLSS_UINT16;
         }
-        else if constexpr (std::is_same_v<T, std::int32_t>) 
+        else if constexpr (std::is_same_v<T, std::int32_t>)
         {
             return MLSS_INT32;
         }
-        else if constexpr (std::is_same_v<T, std::uint32_t>) 
+        else if constexpr (std::is_same_v<T, std::uint32_t>)
         {
             return MLSS_UINT32;
         }
-        else if constexpr (std::is_same_v<T, std::int64_t>) 
+        else if constexpr (std::is_same_v<T, std::int64_t>)
         {
             return MLSS_INT64;
         }
-        else if constexpr (std::is_same_v<T, std::uint64_t>) 
+        else if constexpr (std::is_same_v<T, std::uint64_t>)
         {
             return MLSS_UINT64;
         }
-        else if constexpr (std::is_same_v<T, float>) 
+        else if constexpr (std::is_same_v<T, float>)
         {
             return MLSS_FLOAT32;
         }
-        else if constexpr (std::is_same_v<T, double>) 
+        else if constexpr (std::is_same_v<T, double>)
         {
             return MLSS_FLOAT64;
         }
@@ -78,7 +78,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     MLSSvector createTypedVector(const T* data, size_t count)
     {
         MLSSvector vec;
@@ -107,7 +107,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     const T* getVectorData(const MLSSvector& vec)
     {
         if (vec.m_handle == 0)
@@ -126,7 +126,7 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    template<typename T>
+    template <typename T>
     T* getVectorDataMutable(const MLSSvector& vec)
     {
         if (vec.m_handle == 0)
@@ -145,4 +145,3 @@ namespace mlss
     }
 
 } // namespace mlss
-
