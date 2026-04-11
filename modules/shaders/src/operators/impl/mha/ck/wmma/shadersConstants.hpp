@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::mha::ck::wmma::fp16
+namespace mlss::mha::ck::wmma::fp16
 {
     // Shader constants for different MHA configurations
     constexpr auto cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS = std::to_array<std::uint32_t>({64, 48, 128, 1, 1});
@@ -158,4 +158,4 @@ namespace mlss::shaders::mha::ck::wmma::fp16
                                                                              {13, MLSS_INT32, false, 0, true, true, false, "output_stride_d2"},
                                                                              {14, MLSS_INT32, false, 0, true, true, false, "output_stride_d3"}}};
 
-} // namespace mlss::shaders::mha::ck::wmma::fp16
+} // namespace mlss::mha::ck::wmma::fp16

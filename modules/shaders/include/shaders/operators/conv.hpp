@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorConv : public OperatorBase<OperatorConv>
     {
@@ -21,7 +21,7 @@ namespace mlss::shaders::op
         OperatorConv() = default;
 
         // Constructor
-        OperatorConv(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorConv(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorConv() = default;
@@ -38,4 +38,4 @@ namespace mlss::shaders::op
         static bool getCapsImpl(const std::vector<Attribute>& attributes);
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

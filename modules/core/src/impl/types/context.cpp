@@ -19,12 +19,12 @@ namespace mlss
             }
         }
 
-        // Convert string to GfxArchitectureFlags and refine to high-end variant
-        if (auto archFlag = architechtureStringToFlag(m_asic); archFlag.has_value())
+        // Convert string to GfxIpTriple and refine to high-end variant
+        if (auto gfxIp = architectureStringToGfxIpTriple(m_asic); gfxIp.has_value())
         {
-            if (auto highEndArch = getHighEndArchitecture(archFlag.value()); highEndArch.has_value())
+            if (auto highEndArch = getHighEndGfxIpTriple(gfxIp.value()); highEndArch.has_value())
             {
-                if (auto archString = gfxArchitectureFlagsToString(highEndArch.value()); archString.has_value())
+                if (auto archString = gfxIpTripleToString(highEndArch.value()); archString.has_value())
                 {
                     m_asic = archString.value();
                 }
@@ -40,7 +40,7 @@ namespace mlss
         }
         else
         {
-            m_lastError = archFlag.error();
+            m_lastError = gfxIp.error();
         }
     }
 

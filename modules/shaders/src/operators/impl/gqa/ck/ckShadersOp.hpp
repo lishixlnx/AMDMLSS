@@ -4,12 +4,12 @@
 #include "core/core.hpp"
 #include <cstdint>
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorGQA;
 }
 
-namespace mlss::shaders::gqa::ck
+namespace mlss::gqa::ck
 {
 
     // GQA shader variants for CK implementation
@@ -30,15 +30,14 @@ namespace mlss::shaders::gqa::ck
     };
 
     // GQA Operator implementation using CK library
-    class CKGqa final : public OperatorBase<CKGqa, OperatorRegistration::Disabled>
+    class CKGqa final : public BackendBase<CKGqa, mlss::op::OperatorGQA>
     {
     private:
 
-        using base = OperatorBase<CKGqa, OperatorRegistration::Disabled>;
+        using base = BackendBase<CKGqa, mlss::op::OperatorGQA>;
 
-        // Friend declaration to allow base class access to private members
-        friend class OperatorBase<CKGqa, OperatorRegistration::Disabled>;
-        friend class mlss::shaders::op::OperatorGQA;
+        friend class BackendBase<CKGqa, mlss::op::OperatorGQA>;
+        friend class mlss::op::OperatorGQA;
 
     public:
 
@@ -46,7 +45,7 @@ namespace mlss::shaders::gqa::ck
         CKGqa() = default;
 
         // Constructor
-        CKGqa(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip);
+        CKGqa(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip);
 
         // Destructor
         virtual ~CKGqa() = default;
@@ -60,7 +59,7 @@ namespace mlss::shaders::gqa::ck
     private:
 
         // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
     };
 
-} // namespace mlss::shaders::gqa::ck
+} // namespace mlss::gqa::ck

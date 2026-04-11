@@ -1,12 +1,5 @@
-/* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
-
-#include <vector>
-#include <string>
-#include <expected>
-#include <system_error>
-#include "amdmlss/amdmlss_api_cdefs.h"
-#include "core/core.hpp"
 
 namespace mlss
 {
@@ -42,36 +35,39 @@ namespace mlss
     //=====================================================================================================================
 
     /// @brief Check if the GFX architecture is in the GFX110x family (1100, 1101, 1102, 1103)
-    [[nodiscard]] bool isGfx110x(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx110x(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is in the GFX115x family (1150, 1151, 1152, 1153, 1154)
-    [[nodiscard]] bool isGfx115x(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx115x(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is in the GFX117x family (1170, 1171)
-    [[nodiscard]] bool isGfx117x(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx117x(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is in the GFX120x family (1200, 1201)
-    [[nodiscard]] bool isGfx120x(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx120x(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is in the GFX10x family
-    [[nodiscard]] bool isGfx10(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx10(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is GFX11 (110x, 115x, or 117x)
-    [[nodiscard]] bool isGfx11(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx11(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is GFX12 (120x)
-    [[nodiscard]] bool isGfx12(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx12(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is GFX13 (not yet supported)
-    [[nodiscard]] bool isGfx13(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx13(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is GFX11 or later
-    [[nodiscard]] bool isGfx11Plus(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx11Plus(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is GFX12 or later
-    [[nodiscard]] bool isGfx12Plus(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx12Plus(const GfxIpTriple& gfx);
 
     /// @brief Check if the GFX architecture is max GFX12
-    [[nodiscard]] bool isGfx12Max(const GfxArchitectureFlags& gfx);
+    [[nodiscard]] bool isGfx12Max(const GfxIpTriple& gfx);
+
+    /// @brief Check if the GFX architecture is compatible with the target GFX architecture
+    [[nodiscard]] bool areGfxIpsCompatible(const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget);
 
 } // namespace mlss

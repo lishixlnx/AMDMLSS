@@ -6,7 +6,7 @@
 // Note: shaderCallHipMha.hpp has been removed
 // #include "shaders/interface/shaderCallHipMha.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     // MHA Operator implementation
     class OperatorMHA : public OperatorBase<OperatorMHA>
@@ -24,7 +24,7 @@ namespace mlss::shaders::op
         OperatorMHA() = default;
 
         // Constructor
-        OperatorMHA(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorMHA(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorMHA() = default;
@@ -36,9 +36,9 @@ namespace mlss::shaders::op
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
         // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
 
     private:
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

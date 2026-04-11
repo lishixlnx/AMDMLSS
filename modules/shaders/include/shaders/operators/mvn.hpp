@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
 
     class OperatorMVN : public OperatorBase<OperatorMVN>
@@ -22,7 +22,7 @@ namespace mlss::shaders::op
         OperatorMVN() = default;
 
         // Constructor
-        OperatorMVN(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorMVN(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorMVN() = default;
@@ -39,4 +39,4 @@ namespace mlss::shaders::op
         static bool getCapsImpl(const std::vector<Attribute>& attributes);
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

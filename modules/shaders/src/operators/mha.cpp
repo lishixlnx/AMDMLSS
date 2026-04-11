@@ -1,20 +1,21 @@
 /* Copyright (c) 2021-2025 Advanced Micro Devices, Inc. All rights reserved. */
+
 #include "shaders/operators/mha.hpp"
 #include "impl/mha/ck/ckShadersOp.hpp"
 
-namespace mlss::shaders::op
-{
+template class mlss::BackendBase<mlss::mha::ck::CKMha, mlss::op::OperatorMHA>;
 
-    using namespace mlss::shaders::mha;
+namespace mlss::op
+{
 
     //=====================================================================================================================
     // OperatorMHA implementation
     //=====================================================================================================================
 
-    OperatorMHA::OperatorMHA(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorMHA::OperatorMHA(const std::vector<Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
-        this->m_implName = "HipMHA";
+        this->m_implName = "MHA";
     }
 
     std::string OperatorMHA::getOperatorName()
@@ -24,21 +25,17 @@ namespace mlss::shaders::op
 
     std::expected<Binaries, std::error_code> OperatorMHA::getBinaries() const
     {
-        if (ck::CKMha::getCapsImpl(m_attributes, m_gfxArch))
+        auto result = BackendSelector<OperatorMHA>::select(m_attributes, m_gfxIpTriple);
+        if (result.binaries.has_value())
         {
-            ck::CKMha ckMha(m_attributes, m_gfxArch);
-            m_implName = ckMha.getOperatorName();
-            return ckMha.getBinaries();
+            m_implName = result.implName;
         }
-        else
-        {
-            return std::unexpected(std::make_error_code(std::errc::invalid_argument));
-        }
+        return result.binaries;
     }
 
-    bool OperatorMHA::getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
+    bool OperatorMHA::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
     {
-        return ck::CKMha::getCapsImpl(attributes, gfxArch);
+        return BackendSelector<OperatorMHA>::anyCaps(attributes, gfxArch);
     }
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

@@ -3,39 +3,39 @@
 #include "shaders/operators/gqa.hpp"
 #include "impl/gqa/ck/ckShadersOp.hpp"
 
-namespace mlss::shaders::op
+template class mlss::BackendBase<mlss::gqa::ck::CKGqa, mlss::op::OperatorGQA>;
+
+namespace mlss::op
 {
-    using namespace mlss::shaders::gqa;
 
     //=====================================================================================================================
     // OperatorGQA implementation
     //=====================================================================================================================
 
-    OperatorGQA::OperatorGQA(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorGQA::OperatorGQA(const std::vector<Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
+        this->m_implName = "GQA";
     }
 
     std::string OperatorGQA::getOperatorName()
     {
-        return "AMDMLSS::OperatorMHA1_t";
+        return "AMDMLSS::OperatorGQA";
     }
 
     std::expected<Binaries, std::error_code> OperatorGQA::getBinaries() const
     {
-        if (ck::CKGqa::getCapsImpl(m_attributes, m_gfxArch))
+        auto result = BackendSelector<OperatorGQA>::select(m_attributes, m_gfxIpTriple);
+        if (result.binaries.has_value())
         {
-            ck::CKGqa ckGqa(m_attributes, m_gfxArch);
-            m_implName = ckGqa.getOperatorName();
-            return ckGqa.getBinaries();
+            m_implName = result.implName;
         }
-
-        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
+        return result.binaries;
     }
 
-    bool OperatorGQA::getCapsImpl(const std::vector<mlss::Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
+    bool OperatorGQA::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
     {
-        return ck::CKGqa::getCapsImpl(attributes, gfxArch);
+        return BackendSelector<OperatorGQA>::anyCaps(attributes, gfxArch);
     }
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

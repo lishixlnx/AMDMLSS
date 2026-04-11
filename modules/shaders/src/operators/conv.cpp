@@ -2,14 +2,14 @@
 
 #include "shaders/operators/conv.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
 
     //=====================================================================================================================
     // OperatorConv implementation
     //=====================================================================================================================
 
-    OperatorConv::OperatorConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorConv::OperatorConv(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
         this->m_implName = "HipConv";
@@ -30,4 +30,4 @@ namespace mlss::shaders::op
         return false;
     }
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

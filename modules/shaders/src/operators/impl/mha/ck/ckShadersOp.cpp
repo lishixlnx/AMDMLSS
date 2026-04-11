@@ -3,14 +3,14 @@
 #include "core/core.hpp"
 #include "wmma/shadersUtils.hpp"
 
-namespace mlss::shaders::mha::ck
+namespace mlss::mha::ck
 {
 
     //=====================================================================================================================
     // CKMha implementation
     //=====================================================================================================================
 
-    CKMha::CKMha(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip)
+    CKMha::CKMha(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip)
         : base(attributes, gfxip)
     {
         this->m_implName = "CK-MHA-WMMA";
@@ -63,10 +63,10 @@ namespace mlss::shaders::mha::ck
             }
         }
 
-        return wmma::getWmmaShadersBlob(m_gfxArch, batchSize, headCount, sizeHeads, kvSequenceLength, qSequenceLength, packing, dataType);
+        return wmma::getWmmaShadersBlob(m_gfxIpTriple, batchSize, headCount, sizeHeads, kvSequenceLength, qSequenceLength, packing, dataType);
     }
 
-    bool CKMha::getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
+    bool CKMha::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
     {
         // Extract MHA parameters from attributes
         std::uint32_t batch = 0;
@@ -134,4 +134,4 @@ namespace mlss::shaders::mha::ck
         return wmma::isWmmaShadersAvailable(gfxArch, size_heads, q_seq, kv_seq, packing, data_type);
     }
 
-} // namespace mlss::shaders::mha::ck
+} // namespace mlss::mha::ck

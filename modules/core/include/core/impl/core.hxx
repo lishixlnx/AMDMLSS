@@ -25,16 +25,19 @@
 
 #include "amdmlss/amdmlss_api_cdefs.h"
 
-#include "types/enums.hpp"
+#include "types/enums.hxx"
+#include "types/gfxip.hxx"
 #include "types/enum64.hxx"
 #include "types/context.hxx"
 #include "types/binaries.hxx"
 #include "types/allocator.hxx"
 #include "types/any.hxx"
 #include "types/memory.hxx"
-#include "types/attributeInfo.hxx"
 #include "types/attribute.hxx"
 #include "types/verbose_mode.hxx"
+
+// ML headers
+#include "ml/tree.hxx"
 
 // Utility headers - organized by category
 #include "utils/elf.hxx"
@@ -46,7 +49,6 @@
 #include "utils/device.hxx"
 
 // Utility implementation headers
-#include "utils/elf.inl.hxx"
 #include "utils/enumUtils.inl.hxx"
 #include "utils/adapters.inl.hxx"
 #include "utils/compile.inl.hxx"

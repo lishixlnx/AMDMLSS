@@ -11,14 +11,11 @@
 #define MLSS_ASSERT(cdt) assert(cdt);
 
 #if 0
-#define MLSS_MAKE_BLOB(var) mlss::shaders::makeBinaryBlob(var, #var)
+#define MLSS_MAKE_BLOB(var) mlss::makeBinaryBlob(var, #var)
 #endif
 
 namespace mlss
 {
-
-    namespace shaders
-    {
 
         template <typename T, typename... U>
         concept either = (std::same_as<T, U> || ...);
@@ -161,7 +158,7 @@ namespace mlss
         };
 
         /// Generic overload for external shader types (e.g. C++20 module ShaderType<N>) that expose
-        /// m_binary (with .data()/.size()) and m_kernelName but aren't mlss::shaders::ShaderType<T>.
+        /// m_binary (with .data()/.size()) and m_kernelName but aren't mlss::ShaderType<T>.
         template <typename T>
             requires(!is_library_shader_type<std::remove_cvref_t<T>>::value) && requires(const T& t) {
                 { t.m_binary.data() } -> std::convertible_to<const void*>;
@@ -169,8 +166,6 @@ namespace mlss
                 { t.m_kernelName } -> std::convertible_to<std::string_view>;
             }
         std::unique_ptr<Binaries::Blob> make_binary_blob(const T& shader);
-
-    } // namespace shaders
 
 } // namespace mlss
 

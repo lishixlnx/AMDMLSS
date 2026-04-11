@@ -2,14 +2,14 @@
 
 #include "shaders/operators/qgemm.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
 
     //=====================================================================================================================
     // OperatorGEMM implementation
     //=====================================================================================================================
 
-    OperatorQGEMM::OperatorQGEMM(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorQGEMM::OperatorQGEMM(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
     }
@@ -29,4 +29,4 @@ namespace mlss::shaders::op
         return false;
     }
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

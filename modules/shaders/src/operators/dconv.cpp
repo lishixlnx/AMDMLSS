@@ -2,14 +2,14 @@
 
 #include "shaders/operators/dconv.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
 
     //=====================================================================================================================
     // OperatorDepthWiseConv implementation
     //=====================================================================================================================
 
-    OperatorDepthWiseConv::OperatorDepthWiseConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorDepthWiseConv::OperatorDepthWiseConv(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
     }
@@ -33,7 +33,7 @@ namespace mlss::shaders::op
     // OperatorDilatedConv implementation
     //=====================================================================================================================
 
-    OperatorDilatedConv::OperatorDilatedConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip)
+    OperatorDilatedConv::OperatorDilatedConv(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip)
         : base(attributes, gfxip)
     {
     }
@@ -53,4 +53,4 @@ namespace mlss::shaders::op
         return false;
     }
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

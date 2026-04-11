@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorDepthWiseConv : public mlss::OperatorBase<OperatorDepthWiseConv>
     {
@@ -18,7 +18,7 @@ namespace mlss::shaders::op
         OperatorDepthWiseConv() = default;
 
         // Constructor
-        OperatorDepthWiseConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorDepthWiseConv(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorDepthWiseConv() = default;
@@ -47,7 +47,7 @@ namespace mlss::shaders::op
         OperatorDilatedConv() = default;
 
         // Constructor
-        OperatorDilatedConv(const std::vector<mlss::Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorDilatedConv(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorDilatedConv() = default;
@@ -64,4 +64,4 @@ namespace mlss::shaders::op
         static bool getCapsImpl(const std::vector<mlss::Attribute>& attributes);
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

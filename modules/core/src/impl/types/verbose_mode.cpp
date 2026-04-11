@@ -1,6 +1,4 @@
-#include "core/impl/types/verbose_mode.hxx"
-#include <ostream>
-#include <mutex>
+#include "core/core.hpp"
 
 namespace mlss
 {
