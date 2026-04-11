@@ -32,7 +32,16 @@ find_package(HIP REQUIRED)
 
 target_link_libraries(core PRIVATE HIP::Runtime)
 
+find_package(amd_comgr REQUIRED
+    PATHS "${HIP_PATH}" "$ENV{ROCM_PATH}"
+    PATH_SUFFIXES lib/cmake/amd_comgr
+    NO_DEFAULT_PATH
+)
+
+target_link_libraries(core PRIVATE amd_comgr)
+
 message(STATUS "HIP found using FindHIP.cmake at: ${HIP_DIR}")
+message(STATUS "AMD Comgr found via find_package(amd_comgr)")
 
 if(WIN32)
     find_package(WindowsSDK REQUIRED COMPONENTS DXGI D3D12)

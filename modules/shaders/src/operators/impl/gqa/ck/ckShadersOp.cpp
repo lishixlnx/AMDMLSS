@@ -3,14 +3,14 @@
 #include "core/core.hpp"
 #include "wmma/shadersUtils.hpp"
 
-namespace mlss::shaders::gqa::ck
+namespace mlss::gqa::ck
 {
 
     //=====================================================================================================================
     // CKGqa implementation
     //=====================================================================================================================
 
-    CKGqa::CKGqa(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip)
+    CKGqa::CKGqa(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip)
         : base(attributes, gfxip)
     {
         this->m_implName = "CK-GQA-WMMA";
@@ -78,7 +78,7 @@ namespace mlss::shaders::gqa::ck
         }
 
         return wmma::getWmmaShadersBlob(
-            m_gfxArch,
+            m_gfxIpTriple,
             batchSize,
             qHeadCount,
             kvHeadCount,
@@ -90,7 +90,7 @@ namespace mlss::shaders::gqa::ck
             dataType);
     }
 
-    bool CKGqa::getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
+    bool CKGqa::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
     {
         // Extract GQA parameters from attributes
         std::uint32_t batch = 0;
@@ -148,4 +148,4 @@ namespace mlss::shaders::gqa::ck
         return wmma::isWmmaShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, data_type);
     }
 
-} // namespace mlss::shaders::gqa::ck
+} // namespace mlss::gqa::ck

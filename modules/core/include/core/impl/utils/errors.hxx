@@ -15,7 +15,9 @@ namespace mlss
         // Enum lookup errors
         ArchitectureNotSupported,
         ArchitectureNotFound,
-        CodenameNotFound
+        CodenameNotFound,
+        // Comgr errors
+        ComgrError
     };
 
     // Error category for MLSS errors
@@ -50,6 +52,8 @@ namespace mlss
                     return "Architecture not found";
                 case MLSSErrorCode::CodenameNotFound:
                     return "GPU codename not found";
+                case MLSSErrorCode::ComgrError:
+                    return "AMD Comgr operation failed";
                 default:
                     return "Unknown MLSS error";
             }

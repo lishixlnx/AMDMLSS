@@ -3,24 +3,22 @@
 #include "shaders/shaders.hpp"
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorMHA;
 }
 
-namespace mlss::shaders::mha::ck
+namespace mlss::mha::ck
 {
 
     // MHA Operator implementation
-    class CKMha final : public OperatorBase<CKMha, OperatorRegistration::Disabled>
+    class CKMha final : public BackendBase<CKMha, mlss::op::OperatorMHA>
     {
     private:
 
-        using base = OperatorBase<CKMha, OperatorRegistration::Disabled>;
+        using base = BackendBase<CKMha, mlss::op::OperatorMHA>;
 
-        // Friend declaration to allow base class access to private members
-        friend class OperatorBase<CKMha, OperatorRegistration::Disabled>;
-        friend class mlss::shaders::op::OperatorMHA;
+        friend class BackendBase<CKMha, mlss::op::OperatorMHA>;
 
     public:
 
@@ -28,7 +26,7 @@ namespace mlss::shaders::mha::ck
         CKMha() = default;
 
         // Constructor
-        CKMha(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip);
+        CKMha(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip);
 
         // Destructor
         virtual ~CKMha() = default;
@@ -42,7 +40,7 @@ namespace mlss::shaders::mha::ck
     private:
 
         // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
     };
 
-} // namespace mlss::shaders::mha::ck
+} // namespace mlss::mha::ck

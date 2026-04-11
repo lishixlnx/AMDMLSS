@@ -1,6 +1,6 @@
 #include "shaders/shaders.hpp"
 
-namespace mlss::shaders
+namespace mlss
 {
 
     //=====================================================================================================================
@@ -27,4 +27,4 @@ namespace mlss::shaders
             name});
     }
 
-} // namespace mlss::shaders
+} // namespace mlss

@@ -1,12 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <sstream>
-#include <mutex>
-#include <atomic>
-#include <cstdlib>
-#include <functional>
-
 // Windows headers define ERROR as a macro; undefine it before our enum.
 #ifdef ERROR
 #undef ERROR

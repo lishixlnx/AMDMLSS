@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace mlss::shaders::gqa::ck::wmma::fp16
+namespace mlss::gqa::ck::wmma::fp16
 {
     // Shader constants for different GQA configurations
     // Format: { MPerBlock, NPerBlock, BlockSize, ... }
@@ -594,4 +594,4 @@ namespace mlss::shaders::gqa::ck::wmma::fp16
                                                                                                  {14, MLSS_INT32, false, 0, true, true, false, "output_stride_d2"},
                                                                                                  {15, MLSS_INT32, false, 0, true, true, false, "output_stride_d3"}}};
 
-} // namespace mlss::shaders::gqa::ck::wmma::fp16
+} // namespace mlss::gqa::ck::wmma::fp16

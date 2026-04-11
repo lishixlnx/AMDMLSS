@@ -16,7 +16,7 @@ namespace mlss
     }
 
     //=================================================================================================================
-    std::unique_ptr<OperatorBase<void, OperatorRegistration::Enabled>> OperatorRegistry::create(const std::string& typeName)
+    std::unique_ptr<OperatorBase<void>> OperatorRegistry::create(const std::string& typeName)
     {
         auto it = registry.find(typeName);
         if (it != registry.end())

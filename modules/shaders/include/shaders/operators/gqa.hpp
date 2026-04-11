@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
 
     class OperatorGQA : public OperatorBase<OperatorGQA>
@@ -22,7 +22,7 @@ namespace mlss::shaders::op
         OperatorGQA() = default;
 
         // Constructor
-        OperatorGQA(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorGQA(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
         // Destructor
         virtual ~OperatorGQA() = default;
@@ -34,9 +34,9 @@ namespace mlss::shaders::op
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
         // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
 
     private:
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

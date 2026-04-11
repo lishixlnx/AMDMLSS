@@ -3,9 +3,6 @@
 namespace mlss
 {
 
-    namespace shaders
-    {
-
         //=====================================================================================================================
         template <std::ranges::contiguous_range T, std::size_t M>
             requires BinaryType<T>
@@ -36,9 +33,9 @@ namespace mlss
 
             result.m_kernelName = typename ShaderType<T>::string_type(
                 kernelName.empty()
-                    ? mlss::getKernelName(
-                          reinterpret_cast<const std::byte*>(binary.data()),
-                          binary.size())
+                    ? mlss::getKernelName(std::span<const std::uint8_t>(
+                          reinterpret_cast<const std::uint8_t*>(binary.data()),
+                          binary.size()))
                     : kernelName);
             result.m_compilerVersion = compilerVersion;
             result.m_codeObjectVersion = codeObjectVersion;
@@ -169,7 +166,5 @@ namespace mlss
                 0,
                 name});
         }
-
-    } // namespace shaders
 
 } // namespace mlss

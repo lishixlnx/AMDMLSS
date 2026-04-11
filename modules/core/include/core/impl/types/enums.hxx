@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace mlss
 {
     //=====================================================================================================================
@@ -74,91 +72,6 @@ namespace mlss
         GQA,
         UNKNOWN_OP,
         COUNT = UNKNOWN_OP
-    };
-
-    //=====================================================================================================================
-    enum class GfxArchitectureFlags
-    {
-        Gfx600,
-        Gfx601,
-        Gfx602,
-        Gfx700,
-        Gfx701,
-        Gfx702,
-        Gfx703,
-        Gfx704,
-        Gfx705,
-        Gfx750,
-        Gfx801,
-        Gfx802,
-        Gfx803,
-        Gfx805,
-        Gfx810,
-        Gfx900,
-        Gfx902,
-        Gfx904,
-        Gfx906,
-        Gfx908,
-        Gfx909,
-        Gfx90a,
-        Gfx90c,
-        Gfx940,
-        Gfx941,
-        Gfx942,
-        Gfx950,
-        Gfx1000,
-        Gfx1010,
-        Gfx1011,
-        Gfx1012,
-        Gfx1013,
-        Gfx1020,
-        Gfx1030,
-        Gfx1031,
-        Gfx1032,
-        Gfx1033,
-        Gfx1034,
-        Gfx1035,
-        Gfx1036,
-        Gfx1050,
-        Gfx1100,
-        Gfx1101,
-        Gfx1102,
-        Gfx1103,
-        Gfx1105,
-        Gfx1150,
-        Gfx1151,
-        Gfx1152,
-        Gfx1153,
-        Gfx1154,
-        Gfx115FFFF,
-        Gfx115FFFE,
-        Gfx1170,
-        Gfx1171,
-        Gfx1200,
-        Gfx1201,
-        Gfx1210,
-        Gfx1211,
-        Gfx1250,
-        Gfx1251,
-        Gfx120FFFF,
-        Gfx120FFFE,
-        Gfx1300,
-        Gfx1301,
-        Gfx1302,
-        Gfx130FFFF,
-        Gfx130FFFE,
-        Gfx130FFFD,
-        Gfx4000,
-        Gfx4010,
-        Gfx4020,
-        Gfx4030,
-        Gfx9generic,
-        Gfx9_4generic,
-        Gfx10_1generic,
-        Gfx10_3generic,
-        Gfx11generic,
-        Gfx12generic,
-        Unknown
     };
 
     //=====================================================================================================================
@@ -284,12 +197,25 @@ namespace mlss
 
     enum class ShaderTypesFlags
     {
-        UNKNOWN,
-        WMMA,
-        XDL,
-        DL,
-        SPIRV,
-        HLSL
+        UNKNOWN = 1 << 0,
+        WMMA = 1 << 1,
+        XDL = 1 << 2,
+        DL = 1 << 3,
+        SPIRV = 1 << 4,
+        HLSL = 1 << 5,
     };
+
+    ShaderTypesFlags operator|(ShaderTypesFlags lhs, ShaderTypesFlags rhs);
+    ShaderTypesFlags operator&(ShaderTypesFlags lhs, ShaderTypesFlags rhs);
+    ShaderTypesFlags operator^(ShaderTypesFlags lhs, ShaderTypesFlags rhs);
+    ShaderTypesFlags operator~(ShaderTypesFlags rhs);
+    ShaderTypesFlags operator&=(ShaderTypesFlags& lhs, ShaderTypesFlags rhs);
+    ShaderTypesFlags operator|=(ShaderTypesFlags& lhs, ShaderTypesFlags rhs);
+    ShaderTypesFlags operator^=(ShaderTypesFlags& lhs, ShaderTypesFlags rhs);
+
+    bool operator==(ShaderTypesFlags lhs, ShaderTypesFlags rhs);
+    bool operator!=(ShaderTypesFlags lhs, ShaderTypesFlags rhs);
+    
+
 
 } // namespace mlss

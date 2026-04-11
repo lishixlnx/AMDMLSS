@@ -1,13 +1,9 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 
-#include <cstddef>
-#include <cstdint>
-#include <span>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "core/core.hpp"
 
-#include "core/impl/utils/elf.hxx"
+#include <amd_comgr/amd_comgr.h>
+#include <cstring>
 
 namespace mlss
 {
@@ -58,10 +54,12 @@ namespace mlss
         };
 
         // ELF constants
-        constexpr std::uint32_t SHT_SYMTAB = 2;
-        constexpr std::uint32_t SHT_STRTAB = 3;
-        constexpr std::uint8_t STT_FUNC = 2;
-        constexpr std::uint8_t STT_OBJECT = 1;
+        constexpr std::uint32_t SHT_SYMTAB = 0x02;
+        constexpr std::uint32_t SHT_STRTAB = 0x03;
+        constexpr std::uint8_t STT_FUNC = 0x02;
+        constexpr std::uint8_t STT_OBJECT = 0x01;
+        constexpr std::size_t ELF64_E_FLAGS_OFFSET = 0x30;
+        constexpr std::uint8_t EF_AMDGPU_MACH_MASK = 0xFF;
 
         // Extract symbol type from st_info
         constexpr std::uint8_t ELF64_ST_TYPE(std::uint8_t info)
@@ -76,25 +74,146 @@ namespace mlss
             return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
         }
 
+
+
+        std::expected<std::string, std::error_code> gfxIpToIsaString(GfxIpTriple gfxIp)
+        {
+            auto archNameResult = gfxIpTripleToString(gfxIp);
+            if (!archNameResult.has_value())
+            {
+                return std::unexpected(archNameResult.error());
+            }
+
+            std::string_view archName = archNameResult.value();
+            constexpr std::string_view mlssPrefix = "MLSS_";
+            if (archName.starts_with(mlssPrefix))
+            {
+                archName.remove_prefix(mlssPrefix.size());
+            }
+
+            std::string result;
+            result.reserve(archName.size());
+            for (char c : archName)
+            {
+                result.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+            }
+
+            return result;
+        }
+
+        std::expected<std::vector<std::uint8_t>, std::error_code> patchGfxVersion(
+            std::span<const std::uint8_t> input,
+            std::string_view from, std::uint8_t machFrom,
+            std::string_view to,   std::uint8_t machTo)
+        {
+            if (from.size() != to.size())
+            {
+                return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+            }
+
+            std::vector<std::uint8_t> patched(input.begin(), input.end());
+
+            if (patched.size() > ELF64_E_FLAGS_OFFSET &&
+                (patched[ELF64_E_FLAGS_OFFSET] & EF_AMDGPU_MACH_MASK) == machFrom)
+            {
+                patched[ELF64_E_FLAGS_OFFSET] =
+                    (patched[ELF64_E_FLAGS_OFFSET] & ~EF_AMDGPU_MACH_MASK) | machTo;
+            }
+
+            for (std::size_t i = 0; i + from.size() <= patched.size(); ++i)
+            {
+                if (std::memcmp(&patched[i], from.data(), from.size()) == 0)
+                {
+                    std::memcpy(&patched[i], to.data(), to.size());
+                }
+            }
+
+            return patched;
+        }
+
+#define CHECK_COMGR(call)                                                     \
+    do {                                                                      \
+        amd_comgr_status_t comgrStatus = (call);                              \
+        if (comgrStatus != AMD_COMGR_STATUS_SUCCESS)                          \
+        {                                                                     \
+            cleanup();                                                        \
+            return std::unexpected(make_error_code(MLSSErrorCode::ComgrError));\
+        }                                                                     \
+    } while (0)
+
+        std::expected<std::vector<std::uint8_t>, std::error_code> linkRelocatableToExecutable(
+            std::span<const std::uint8_t> relocatable,
+            std::string_view targetIsa)
+        {
+            amd_comgr_data_t relocData{};
+            amd_comgr_data_set_t relocSet{};
+            amd_comgr_data_set_t execSet{};
+            amd_comgr_action_info_t actionInfo{};
+            amd_comgr_data_t execData{};
+
+            auto cleanup = [&]()
+            {
+                amd_comgr_release_data(relocData);
+                amd_comgr_release_data(execData);
+                amd_comgr_destroy_data_set(relocSet);
+                amd_comgr_destroy_data_set(execSet);
+                amd_comgr_destroy_action_info(actionInfo);
+            };
+
+            CHECK_COMGR(amd_comgr_create_data(AMD_COMGR_DATA_KIND_RELOCATABLE, &relocData));
+            CHECK_COMGR(amd_comgr_set_data(relocData, relocatable.size(),
+                        reinterpret_cast<const char*>(relocatable.data())));
+            CHECK_COMGR(amd_comgr_set_data_name(relocData, "input.o"));
+
+            CHECK_COMGR(amd_comgr_create_data_set(&relocSet));
+            CHECK_COMGR(amd_comgr_data_set_add(relocSet, relocData));
+
+            CHECK_COMGR(amd_comgr_create_action_info(&actionInfo));
+            CHECK_COMGR(amd_comgr_action_info_set_isa_name(actionInfo, targetIsa.data()));
+
+            CHECK_COMGR(amd_comgr_create_data_set(&execSet));
+            CHECK_COMGR(amd_comgr_do_action(
+                AMD_COMGR_ACTION_LINK_RELOCATABLE_TO_EXECUTABLE,
+                actionInfo, relocSet, execSet));
+
+            CHECK_COMGR(amd_comgr_action_data_get_data(execSet,
+                        AMD_COMGR_DATA_KIND_EXECUTABLE, 0, &execData));
+
+            std::size_t execSize = 0;
+            CHECK_COMGR(amd_comgr_get_data(execData, &execSize, nullptr));
+            std::vector<std::uint8_t> result(execSize);
+            CHECK_COMGR(amd_comgr_get_data(execData, &execSize, reinterpret_cast<char*>(result.data())));
+
+            cleanup();
+            return result;
+        }
+
+#undef CHECK_COMGR
+
+
+
     } // anonymous namespace
 
     //=====================================================================================================================
-    std::string getKernelName(const std::byte* const ptr, const std::size_t size)
+    std::string getKernelName(const std::span<const std::uint8_t>& arr)
     {
-        if (ptr == nullptr || size < sizeof(Elf64_Ehdr))
+        if (arr.size() < sizeof(Elf64_Ehdr))
         {
             throw std::runtime_error("Invalid ELF binary: null pointer or insufficient size");
         }
 
+        const std::uint8_t* const ptr = arr.data();
+        const std::size_t size = arr.size();
+
         // Verify ELF magic number
-        if (ptr[0] != std::byte{0x7f} || ptr[1] != std::byte{'E'} ||
-            ptr[2] != std::byte{'L'} || ptr[3] != std::byte{'F'})
+        if (ptr[0] != 0x7f || ptr[1] != std::uint8_t{'E'} ||
+            ptr[2] != std::uint8_t{'L'} || ptr[3] != std::uint8_t{'F'})
         {
             throw std::runtime_error("Invalid ELF binary: bad magic number");
         }
 
-        // Verify 64-bit ELF
-        if (ptr[4] != std::byte{2})
+        // Verify 64-bit ELF (EI_CLASS == ELFCLASS64)
+        if (ptr[4] != 2)
         {
             throw std::runtime_error("Invalid ELF binary: not a 64-bit ELF");
         }
@@ -204,6 +323,66 @@ namespace mlss
         }
 
         return kernelNames[0];
+    }
+
+
+    std::expected<std::vector<std::uint8_t>, std::error_code> getNonRelocatable(const std::span<const std::uint8_t>& arr,
+        const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget)
+    {
+        if (!areGfxIpsCompatible(gfxIpHighEnd, gfxIpTarget))
+        {
+            return std::unexpected(make_error_code(MLSSErrorCode::ArchitectureNotSupported));
+        }
+
+        auto targetIsaResult = gfxIpToIsaString(gfxIpTarget);
+        if (!targetIsaResult.has_value())
+        {
+            return std::unexpected(targetIsaResult.error());
+        }
+        const std::string comgrIsa = "amdgcn-amd-amdhsa--" + targetIsaResult.value();
+
+        std::span<const std::uint8_t> inputData = arr;
+        std::vector<std::uint8_t> patched;
+
+        if (gfxIpHighEnd != gfxIpTarget)
+        {
+            auto elfShaderQuery = gfxIpTripleToElfMatch(gfxIpHighEnd);
+            if (!elfShaderQuery.has_value())
+            {
+                return std::unexpected(elfShaderQuery.error());
+            }
+
+            auto elfTargetQuery = gfxIpTripleToElfMatch(gfxIpTarget);
+            if (!elfTargetQuery.has_value())
+            {
+                return std::unexpected(elfTargetQuery.error());
+            }
+
+            auto shaderIsaResult = gfxIpToIsaString(gfxIpHighEnd);
+            if (!shaderIsaResult.has_value())
+            {
+                return std::unexpected(shaderIsaResult.error());
+            }
+
+            auto patchedQuery = patchGfxVersion(arr,
+                shaderIsaResult.value(), elfShaderQuery.value(),
+                targetIsaResult.value(), elfTargetQuery.value());
+            if (!patchedQuery.has_value())
+            {
+                return std::unexpected(patchedQuery.error());
+            }
+
+            patched = std::move(patchedQuery.value());
+            inputData = patched;
+        }
+
+        auto executableQuery = linkRelocatableToExecutable(inputData, comgrIsa);
+        if (!executableQuery.has_value())
+        {
+            return std::unexpected(executableQuery.error());
+        }
+
+        return std::move(executableQuery.value());
     }
 
 } // namespace mlss
