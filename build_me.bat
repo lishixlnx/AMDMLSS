@@ -10,6 +10,8 @@ set RUN_SAMPLE_TESTS=0
 set DEPLOY=
 set DEPLOY_PATH=./amdmlss_redist
 
+goto :parse_args
+
 :: Function to display usage
 :usage
 echo Usage: %0 [-c^|--compiler ^<compiler^>] [-b^|--build ^<build_type^>] [options]
