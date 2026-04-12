@@ -117,3 +117,4 @@ namespace mlss
 
 #include "base.inl.hxx"
 #include "backend.hxx"
+#include "case.hxx"

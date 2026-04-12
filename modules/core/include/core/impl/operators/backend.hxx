@@ -4,12 +4,12 @@
 namespace mlss
 {
 
-    template <typename OperatorType>
+    template <typename ParentType>
     class BackendRegistry
     {
     public:
 
-        using GetCapsFunction = std::function<bool(const std::vector<Attribute>&, GfxIpTriple)>;
+        using GetCapsFunction = std::function<uint32_t(const std::vector<Attribute>&, GfxIpTriple, const void*)>;
         using GetBinariesFunction = std::function<std::expected<Binaries, std::error_code>(const std::vector<Attribute>&, const GfxIpTriple&)>;
 
         struct Entry
@@ -38,7 +38,7 @@ namespace mlss
         }
     };
 
-    template <typename Derived, typename OperatorType>
+    template <typename Derived, typename ParentType>
     class BackendBase
     {
     public:
@@ -47,34 +47,39 @@ namespace mlss
 
         virtual std::expected<Binaries, std::error_code> getBinaries() const = 0;
 
-        static bool getCaps(const std::vector<Attribute>& attributes, GfxIpTriple gfxIp)
+        static uint32_t getCaps(const std::vector<Attribute>& attributes, GfxIpTriple gfxIp, const void* context = nullptr)
         {
-            if constexpr (requires { { Derived::getCapsImpl(attributes, gfxIp) } -> std::convertible_to<bool>; })
+            if constexpr (requires { { Derived::getCapsImpl(attributes, gfxIp, context) } -> std::convertible_to<uint32_t>; })
             {
-                return Derived::getCapsImpl(attributes, gfxIp);
+                return static_cast<uint32_t>(Derived::getCapsImpl(attributes, gfxIp, context));
             }
-            else if constexpr (requires { { Derived::getCapsImpl(attributes) } -> std::convertible_to<bool>; })
+            else if constexpr (requires { { Derived::getCapsImpl(attributes, gfxIp) } -> std::convertible_to<uint32_t>; })
+            {
+                return static_cast<uint32_t>(Derived::getCapsImpl(attributes, gfxIp));
+            }
+            else if constexpr (requires { { Derived::getCapsImpl(attributes) } -> std::convertible_to<uint32_t>; })
             {
                 std::ignore = gfxIp;
-                return Derived::getCapsImpl(attributes);
+                return static_cast<uint32_t>(Derived::getCapsImpl(attributes));
             }
             else
             {
                 static_assert(sizeof(Derived) == 0,
                               "Derived class must implement getCapsImpl with signature "
-                              "'static bool getCapsImpl(const std::vector<Attribute>&)' or "
-                              "'static bool getCapsImpl(const std::vector<Attribute>&, GfxIpTriple)'");
-                return false;
+                              "'static uint32_t getCapsImpl(const std::vector<Attribute>&)' or "
+                              "'static uint32_t getCapsImpl(const std::vector<Attribute>&, GfxIpTriple)' or "
+                              "'static uint32_t getCapsImpl(const std::vector<Attribute>&, GfxIpTriple, const void*)'");
+                return 0x00000000u;
             }
         }
 
         static bool registerBackend()
         {
-            BackendRegistry<OperatorType>::registerBackend(
+            BackendRegistry<ParentType>::registerBackend(
                 {Derived::getOperatorName(),
-                 [](const std::vector<Attribute>& attrs, GfxIpTriple arch) -> bool
+                 [](const std::vector<Attribute>& attrs, GfxIpTriple arch, const void* context) -> uint32_t
                  {
-                     return Derived::getCaps(attrs, arch);
+                     return Derived::getCaps(attrs, arch, context);
                  },
                  [](const std::vector<Attribute>& attrs, const GfxIpTriple& arch) -> std::expected<Binaries, std::error_code>
                  {
@@ -125,7 +130,7 @@ namespace mlss
         inline static bool s_registered = registerBackend();
     };
 
-    template <typename OperatorType>
+    template <typename ParentType>
     struct BackendSelector
     {
         struct SelectionResult
@@ -134,11 +139,11 @@ namespace mlss
             std::string implName;
         };
 
-        static bool anyCaps(const std::vector<Attribute>& attrs, GfxIpTriple arch)
+        static bool anyCaps(const std::vector<Attribute>& attrs, GfxIpTriple arch, const void* context = nullptr)
         {
-            for (const auto& backend : BackendRegistry<OperatorType>::getBackends())
+            for (const auto& backend : BackendRegistry<ParentType>::getBackends())
             {
-                if (backend.getCaps(attrs, arch))
+                if (backend.getCaps(attrs, arch, context) != 0x00000000u)
                 {
                     return true;
                 }
@@ -146,15 +151,40 @@ namespace mlss
             return false;
         }
 
-        static SelectionResult select(const std::vector<Attribute>& attrs, const GfxIpTriple& arch)
+        static uint32_t bestCaps(const std::vector<Attribute>& attrs, GfxIpTriple arch, const void* context = nullptr)
         {
-            for (const auto& backend : BackendRegistry<OperatorType>::getBackends())
+            uint32_t best = 0x00000000u;
+            for (const auto& backend : BackendRegistry<ParentType>::getBackends())
             {
-                if (backend.getCaps(attrs, arch))
+                uint32_t score = backend.getCaps(attrs, arch, context);
+                if (score > best)
                 {
-                    return {backend.getBinaries(attrs, arch), backend.name};
+                    best = score;
                 }
             }
+            return best;
+        }
+
+        static SelectionResult select(const std::vector<Attribute>& attrs, const GfxIpTriple& arch, const void* context = nullptr)
+        {
+            uint32_t bestScore = 0x00000000u;
+            const typename BackendRegistry<ParentType>::Entry* bestEntry = nullptr;
+
+            for (const auto& backend : BackendRegistry<ParentType>::getBackends())
+            {
+                uint32_t score = backend.getCaps(attrs, arch, context);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestEntry = &backend;
+                }
+            }
+
+            if (bestEntry != nullptr)
+            {
+                return {bestEntry->getBinaries(attrs, arch), bestEntry->name};
+            }
+
             return {std::unexpected(std::make_error_code(std::errc::not_supported)), {}};
         }
     };

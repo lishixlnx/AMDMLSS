@@ -29,36 +29,24 @@ namespace mlss::gqa::ck
         unpacked_with_strides_64_32x64x48_32x48x64
     };
 
-    // GQA Operator implementation using CK library
     class CKGqa final : public BackendBase<CKGqa, mlss::op::OperatorGQA>
     {
     private:
 
         using base = BackendBase<CKGqa, mlss::op::OperatorGQA>;
 
-        friend class BackendBase<CKGqa, mlss::op::OperatorGQA>;
-        friend class mlss::op::OperatorGQA;
-
     public:
 
-        // Default constructor
         CKGqa() = default;
 
-        // Constructor
         CKGqa(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip);
 
-        // Destructor
         virtual ~CKGqa() = default;
 
-        // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-    private:
-
-        // Static method to check capabilities
         static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
     };
 

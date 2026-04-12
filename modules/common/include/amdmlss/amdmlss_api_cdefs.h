@@ -240,31 +240,6 @@
 #define MLSS_MI300X MLSS(MI300X)
 #define MLSS_MI325X MLSS(MI325X)
 
-// Activation Functions
-#define MLSS_ELU MLSS(ELU)
-#define MLSS_HARDMAX MLSS(HARDMAX)
-#define MLSS_HARD_SIGMOID MLSS(HARD_SIGMOID)
-#define MLSS_IDENTITY MLSS(IDENTITY)
-#define MLSS_LEAKY_RELU MLSS(LEAKY_RELU)
-#define MLSS_LINEAR MLSS(LINEAR)
-#define MLSS_LOG_SOFTMAX MLSS(LOG_SOFTMAX)
-#define MLSS_PARAMETERIZED_RELU MLSS(PARAMETERIZED_RELU)
-#define MLSS_PARAMETRIC_SOFTPLUS MLSS(PARAMETRIC_SOFTPLUS)
-#define MLSS_RELU MLSS(RELU)
-#define MLSS_SCALED_ELU MLSS(SCALED_ELU)
-#define MLSS_SCALED_TANH MLSS(SCALED_TANH)
-#define MLSS_SIGMOID MLSS(SIGMOID)
-#define MLSS_SOFTMAX MLSS(SOFTMAX)
-#define MLSS_SOFTPLUS MLSS(SOFTPLUS)
-#define MLSS_SOFTSIGN MLSS(SOFTSIGN)
-#define MLSS_TANH MLSS(TANH)
-#define MLSS_THRESHOLDED_RELU MLSS(THRESHOLDED_RELU)
-
-// Precision Modes
-#define MLSS_PREC_FP16 MLSS(PREC_FP16)
-#define MLSS_PREC_FP32 MLSS(PREC_FP32)
-#define MLSS_PREC_FP16PFP32 MLSS(PREC_FP16PFP32)
-
 enum MLSSOPAttributesFlag
 {
     MLSS_ATTR_GQA_BATCH,
@@ -451,6 +426,37 @@ enum MLSSOPAttributesFlag
     MLSS_ATTR_CONV_DILATED_ACTIVATION,
 };
 
+enum MLSSPrecisionFlag
+{
+    MLSS_PRECISION_FLOAT32,
+    MLSS_PRECISION_FLOAT16,
+    MLSS_PRECISION_FLOAT16_ADD_FLOAT32,
+    MLSS_PRECISION_COUNT
+};
+
+enum MLSSActivationFunctionFlag
+{
+    MLSS_ACTIVATION_ELU,
+    MLSS_ACTIVATION_HARDMAX,
+    MLSS_ACTIVATION_HARD_SIGMOID,
+    MLSS_ACTIVATION_IDENTITY,
+    MLSS_ACTIVATION_LEAKY_RELU,
+    MLSS_ACTIVATION_LINEAR,
+    MLSS_ACTIVATION_LOG_SOFTMAX,
+    MLSS_ACTIVATION_PARAMETERIZED_RELU,
+    MLSS_ACTIVATION_PARAMETRIC_SOFTPLUS,
+    MLSS_ACTIVATION_RELU,
+    MLSS_ACTIVATION_SCALED_ELU,
+    MLSS_ACTIVATION_SCALED_TANH,
+    MLSS_ACTIVATION_SIGMOID,
+    MLSS_ACTIVATION_SOFTMAX,
+    MLSS_ACTIVATION_SOFTPLUS,
+    MLSS_ACTIVATION_SOFTSIGN,
+    MLSS_ACTIVATION_TANH,
+    MLSS_ACTIVATION_THRESHOLDED_RELU,
+    MLSS_ACTIVATION_COUNT
+};
+
 enum MLSSDeviceTypesFlag
 {
     MLSS_DEVICE_APU,
@@ -503,18 +509,6 @@ enum MLSSTypesFlag
     MLSS_CUSTOM_TYPE_START = 0x01000000 // Start of custom type ID range
 };
 
-enum MLSSBinaryType
-{
-    MLSS_BINARY_TYPE_ELF,
-    MLSS_BINARY_TYPE_IL,
-    MLSS_BINARY_TYPE_COUNT
-};
-
-enum MLSSFunctionType
-{
-    MLSS_GLOBAL_FUNCTION,
-    MLSS_DEVICE_FUNCTION
-};
 
 enum MLSSStatusFlag
 {
@@ -578,64 +572,8 @@ enum MLSSStatusFlag
     MLSS_WARNING_NOT_IMPLEMENTED = 1101
 };
 
-// Feature modes for mlssSet function - can be OR'd together
-enum MLSSModeFlag
-{
-    // Feature/Mode identifiers (bits 16-31)
-    MLSS_VERBOSE_MODE = 0x10000,      // Verbose output mode
-    MLSS_DEBUG_MODE = 0x20000,        // Debug mode
-    MLSS_PROFILING_MODE = 0x30000,    // Profiling mode
-    MLSS_VALIDATION_MODE = 0x40000,   // Input validation mode
-    MLSS_OPTIMIZATION_MODE = 0x50000, // Auto optimization mode
-    MLSS_CACHE_MODE = 0x60000,        // Caching mode
 
-    // Mode mask to extract the mode type
-    MLSS_MODE_MASK = 0xFFFF0000
-};
 
-// Setting flags that can be OR'd with modes
-enum MLSSSettingFlag
-{
-    // Enable/Disable flags (bit 15)
-    MLSS_DISABLE = 0x0000, // Disable feature (default)
-    MLSS_ENABLE = 0x8000,  // Enable feature
-
-    // Verbose levels (bits 0-3) - use with MLSS_VERBOSE_MODE
-    MLSS_VERBOSE_ERROR = 0x0001,   // Only errors
-    MLSS_VERBOSE_WARNING = 0x0002, // Errors and warnings
-    MLSS_VERBOSE_INFO = 0x0003,    // Errors, warnings, and info
-    MLSS_VERBOSE_DEBUG = 0x0004,   // Full debug output
-    MLSS_VERBOSE_TRACE = 0x0005,   // Trace level output
-
-    // Debug levels (bits 0-3) - use with MLSS_DEBUG_MODE
-    MLSS_DEBUG_BASIC = 0x0001,    // Basic debug
-    MLSS_DEBUG_DETAILED = 0x0002, // Detailed debug
-    MLSS_DEBUG_FULL = 0x0003,     // Full debug
-
-    // Profiling levels (bits 0-3) - use with MLSS_PROFILING_MODE
-    MLSS_PROFILING_BASIC = 0x0001,    // Basic timing
-    MLSS_PROFILING_DETAILED = 0x0002, // Detailed profiling
-    MLSS_PROFILING_MEMORY = 0x0003,   // Memory profiling
-    MLSS_PROFILING_FULL = 0x0004,     // Full profiling
-
-    // Validation levels (bits 0-3) - use with MLSS_VALIDATION_MODE
-    MLSS_VALIDATION_BASIC = 0x0001,  // Basic parameter validation
-    MLSS_VALIDATION_STRICT = 0x0002, // Strict validation
-
-    // Optimization levels (bits 0-3) - use with MLSS_OPTIMIZATION_MODE
-    MLSS_OPTIMIZATION_SIZE = 0x0001,     // Optimize for size
-    MLSS_OPTIMIZATION_SPEED = 0x0002,    // Optimize for speed
-    MLSS_OPTIMIZATION_BALANCED = 0x0003, // Balanced optimization
-
-    // Cache levels (bits 0-3) - use with MLSS_CACHE_MODE
-    MLSS_CACHE_BASIC = 0x0001,      // Basic caching
-    MLSS_CACHE_AGGRESSIVE = 0x0002, // Aggressive caching
-
-    // Masks for extracting parts
-    MLSS_LEVEL_MASK = 0x000F,      // Extract level bits
-    MLSS_ENABLE_MASK = 0x8000,     // Extract enable bit
-    MLSS_SETTING_MASK = 0x0000FFFF // Extract all setting bits
-};
 
 // Legacy verbose levels for backward compatibility
 enum MLSSVerboseLegacy

@@ -22,7 +22,6 @@
 #include "shaders/shaders.hpp"
 #include "shaders/operators/mha.hpp"
 #include "shaders/operators/conv.hpp"
-#include "shaders/operators/dconv.hpp"
 #include "shaders/operators/gemm.hpp"
 #include "shaders/operators/gqa.hpp"
 #include "shaders/operators/mvn.hpp"
