@@ -63,7 +63,7 @@ namespace mlss::mha::ck
             }
         }
 
-        return wmma::getWmmaShadersBlob(m_gfxIpTriple, batchSize, headCount, sizeHeads, kvSequenceLength, qSequenceLength, packing, dataType);
+        return wmma::getShadersBlob(m_gfxIpTriple, batchSize, headCount, sizeHeads, kvSequenceLength, qSequenceLength, packing, dataType);
     }
 
     bool CKMha::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
@@ -131,7 +131,7 @@ namespace mlss::mha::ck
             return false;
         }
 
-        return wmma::isWmmaShadersAvailable(gfxArch, size_heads, q_seq, kv_seq, packing, data_type);
+        return wmma::isShadersAvailable(gfxArch, size_heads, q_seq, kv_seq, packing, data_type);
     }
 
 } // namespace mlss::mha::ck

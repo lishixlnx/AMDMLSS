@@ -114,7 +114,7 @@ namespace mlss::gqa::ck::wmma
 
     } // anonymous namespace
 
-    bool isWmmaShadersAvailable(
+    bool isShadersAvailable(
         GfxIpTriple gfxArch,
         const std::uint32_t& sizeHeads,
         const std::uint32_t& kvSequenceLength,
@@ -134,7 +134,7 @@ namespace mlss::gqa::ck::wmma
         return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || ((qSequenceLength == kvSequenceLength) && (sizeHeads <= 80));
     }
 
-    std::expected<Binaries, std::error_code> getWmmaShadersBlob(
+    std::expected<Binaries, std::error_code> getShadersBlob(
         GfxIpTriple gfxArch,
         const std::uint32_t& batchSize,
         const std::uint32_t& qHeadCount,
@@ -146,7 +146,7 @@ namespace mlss::gqa::ck::wmma
         bool useStrides,
         const std::uint32_t& dataType)
     {
-        if (!isWmmaShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, dataType))
+        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, dataType))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }

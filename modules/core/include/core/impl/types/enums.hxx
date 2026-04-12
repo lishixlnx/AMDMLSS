@@ -59,7 +59,7 @@ namespace mlss
         SOFTSIGN            = MLSS_ACTIVATION_SOFTSIGN,
         TANH                = MLSS_ACTIVATION_TANH,
         THRESHOLDED_RELU    = MLSS_ACTIVATION_THRESHOLDED_RELU,
-        COUNT               = MLSS_ACTIVATION_COUNT,
+        COUNT                = MLSS_ACTIVATION_COUNT,
     };
 
     //=====================================================================================================================

@@ -203,7 +203,7 @@ namespace mlss::conv::dilated::hip::wmma
 
     } // namespace
 
-    mlss::op::utils::MetaCmdCaps isWmmaShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
     {
         using mlss::op::utils::MetaCmdCaps;
 
@@ -232,7 +232,7 @@ namespace mlss::conv::dilated::hip::wmma
         return caps;
     }
 
-    std::expected<Binaries, std::error_code> getWmmaShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
     {
         auto shader = retrieveNNShader(gfxip, params);
 

@@ -20,7 +20,7 @@ namespace mlss::conv::dilated::hip
 
     std::expected<Binaries, std::error_code> HipDilatedConv::getBinaries() const
     {
-        return wmma::getWmmaShadersBlob(m_gfxIpTriple, params);
+        return wmma::getShadersBlob(m_gfxIpTriple, params);
     }
 
     uint32_t HipDilatedConv::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch, const void* context)
@@ -36,7 +36,7 @@ namespace mlss::conv::dilated::hip
             params = mlss::conv::utils::buildConvParams(attributes);
         }
 
-        return wmma::isWmmaShadersAvailable(gfxArch, params).values;
+        return wmma::isShadersAvailable(gfxArch, params).values;
     }
 
 } // namespace mlss::conv::dilated::hip

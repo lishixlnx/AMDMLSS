@@ -20,7 +20,7 @@ namespace mlss::conv::one_by_one::misa
 
     std::expected<Binaries, std::error_code> MisaConv1x1::getBinaries() const
     {
-        return getMisaShadersBlob(m_gfxIpTriple, mlss::conv::utils::buildConvParams(m_attributes));
+        return getShadersBlob(m_gfxIpTriple, mlss::conv::utils::buildConvParams(m_attributes));
     }
 
     uint32_t MisaConv1x1::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch, const void* context)
@@ -36,7 +36,7 @@ namespace mlss::conv::one_by_one::misa
             params = mlss::conv::utils::buildConvParams(attributes);
         }
 
-        return isMisaShadersAvailable(gfxArch, params).values;
+        return isShadersAvailable(gfxArch, params).values;
     }
 
 } // namespace mlss::conv::one_by_one::misa

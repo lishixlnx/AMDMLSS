@@ -77,7 +77,7 @@ namespace mlss::gqa::ck
             }
         }
 
-        return wmma::getWmmaShadersBlob(
+        return wmma::getShadersBlob(
             m_gfxIpTriple,
             batchSize,
             qHeadCount,
@@ -145,7 +145,7 @@ namespace mlss::gqa::ck
             return false;
         }
 
-        return wmma::isWmmaShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, data_type);
+        return wmma::isShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, data_type);
     }
 
 } // namespace mlss::gqa::ck
