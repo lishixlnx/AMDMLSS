@@ -183,4 +183,164 @@ GenericConvParams buildConvParams(const std::vector<Attribute>& attributes)
     return params;
 }
 
+namespace
+{
+    // =====================================================================================================================
+// Compute slice K packed value
+uint32 GetMoveSliceK(
+    const GenericConvParams& params, 
+    const std::uint32_t& tile_k)
+{
+    std::uint32_t cPerGPerV = (params.c / params.groups) / VectorC;
+    std::uint32_t gemmKLeft = tile_k / VectorC;
+    std::uint32_t sMoveSliceKC = gemmKLeft % cPerGPerV;
+    gemmKLeft /= cPerGPerV;
+    std::uint32_t sMoveSliceKX = gemmKLeft % params.s;
+    std::uint32_t sMoveSliceKY = (gemmKLeft / params.s) % params.r;
+    return (sMoveSliceKY << 16) | (sMoveSliceKX << 8) | sMoveSliceKC;
+}
+
+struct MagicDivU32
+{
+    std::uint32_t magic;
+    std::uint8_t shift;
+};
+
+MagicDivU32 MagicDivU32Gen(
+    std::uint32_t d)
+{
+    MLSS_ASSERT((d >= 1) && (d <= INT32_MAX));
+    std::uint8_t shift;
+    for (shift = 0; shift < 32; shift++)
+    {
+        if ((1ull << shift) >= d)
+        {
+            break;
+        }
+    }
+
+    const uint64 magic = (((1ull << 32) * ((1ull << shift) - d)) / d) + 1;
+    MLSS_ASSERT(magic <= INT32_MAX); // 0xfffffffful
+
+    MagicDivU32 result;
+    result.magic = static_cast<decltype(result.magic)>(magic);
+    result.shift = shift;
+    return result;
+}
+
+// =====================================================================================================================
+// Derive packed shift values for magic numbers required in the shader argument list
+std::uint32_t MagicDivU32PackShift(
+    std::uint8_t s0,
+    std::uint8_t s1,
+    std::uint8_t s2,
+    std::uint8_t s3)
+{
+    const uint32 shift0 = static_cast<uint32>(s0);
+    const uint32 shift1 = static_cast<uint32>(s1);
+    const uint32 shift2 = static_cast<uint32>(s2);
+    const uint32 shift3 = static_cast<uint32>(s3);
+    return (shift3 << 24) | (shift2 << 16) | (shift1 << 8) | shift0;
+}
+
+// =====================================================================================================================
+// Compute batch split size based on configuration parameters
+uint32 ConvSplitBatchSize(
+    const MisaConvArgs& args)
+{
+    const std::uint64_t memorySizeInput = args.c * args.hi * args.wi * sizeof(uint16);
+    const std::uint64_t memorySizeOutput = args.k * args.ho * args.wo * sizeof(uint16);
+    constexpr std::uint64_t Size4GbMinusOne = static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max());
+    const std::uint32_t n = args.n;
+    const std::uint64_t imageSize =
+        memorySizeInput >= memorySizeOutput ? memorySizeInput : memorySizeOutput;
+    std::uint32_t splitedN = std::uint32_t(Size4GbMinusOne / imageSize);
+    MLSS_ASSERT(splitedN != 0);
+    while (splitedN >= 1)
+    {
+        if ((n % splitedN == 0) && ((splitedN * imageSize) < Size4GbMinusOne))
+        {
+            break;
+        }
+
+        splitedN--;
+    }
+    MLSS_ASSERT(((splitedN * imageSize) < Size4GbMinusOne) && ((n % splitedN) == 0));
+    return n / splitedN;
+}
+
+// =====================================================================================================================
+// Compute array of grid sizes used as Dispatch arguments
+MLSSdim3 GetGridSize(
+    const MisaConvArgs&  args, 
+    const std::array<std::uint32_t, 3>& macroTile)
+{
+    MLSSdim3 grid{ 0, 0, 0 };
+    const uint32 splits = ConvSplitBatchSize(args);
+    const uint32 gemmM = args.k / args.g;
+    const uint32 gemmN = (args.n / splits) * args.ho * args.wo;
+
+    grid.x = (gemmN + macroTile[1] - 1) / macroTile[1];
+    grid.y = (gemmM + macroTile[0] - 1) / macroTile[0];
+    grid.z = splits * args.g;
+    return grid;
+}
+
+} // namespace
+
+MLSSdim3 MisaConvGetGridSize(
+    const MisaConvArgs&  args,
+    const std::array<std::uint32_t, 3>& macroTile)
+{
+    return GetGridSize(args, macroTile);
+}
+
+MisaConvArgs buildMisaConvArgs(const GenericConvParams& params, const std::uint32_t& tile_k)
+{
+    constexpr std::uint32_t VectorC = 8;
+
+    MisaConvArgs args{};
+
+    args.hi = params.h;
+    args.wi = params.w;
+    args.n = params.n;
+    args.k = params.k;
+    args.c = params.c;
+    args.g = params.groups;
+    args.ho = params.outH;
+    args.wo = params.outW;
+    args.inStrideN  = sizeof(uint16) * params.c * params.h * params.w;
+    args.inStrideC  = sizeof(uint16) * VectorC;
+    args.inStrideH  = sizeof(uint16) * params.c * params.w;
+    args.inStrideW  = sizeof(uint16) * params.c;
+    args.outStrideN = sizeof(uint16) * params.k * params.outH * params.outW;
+    args.outStrideK = sizeof(uint16) * VectorC;
+    args.outStrideH = sizeof(uint16) * params.k * params.outW;
+    args.outStrideW = sizeof(uint16) * params.k;
+    args.strideHw   = (params.convStrideY << 16) | params.convStrideX;
+    args.dilationHw = (params.filterStrideY << 16) | params.filterStrideX;
+    args.padHw      = (params.startPadY << 16) | params.startPadX;
+    args.weiHw      = (params.r << 16) | params.s;
+    args.moveSliceK = GetMoveSliceK(params, tile_k);
+
+    const MagicDivU32 mdiv0 = MagicDivU32Gen(params.groups);
+    const std::uint32_t cPergPerV = params.c / params.groups / VectorC;
+    const MagicDivU32 mdiv1 = MagicDivU32Gen(cPergPerV);
+    const MagicDivU32 mdiv2 = MagicDivU32Gen(params.outH);
+    const MagicDivU32 mdiv3 = MagicDivU32Gen(params.outW);
+    const MagicDivU32 mdiv4 = MagicDivU32Gen(params.r);
+    const MagicDivU32 mdiv5 = MagicDivU32Gen(params.s);
+
+    args.magic0 = mdiv0.magic;
+    args.magic1 = mdiv1.magic;
+    args.magic2 = mdiv2.magic;
+    args.magic3 = mdiv3.magic;
+    args.magic4 = mdiv4.magic;
+    args.magic5 = mdiv5.magic;
+    args.shiftPack0 = MagicDivU32PackShift(mdiv0.shift, mdiv1.shift, mdiv2.shift, mdiv3.shift);
+    args.shiftPack1 = MagicDivU32PackShift(mdiv4.shift, mdiv5.shift, 0, 0);
+
+    return args;
+}
+
 } // namespace mlss::conv::utils

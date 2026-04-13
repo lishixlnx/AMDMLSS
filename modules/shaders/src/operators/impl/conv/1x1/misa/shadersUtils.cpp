@@ -1,5 +1,6 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
+#include "shadersConstants.hpp"
 #include "fp16/gfx1100/shadersBin.hpp"
 #include "fp16/gfx1201/shadersBin.hpp"
 
@@ -87,6 +88,16 @@ namespace mlss::conv::one_by_one::misa
             std::lock_guard lock(s_cacheMutex);
             auto [it, inserted] = s_shaderCache.emplace(key, std::move(cached));
             return &it->second;
+        }
+
+        std::span<const std::uint32_t> selectConstants(const GenericConvParams& params)
+        {
+            bool hasRelu = params.activation == ActivationFunctionFlags::RELU;
+
+            if (params.hasBias && hasRelu) return fp16::Misa1x1BiasReluConsts;
+            if (hasRelu)                   return fp16::Misa1x1ReluConsts;
+            if (params.hasBias)            return fp16::Misa1x1BiasConsts;
+            return fp16::Misa1x1Consts;
         }
 
     } // namespace
@@ -353,12 +364,24 @@ namespace mlss::conv::one_by_one::misa
         const auto& cachedShader = *cachedResult.value();
         auto nonRelocDescriptor = make_shader_descriptor(cachedShader);
 
+        auto constants = selectConstants(params);
+        std::array<std::uint32_t, 3> macroTile = { constants[0], constants[1], constants[2] };
+        auto misaArgs = mlss::conv::utils::buildMisaConvArgs(params, constants[2]);
+        auto grid = mlss::conv::utils::MisaConvGetGridSize(misaArgs, macroTile);
+        MLSSdim3 blocks{ fp16::VectorC * macroTile[0] / macroTile[2], 0x01u, 0x01u };
+
         Binaries binaries;
 
         Blob relocBlob = std::move(*make_binary_blob(relocDescriptor));
+        relocBlob = fp16::misa_conv_ARGS_CONSTANTS;
+        relocBlob.m_constants.assign(constants.begin(), constants.end());
+        relocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(relocBlob));
 
         Blob nonRelocBlob = std::move(*make_binary_blob(nonRelocDescriptor));
+        nonRelocBlob = fp16::misa_conv_ARGS_CONSTANTS;
+        nonRelocBlob.m_constants.assign(constants.begin(), constants.end());
+        nonRelocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(nonRelocBlob));
 
         return binaries;

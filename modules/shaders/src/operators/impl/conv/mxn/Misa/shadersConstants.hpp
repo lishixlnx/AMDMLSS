@@ -3,14 +3,14 @@
 
 #include "core/core.hpp"
 
-namespace mlss::conv::one_by_one::misa::fp16
+namespace mlss::conv::mxn::misa::fp16
 {
     constexpr std::uint32_t VectorC = 0x08u;
 
-    constexpr auto Misa1x1BiasReluConsts = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
-    constexpr auto Misa1x1ReluConsts     = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
-    constexpr auto Misa1x1BiasConsts     = std::to_array<std::uint32_t>({ 0x40u, 0x20u, 0x20u });
-    constexpr auto Misa1x1Consts         = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
+    constexpr auto MisaMxNBiasReluConsts = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
+    constexpr auto MisaMxNReluConsts     = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
+    constexpr auto MisaMxNBiasConsts     = std::to_array<std::uint32_t>({ 0x40u, 0x20u, 0x20u });
+    constexpr auto MisaMxNConsts         = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
 
     const std::array<MLSSarg, 33> misa_conv_ARGS_CONSTANTS = {{
         { 0, MLSS_FLOAT16, true,  2, true,  true,  false, "pIn"},
@@ -48,4 +48,4 @@ namespace mlss::conv::one_by_one::misa::fp16
         {32, MLSS_UINT32,  false, 0, true,  true,  false, "shiftPack1"}
     }};
 
-} // namespace mlss::conv::one_by_one::misa::fp16
+} // namespace mlss::conv::mxn::misa::fp16

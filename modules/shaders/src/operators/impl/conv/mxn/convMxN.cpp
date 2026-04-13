@@ -1,5 +1,8 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "convMxN.hpp"
+#include "Misa/misaShadersOp.hpp"
+
+template class mlss::BackendBase<mlss::conv::mxn::misa::MisaConvMxN, mlss::conv::mxn::ConvMxN>;
 
 namespace mlss::conv::mxn
 {
@@ -27,10 +30,7 @@ namespace mlss::conv::mxn
 
     uint32_t ConvMxN::getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip, const void* context)
     {
-        std::ignore = attributes;
-        std::ignore = gfxip;
-        std::ignore = context;
-        return 0x00000000u;
+        return BackendSelector<ConvMxN>::bestCaps(attributes, gfxip, context);
     }
 
 } // namespace mlss::conv::mxn
