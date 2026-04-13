@@ -4,6 +4,9 @@
 
 template class mlss::BackendBase<mlss::conv::dilated::hip::HipDilatedConv, mlss::conv::dilated::DilatedConv>;
 
+using namespace mlss::conv::utils;
+using mlss::op::utils::MetaCmdCaps;
+
 namespace mlss::conv::dilated
 {
 
@@ -20,17 +23,39 @@ namespace mlss::conv::dilated
 
     std::expected<Binaries, std::error_code> DilatedConv::getBinaries() const
     {
-        auto result = BackendSelector<DilatedConv>::select(m_attributes, m_gfxIpTriple);
-        if (result.binaries.has_value())
+        if (auto* hipEntry = BackendRegistry<DilatedConv>::get<hip::HipDilatedConv>(); hipEntry != nullptr)
         {
-            m_implName = result.implName;
+            auto result = hipEntry->getBinaries(m_attributes, m_gfxIpTriple);
+            if (result.has_value())
+            {
+                m_implName = hipEntry->name;
+                return result;
+            }
         }
-        return result.binaries;
+
+        return std::unexpected(std::make_error_code(std::errc::not_supported));
     }
 
     uint32_t DilatedConv::getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip, const void* context)
     {
-        return BackendSelector<DilatedConv>::bestCaps(attributes, gfxip, context);
+        GenericConvParams params{};
+        MetaCmdCaps caps{.values = 0x00000000u};
+
+        if (context != nullptr)
+        {
+            params = *static_cast<const GenericConvParams*>(context);
+        }
+        else if (!attributes.empty())
+        {
+            params = buildConvParams(attributes);
+        }
+
+        if (auto* hipEntry = BackendRegistry<DilatedConv>::get<hip::HipDilatedConv>(); hipEntry != nullptr)
+        {
+            caps.values = hipEntry->getCaps(attributes, gfxip, &params);
+        }
+
+        return caps.values;
     }
 
 } // namespace mlss::conv::dilated
