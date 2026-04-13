@@ -3,6 +3,16 @@
 
 namespace mlss
 {
+    bool operator ==(const HyperConsts& lhs, const HyperConsts& rhs) noexcept
+    {
+        return lhs.u64All == rhs.u64All;
+    }
+
+    bool operator !=(const HyperConsts& lhs, const HyperConsts& rhs) noexcept
+    {
+        return lhs.u64All != rhs.u64All;
+    }
+
     bool calcHyperboloid(const HyperConsts& consts, const float& c, const float& k, const float& d)
     {
         const float deltaC = std::max(c - static_cast<float>(consts.cOffset), 0.0f);

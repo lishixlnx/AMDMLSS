@@ -20,6 +20,9 @@ namespace mlss
         std::uint64_t u64All;
     };
 
+    bool operator ==(const HyperConsts& lhs, const HyperConsts& rhs) noexcept;
+    bool operator !=(const HyperConsts& lhs, const HyperConsts& rhs) noexcept;
+
     // A special case that means "always outside" of the hyperboloid. Essentially, we should never use a metacommand
     // if we see this bit pattern.
     constexpr HyperConsts AlwaysFail = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
