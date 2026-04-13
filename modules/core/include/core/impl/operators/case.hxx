@@ -1,6 +1,8 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
+#include <unordered_map>
+
 namespace mlss
 {
 
@@ -19,9 +21,11 @@ namespace mlss
             GetBinariesFunction getBinaries;
         };
 
+        template <typename CaseType>
         static void registerCase(Entry entry)
         {
-            registry().emplace_back(std::move(entry));
+            registry().emplace_back(entry);
+            typedRegistry().emplace(typeKey<CaseType>(), std::move(entry));
         }
 
         static const std::vector<Entry>& getCases()
@@ -29,11 +33,28 @@ namespace mlss
             return registry();
         }
 
+        template <typename CaseType>
+        static const Entry* get()
+        {
+            auto it = typedRegistry().find(typeKey<CaseType>());
+            if (it != typedRegistry().end())
+            {
+                return &it->second;
+            }
+            return nullptr;
+        }
+
     private:
 
         static std::vector<Entry>& registry()
         {
             static std::vector<Entry> instance;
+            return instance;
+        }
+
+        static std::unordered_map<TypeKey, Entry, TypeKeyHash>& typedRegistry()
+        {
+            static std::unordered_map<TypeKey, Entry, TypeKeyHash> instance;
             return instance;
         }
     };
@@ -75,7 +96,7 @@ namespace mlss
 
         static bool registerCase()
         {
-            CaseRegistry<OperatorType>::registerCase(
+            CaseRegistry<OperatorType>::template registerCase<Derived>(
                 {Derived::getCaseName(),
                  [](const std::vector<Attribute>& attrs, GfxIpTriple arch, const void* context) -> uint32_t
                  {
