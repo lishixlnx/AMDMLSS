@@ -3,6 +3,7 @@
 #include "core/core.hpp"
 
 #include <amd_comgr/amd_comgr.h>
+#include <charconv>
 #include <cstring>
 
 namespace mlss
@@ -186,6 +187,122 @@ namespace mlss
 
             cleanup();
             return result;
+        }
+
+        std::expected<MLSSdim3, std::error_code> extractWorkgroupSize(
+            std::span<const std::uint8_t> binary)
+        {
+            amd_comgr_data_t data{};
+            amd_comgr_metadata_node_t rootMeta{};
+            amd_comgr_metadata_node_t kernelsMeta{};
+            amd_comgr_metadata_node_t kernel0Meta{};
+            amd_comgr_metadata_node_t wgsMeta{};
+            amd_comgr_metadata_node_t dimMeta[0x03]{};
+            bool hasRoot    = false;
+            bool hasKernels = false;
+            bool hasKernel0 = false;
+            bool hasWgs     = false;
+            std::uint32_t dimCount = 0x00u;
+
+            auto cleanup = [&]()
+            {
+                for (std::uint32_t i = 0x00u; i < dimCount; ++i)
+                {
+                    amd_comgr_destroy_metadata(dimMeta[i]);
+                }
+                if (hasWgs)     amd_comgr_destroy_metadata(wgsMeta);
+                if (hasKernel0) amd_comgr_destroy_metadata(kernel0Meta);
+                if (hasKernels) amd_comgr_destroy_metadata(kernelsMeta);
+                if (hasRoot)    amd_comgr_destroy_metadata(rootMeta);
+                amd_comgr_release_data(data);
+            };
+
+            CHECK_COMGR(amd_comgr_create_data(AMD_COMGR_DATA_KIND_RELOCATABLE, &data));
+            CHECK_COMGR(amd_comgr_set_data(data, binary.size(),
+                        reinterpret_cast<const char*>(binary.data())));
+
+            CHECK_COMGR(amd_comgr_get_data_metadata(data, &rootMeta));
+            hasRoot = true;
+
+            CHECK_COMGR(amd_comgr_metadata_lookup(rootMeta, "amdhsa.kernels", &kernelsMeta));
+            hasKernels = true;
+
+            CHECK_COMGR(amd_comgr_index_list_metadata(kernelsMeta, 0, &kernel0Meta));
+            hasKernel0 = true;
+
+            auto parseMetadataUint32 = [](amd_comgr_metadata_node_t node)
+                -> std::expected<std::uint32_t, std::error_code>
+            {
+                std::size_t strSize = 0x00u;
+                if (amd_comgr_get_metadata_string(node, &strSize, nullptr) != AMD_COMGR_STATUS_SUCCESS)
+                {
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+                }
+
+                std::string buf(strSize, '\0');
+                if (amd_comgr_get_metadata_string(node, &strSize, buf.data()) != AMD_COMGR_STATUS_SUCCESS)
+                {
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+                }
+
+                std::uint32_t val = 0x00u;
+                auto [ptr, ec] = std::from_chars(buf.data(), buf.data() + buf.size(), val);
+                if (ec != std::errc{})
+                {
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+                }
+                return val;
+            };
+
+            amd_comgr_status_t wgsStatus = amd_comgr_metadata_lookup(
+                kernel0Meta, ".reqd_workgroup_size", &wgsMeta);
+
+            if (wgsStatus == AMD_COMGR_STATUS_SUCCESS)
+            {
+                hasWgs = true;
+                MLSSdim3 result{ 0x01u, 0x01u, 0x01u };
+
+                for (std::uint32_t i = 0x00u; i < 0x03u; ++i)
+                {
+                    CHECK_COMGR(amd_comgr_index_list_metadata(wgsMeta, i, &dimMeta[i]));
+                    dimCount = i + 0x01u;
+
+                    auto valResult = parseMetadataUint32(dimMeta[i]);
+                    if (!valResult.has_value())
+                    {
+                        cleanup();
+                        return std::unexpected(valResult.error());
+                    }
+
+                    if (i == 0x00u) result.m_x = valResult.value();
+                    if (i == 0x01u) result.m_y = valResult.value();
+                    if (i == 0x02u) result.m_z = valResult.value();
+                }
+
+                cleanup();
+                return result;
+            }
+
+            wgsStatus = amd_comgr_metadata_lookup(
+                kernel0Meta, ".max_flat_workgroup_size", &wgsMeta);
+
+            if (wgsStatus == AMD_COMGR_STATUS_SUCCESS)
+            {
+                hasWgs = true;
+
+                auto valResult = parseMetadataUint32(wgsMeta);
+                if (!valResult.has_value())
+                {
+                    cleanup();
+                    return std::unexpected(valResult.error());
+                }
+
+                cleanup();
+                return MLSSdim3{ valResult.value(), 0x01u, 0x01u };
+            }
+
+            cleanup();
+            return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }
 
 #undef CHECK_COMGR
@@ -383,6 +500,12 @@ namespace mlss
         }
 
         return std::move(executableQuery.value());
+    }
+
+    //=====================================================================================================================
+    std::expected<MLSSdim3, std::error_code> getWorkgroupSize(const std::span<const std::uint8_t>& arr)
+    {
+        return extractWorkgroupSize(arr);
     }
 
 } // namespace mlss

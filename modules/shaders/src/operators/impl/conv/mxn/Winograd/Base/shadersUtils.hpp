@@ -5,11 +5,11 @@
 #include "../../../utils.hpp"
 #include "../../../../opUtils.hpp"
 
-namespace mlss::conv::mxn::winograd::ultra
+namespace mlss::conv::mxn::winograd::base
 {
 
     mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params);
 
     std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params);
 
-} // namespace mlss::conv::mxn::winograd::ultra
+} // namespace mlss::conv::mxn::winograd::base

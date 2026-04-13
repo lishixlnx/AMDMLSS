@@ -1,9 +1,11 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "convMxN.hpp"
 #include "Misa/misaShadersOp.hpp"
+#include "Winograd/Base/winogradBaseShadersOp.hpp"
 #include "Winograd/Ultra/winogradUltraShadersOp.hpp"
 
 template class mlss::BackendBase<mlss::conv::mxn::misa::MisaConvMxN, mlss::conv::mxn::ConvMxN>;
+template class mlss::BackendBase<mlss::conv::mxn::winograd::base::WinogradBaseConvMxN, mlss::conv::mxn::ConvMxN>;
 template class mlss::BackendBase<mlss::conv::mxn::winograd::ultra::WinogradUltraConvMxN, mlss::conv::mxn::ConvMxN>;
 
 namespace mlss::conv::mxn

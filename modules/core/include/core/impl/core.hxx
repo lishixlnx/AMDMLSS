@@ -38,6 +38,7 @@
 
 // ML headers
 #include "ml/tree.hxx"
+#include "ml/hypeboloid.hxx"
 
 // Utility headers - organized by category
 #include "utils/elf.hxx"

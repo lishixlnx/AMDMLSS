@@ -16,4 +16,10 @@ namespace mlss
     [[nodiscard]] std::expected<std::vector<std::uint8_t>, std::error_code> getNonRelocatable(const std::span<const std::uint8_t>& arr,
          const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget);
 
+    /// @brief Extract the required workgroup size from ELF kernel metadata via amd_comgr.
+    /// @param arr ELF binary bytes (relocatable or executable)
+    /// @return MLSSdim3 with the workgroup dimensions, or an error code
+    [[nodiscard]] std::expected<MLSSdim3, std::error_code> getWorkgroupSize(
+        const std::span<const std::uint8_t>& arr);
+
 } // namespace mlss
