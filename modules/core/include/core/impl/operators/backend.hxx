@@ -1,8 +1,27 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
+#include <unordered_map>
+
 namespace mlss
 {
+
+    using TypeKey = const void*;
+
+    template <typename T>
+    constexpr TypeKey typeKey() noexcept
+    {
+        static constexpr char tag = '\0';
+        return &tag;
+    }
+
+    struct TypeKeyHash
+    {
+        std::size_t operator()(TypeKey key) const noexcept
+        {
+            return std::hash<std::uintptr_t>{}(reinterpret_cast<std::uintptr_t>(key));
+        }
+    };
 
     template <typename ParentType>
     class BackendRegistry
@@ -19,9 +38,11 @@ namespace mlss
             GetBinariesFunction getBinaries;
         };
 
+        template <typename BackendType>
         static void registerBackend(Entry entry)
         {
-            registry().emplace_back(std::move(entry));
+            registry().emplace_back(entry);
+            typedRegistry().emplace(typeKey<BackendType>(), std::move(entry));
         }
 
         static const std::vector<Entry>& getBackends()
@@ -29,11 +50,28 @@ namespace mlss
             return registry();
         }
 
+        template <typename BackendType>
+        static const Entry* get()
+        {
+            auto it = typedRegistry().find(typeKey<BackendType>());
+            if (it != typedRegistry().end())
+            {
+                return &it->second;
+            }
+            return nullptr;
+        }
+
     private:
 
         static std::vector<Entry>& registry()
         {
             static std::vector<Entry> instance;
+            return instance;
+        }
+
+        static std::unordered_map<TypeKey, Entry, TypeKeyHash>& typedRegistry()
+        {
+            static std::unordered_map<TypeKey, Entry, TypeKeyHash> instance;
             return instance;
         }
     };
@@ -75,7 +113,7 @@ namespace mlss
 
         static bool registerBackend()
         {
-            BackendRegistry<ParentType>::registerBackend(
+            BackendRegistry<ParentType>::template registerBackend<Derived>(
                 {Derived::getOperatorName(),
                  [](const std::vector<Attribute>& attrs, GfxIpTriple arch, const void* context) -> uint32_t
                  {
