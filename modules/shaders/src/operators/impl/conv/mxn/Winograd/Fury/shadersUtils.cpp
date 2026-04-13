@@ -41,7 +41,7 @@ namespace mlss::conv::mxn::winograd::fury
 
             constexpr std::uint64_t nhwFactor  = 0x3Eu;
             constexpr std::uint64_t kFactor    = 0x10u;
-            constexpr std::uint64_t nhwFactorG = roundUpToMultiple(nhwFactor, std::uint64_t{0x20u});
+            const std::uint64_t nhwFactorG = roundUpToMultiple(nhwFactor, std::uint64_t{0x20u});
 
             const std::uint64_t cFactor = c32Mode ? 0x20u : 0x10u;
 

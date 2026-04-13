@@ -7,10 +7,10 @@ namespace mlss::conv::mxn::misa::fp16
 {
     constexpr std::uint32_t VectorC = 0x08u;
 
-    constexpr auto MisaMxNBiasReluConsts = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
-    constexpr auto MisaMxNReluConsts     = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
-    constexpr auto MisaMxNBiasConsts     = std::to_array<std::uint32_t>({ 0x40u, 0x20u, 0x20u });
-    constexpr auto MisaMxNConsts         = std::to_array<std::uint32_t>({ 0x20u, 0x40u, 0x20u });
+    constexpr std::array<std::uint32_t, 3> MisaMxNBiasReluConsts = { 0x20u, 0x40u, 0x20u };
+    constexpr std::array<std::uint32_t, 3> MisaMxNReluConsts     = { 0x20u, 0x40u, 0x20u };
+    constexpr std::array<std::uint32_t, 3> MisaMxNBiasConsts     = { 0x40u, 0x20u, 0x20u };
+    constexpr std::array<std::uint32_t, 3> MisaMxNConsts         = { 0x20u, 0x40u, 0x20u };
 
     const std::array<MLSSarg, 33> misa_conv_ARGS_CONSTANTS = {{
         { 0, MLSS_FLOAT16, true,  2, true,  true,  false, "pIn"},

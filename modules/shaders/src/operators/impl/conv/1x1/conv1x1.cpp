@@ -1,5 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "conv1x1.hpp"
+#include "../utils.hpp"
 #include "misa/misaShadersOp.hpp"
 #include "hip/hipConv1x1ShadersOp.hpp"
 
@@ -7,6 +8,7 @@ template class mlss::BackendBase<mlss::conv::one_by_one::misa::MisaConv1x1, mlss
 template class mlss::BackendBase<mlss::conv::one_by_one::hip::wmma::HipConv1x1, mlss::conv::one_by_one::Conv1x1>;
 
 using namespace mlss::conv::utils;
+using mlss::op::utils::MetaCmdCaps;
 
 namespace mlss::conv::one_by_one
 {
@@ -24,56 +26,27 @@ namespace mlss::conv::one_by_one
 
     std::expected<Binaries, std::error_code> Conv1x1::getBinaries() const
     {
-        GenericConvParams params{};
-
-        Binaries binaries;        
-
-        auto result = BackendSelector<Conv1x1>::select(m_attributes, m_gfxIpTriple);
-        if (result.binaries.has_value())
+        if (auto* misaEntry = BackendRegistry<Conv1x1>::get<misa::MisaConv1x1>(); misaEntry != nullptr)
         {
-            m_implName = result.implName;
-        }
-
-        if(context != nullptr)
-        {
-            auto params = *static_cast<const mlss::conv::utils::GenericConvParams*>(context);
-        }
-        else if(!attributes.empty())
-        {
-            params = mlss::conv::utils::buildConvParams(attributes);
-        }
-
-        if(params.r == 1 && params.s == 1)
-        {
-            if(auto* misaEntry = BackendRegistry<Conv1x1>::get<misa::MisaConv1x1>(); misaEntry != nullptr)
+            auto result = misaEntry->getBinaries(m_attributes, m_gfxIpTriple);
+            if (result.has_value())
             {
-                if(tmp = misaEntry->getBinaries(attributes, gfxip), tmp.has_value())
-                {
-                    binaries = tmp.value();
-                }
-                else
-                {
-                    return std::unexpected(tmp.error());
-                }
-            }
-            else if (auto* hipEntry = BackendRegistry<Conv1x1>::get<hip::wmma::HipConv1x1>(); hipEntry != nullptr)
-            {
-                if(tmp = hipEntry->getBinaries(attributes, gfxip), tmp.has_value())
-                {
-                    binaries = tmp.value();
-                }
-                else
-                {
-                    return std::unexpected(tmp.error());
-                }
+                m_implName = misaEntry->name;
+                return result;
             }
         }
-        else
+
+        if (auto* hipEntry = BackendRegistry<Conv1x1>::get<hip::wmma::HipConv1x1>(); hipEntry != nullptr)
         {
-            return std::unexpected(std::make_error_code(std::errc::invalid_argument));
+            auto result = hipEntry->getBinaries(m_attributes, m_gfxIpTriple);
+            if (result.has_value())
+            {
+                m_implName = hipEntry->name;
+                return result;
+            }
         }
 
-        return binaries;
+        return std::unexpected(std::make_error_code(std::errc::not_supported));
     }
 
     uint32_t Conv1x1::getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip, const void* context)
@@ -84,11 +57,11 @@ namespace mlss::conv::one_by_one
 
         if(context != nullptr)
         {
-            auto params = *static_cast<const mlss::conv::utils::GenericConvParams*>(context);
+            params = *static_cast<const GenericConvParams*>(context);
         }
         else if(!attributes.empty())
         {
-            params = mlss::conv::utils::buildConvParams(attributes);
+            params = buildConvParams(attributes);
         }
 
         if(params.r == 1 && params.s == 1)

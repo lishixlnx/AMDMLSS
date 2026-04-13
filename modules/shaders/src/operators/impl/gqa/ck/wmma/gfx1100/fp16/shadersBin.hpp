@@ -6,8 +6,7 @@
 namespace mlss::gqa::ck::wmma::fp16::gfx1100
 {
 
-
-constexpr StaticShaderType<30560> packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<30560> packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -1924,7 +1923,7 @@ constexpr StaticShaderType<30560> packed_kv_gqa_cross_attn_128_64x64x48_64x48x64
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<33584> packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<33584> packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -4030,7 +4029,7 @@ constexpr StaticShaderType<33584> packed_kv_gqa_fallback_cross_attn_64_32x64x48_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<33584> packed_kv_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<33584> packed_kv_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -6136,7 +6135,7 @@ constexpr StaticShaderType<33584> packed_kv_gqa_fallback_self_attn_64_32x64x48_3
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<40744> packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<40744> packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -8690,7 +8689,7 @@ constexpr StaticShaderType<40744> packed_kv_gqa_self_attn_128_64x128x80_64x80x64
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<43440> packed_kv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<43440> packed_kv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -11413,7 +11412,7 @@ constexpr StaticShaderType<43440> packed_kv_gqa_self_attn_128_64x192x48_64x48x64
 };
 
 
-constexpr StaticShaderType<33456> packed_qkv_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<33456> packed_qkv_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -13511,7 +13510,7 @@ constexpr StaticShaderType<33456> packed_qkv_gqa_fallback_self_attn_64_32x64x48_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<40616> packed_qkv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<40616> packed_qkv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -16057,7 +16056,7 @@ constexpr StaticShaderType<40616> packed_qkv_gqa_self_attn_128_64x128x80_64x80x6
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<43304> packed_qkv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<43304> packed_qkv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -18772,7 +18771,7 @@ constexpr StaticShaderType<43304> packed_qkv_gqa_self_attn_128_64x192x48_64x48x6
 };
 
 
-constexpr StaticShaderType<30624> unpacked_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<30624> unpacked_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -20693,7 +20692,7 @@ constexpr StaticShaderType<30624> unpacked_gqa_cross_attn_128_64x64x48_64x48x64_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<33720> unpacked_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<33720> unpacked_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -22808,7 +22807,7 @@ constexpr StaticShaderType<33720> unpacked_gqa_fallback_cross_attn_64_32x64x48_3
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<33720> unpacked_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<33720> unpacked_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -24923,7 +24922,7 @@ constexpr StaticShaderType<33720> unpacked_gqa_fallback_self_attn_64_32x64x48_32
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<40816> unpacked_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<40816> unpacked_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -27481,7 +27480,7 @@ constexpr StaticShaderType<40816> unpacked_gqa_self_attn_128_64x128x80_64x80x64_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<43632> unpacked_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
+const StaticShaderType<43632> unpacked_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_gfx1100 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

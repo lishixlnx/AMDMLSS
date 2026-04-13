@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <ranges>
 #include <span>
 #include "core/core.hpp"

@@ -6,7 +6,7 @@
 namespace mlss::mha::ck::wmma::fp16::gfx1201
 {
 
-constexpr StaticShaderType<24456> cross_attention_128_64x64x48_64x48x64_forward_gfx1201 =
+const StaticShaderType<24456> cross_attention_128_64x64x48_64x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -1542,7 +1542,7 @@ constexpr StaticShaderType<24456> cross_attention_128_64x64x48_64x48x64_forward_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<26328> fallback_cross_attention_64_32x64x48_32x48x64_forward_gfx1201 =
+const StaticShaderType<26328> fallback_cross_attention_64_32x64x48_32x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -3195,7 +3195,7 @@ constexpr StaticShaderType<26328> fallback_cross_attention_64_32x64x48_32x48x64_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<26024> fallback_self_attention_64_32x64x48_32x48x64_forward_gfx1201 =
+const StaticShaderType<26024> fallback_self_attention_64_32x64x48_32x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -4829,7 +4829,7 @@ constexpr StaticShaderType<26024> fallback_self_attention_64_32x64x48_32x48x64_f
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<30360> self_attention_128_64x128x80_64x80x64_forward_gfx1201 =
+const StaticShaderType<30360> self_attention_128_64x128x80_64x80x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -6734,7 +6734,7 @@ constexpr StaticShaderType<30360> self_attention_128_64x128x80_64x80x64_forward_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<31904> self_attention_128_64x192x48_64x48x64_forward_gfx1201 =
+const StaticShaderType<31904> self_attention_128_64x192x48_64x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -8737,7 +8737,7 @@ constexpr StaticShaderType<31904> self_attention_128_64x192x48_64x48x64_forward_
 
 
 
-constexpr StaticShaderType<24560> unpacked_cross_attention_128_64x64x48_64x48x64_forward_gfx1201 =
+const StaticShaderType<24560> unpacked_cross_attention_128_64x64x48_64x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -10279,7 +10279,7 @@ constexpr StaticShaderType<24560> unpacked_cross_attention_128_64x64x48_64x48x64
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<26440> unpacked_fallback_cross_attention_64_32x64x48_32x48x64_forward_gfx1201 =
+const StaticShaderType<26440> unpacked_fallback_cross_attention_64_32x64x48_32x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -11939,7 +11939,7 @@ constexpr StaticShaderType<26440> unpacked_fallback_cross_attention_64_32x64x48_
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<26320> unpacked_fallback_self_attention_64_32x64x48_32x48x64_forward_gfx1201 =
+const StaticShaderType<26320> unpacked_fallback_self_attention_64_32x64x48_32x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -13591,7 +13591,7 @@ constexpr StaticShaderType<26320> unpacked_fallback_self_attention_64_32x64x48_3
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<30544> unpacked_self_attention_128_64x128x80_64x80x64_forward_gfx1201 =
+const StaticShaderType<30544> unpacked_self_attention_128_64x128x80_64x80x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -15507,7 +15507,7 @@ constexpr StaticShaderType<30544> unpacked_self_attention_128_64x128x80_64x80x64
     .m_shaderType = ShaderTypesFlags::WMMA
 };
 
-constexpr StaticShaderType<32144> unpacked_self_attention_128_64x192x48_64x48x64_forward_gfx1201 =
+const StaticShaderType<32144> unpacked_self_attention_128_64x192x48_64x48x64_forward_gfx1201 =
 {
     .m_binary = {
 0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

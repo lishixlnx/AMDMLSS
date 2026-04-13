@@ -6,7 +6,7 @@
 namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
 {
 
-    constexpr StaticShaderType<29192> gemm2d_NN_32x32x64_F16 =
+    const StaticShaderType<29192> gemm2d_NN_32x32x64_F16 =
     {
         .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -1842,7 +1842,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
         .m_shaderType = ShaderTypesFlags::WMMA
     };
         
-        constexpr StaticShaderType<28872> gemm2d_NN_64x32x32NN_F16 =
+        const StaticShaderType<28872> gemm2d_NN_64x32x32NN_F16 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -3658,7 +3658,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::WMMA
         };
         
-        constexpr StaticShaderType<29904> gemm2d_NN_64x64x64NN_F16 =
+        const StaticShaderType<29904> gemm2d_NN_64x64x64NN_F16 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -5538,7 +5538,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::WMMA
         };
         
-        constexpr StaticShaderType<30296> gemm2d_NN_128x64x32NN_F16 =
+        const StaticShaderType<30296> gemm2d_NN_128x64x32NN_F16 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -7443,7 +7443,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::WMMA
         };
         
-        constexpr StaticShaderType<31960> gemm2d_NN_256x32x32_F16 =
+        const StaticShaderType<31960> gemm2d_NN_256x32x32_F16 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -9452,7 +9452,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::WMMA
         };
         
-        constexpr StaticShaderType<29480> gemm2d_NN_128x128x32_F16 =
+        const StaticShaderType<29480> gemm2d_NN_128x128x32_F16 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

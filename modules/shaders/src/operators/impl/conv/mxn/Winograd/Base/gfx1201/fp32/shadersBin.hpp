@@ -8,7 +8,7 @@ namespace mlss::conv::mxn::winograd::base::fp32::gfx1201
 
 // 40_5_0/GFX12_fp32_f2x3_stride1.elf
 // Assembled for gfx12. It is for F(2,3) winograd transform. It supports forward and backward convolutions for FP32 tensors with stride = 1.
-constexpr StaticShaderType<53944> ConvWinogradElf_Gfx12_F2x3_Fp32Stride1 =
+const StaticShaderType<53944> ConvWinogradElf_Gfx12_F2x3_Fp32Stride1 =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -2719,7 +2719,7 @@ constexpr StaticShaderType<53944> ConvWinogradElf_Gfx12_F2x3_Fp32Stride1 =
 
 // 40_5_0/GFX12_fp32_f2x3_ostride2.elf
 // Assembled for gfx12. It is for F(2,3) winograd transform. It supports forward convolutions for FP32 tensors with stride = 2.
-constexpr StaticShaderType<54968> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dec =
+const StaticShaderType<54968> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dec =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -5481,7 +5481,7 @@ constexpr StaticShaderType<54968> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dec =
 
 // 40_5_0/GFX12_fp32_f2x3_dstride2.elf
 // Assembled for gfx12. It is for F(2,3) winograd transform. It supports backward convolutions for FP32 tensors with stride = 2.
-constexpr StaticShaderType<54456> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dil =
+const StaticShaderType<54456> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dil =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -8217,7 +8217,7 @@ constexpr StaticShaderType<54456> ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dil =
 
 // 40_5_0/GFX12_fp32_f3x2_stride1.elf
 // Assembled for gfx12. It is for F(3,2) winograd transform. It supports forward and backward convolutions for FP32 tensors with stride = 1.
-constexpr StaticShaderType<66488> ConvWinogradElf_Gfx12_F3x2_Fp32Stride1 =
+const StaticShaderType<66488> ConvWinogradElf_Gfx12_F3x2_Fp32Stride1 =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -11555,7 +11555,7 @@ constexpr StaticShaderType<66488> ConvWinogradElf_Gfx12_F3x2_Fp32Stride1 =
 
 // 40_5_0/GFX12_fp32_f3x2_ostride2.elf
 // Assembled for gfx12. It is for F(3,2) winograd transform. It supports forward convolutions for FP32 tensors with stride = 2.
-constexpr StaticShaderType<67512> ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dec =
+const StaticShaderType<67512> ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dec =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -14944,7 +14944,7 @@ constexpr StaticShaderType<67512> ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dec =
 
 // 40_5_0/GFX12_fp32_f3x2_dstride2.elf
 // Assembled for gfx12. It is for F(3,2) winograd transform. It supports backward convolutions for FP32 tensors with stride = 2.
-constexpr StaticShaderType<67768> ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dil =
+const StaticShaderType<67768> ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dil =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,

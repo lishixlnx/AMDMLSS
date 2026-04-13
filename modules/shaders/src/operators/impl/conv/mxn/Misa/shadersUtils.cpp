@@ -122,7 +122,7 @@ namespace mlss::conv::mxn::misa
                 isSupported = false;
             }
 
-            if(((params.c / params.groups) % fp16::VectorC != 0)) || ((params.k / params.groups) % fp16::VectorC != 0))
+            if(((params.c / params.groups) % fp16::VectorC != 0) || ((params.k / params.groups) % fp16::VectorC != 0))
             {
                 isSupported = false;
             }

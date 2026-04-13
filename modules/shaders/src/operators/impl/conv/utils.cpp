@@ -1,5 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "utils.hpp"
+#include "shaders/shaders.hpp"
 
 namespace mlss::conv::utils
 {
@@ -185,9 +186,10 @@ GenericConvParams buildConvParams(const std::vector<Attribute>& attributes)
 
 namespace
 {
-    // =====================================================================================================================
-// Compute slice K packed value
-uint32 GetMoveSliceK(
+constexpr std::uint32_t VectorC = 0x08;
+
+// =====================================================================================================================
+std::uint32_t GetMoveSliceK(
     const GenericConvParams& params, 
     const std::uint32_t& tile_k)
 {
@@ -219,7 +221,7 @@ MagicDivU32 MagicDivU32Gen(
         }
     }
 
-    const uint64 magic = (((1ull << 32) * ((1ull << shift) - d)) / d) + 1;
+    const std::uint64_t magic = (((1ull << 32) * ((1ull << shift) - d)) / d) + 1;
     MLSS_ASSERT(magic <= INT32_MAX); // 0xfffffffful
 
     MagicDivU32 result;
@@ -236,20 +238,20 @@ std::uint32_t MagicDivU32PackShift(
     std::uint8_t s2,
     std::uint8_t s3)
 {
-    const uint32 shift0 = static_cast<uint32>(s0);
-    const uint32 shift1 = static_cast<uint32>(s1);
-    const uint32 shift2 = static_cast<uint32>(s2);
-    const uint32 shift3 = static_cast<uint32>(s3);
+    const std::uint32_t shift0 = static_cast<std::uint32_t>(s0);
+    const std::uint32_t shift1 = static_cast<std::uint32_t>(s1);
+    const std::uint32_t shift2 = static_cast<std::uint32_t>(s2);
+    const std::uint32_t shift3 = static_cast<std::uint32_t>(s3);
     return (shift3 << 24) | (shift2 << 16) | (shift1 << 8) | shift0;
 }
 
 // =====================================================================================================================
 // Compute batch split size based on configuration parameters
-uint32 ConvSplitBatchSize(
+std::uint32_t ConvSplitBatchSize(
     const MisaConvArgs& args)
 {
-    const std::uint64_t memorySizeInput = args.c * args.hi * args.wi * sizeof(uint16);
-    const std::uint64_t memorySizeOutput = args.k * args.ho * args.wo * sizeof(uint16);
+    const std::uint64_t memorySizeInput = args.c * args.hi * args.wi * sizeof(std::uint16_t);
+    const std::uint64_t memorySizeOutput = args.k * args.ho * args.wo * sizeof(std::uint16_t);
     constexpr std::uint64_t Size4GbMinusOne = static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max());
     const std::uint32_t n = args.n;
     const std::uint64_t imageSize =
@@ -275,14 +277,14 @@ MLSSdim3 GetGridSize(
     const MisaConvArgs&  args, 
     const std::array<std::uint32_t, 3>& macroTile)
 {
-    MLSSdim3 grid{ 0, 0, 0 };
-    const uint32 splits = ConvSplitBatchSize(args);
-    const uint32 gemmM = args.k / args.g;
-    const uint32 gemmN = (args.n / splits) * args.ho * args.wo;
+    MLSSdim3 grid{};
+    const std::uint32_t splits = ConvSplitBatchSize(args);
+    const std::uint32_t gemmM = args.k / args.g;
+    const std::uint32_t gemmN = (args.n / splits) * args.ho * args.wo;
 
-    grid.x = (gemmN + macroTile[1] - 1) / macroTile[1];
-    grid.y = (gemmM + macroTile[0] - 1) / macroTile[0];
-    grid.z = splits * args.g;
+    grid.m_x = (gemmN + macroTile[1] - 1) / macroTile[1];
+    grid.m_y = (gemmM + macroTile[0] - 1) / macroTile[0];
+    grid.m_z = splits * args.g;
     return grid;
 }
 
@@ -297,8 +299,6 @@ MLSSdim3 MisaConvGetGridSize(
 
 MisaConvArgs buildMisaConvArgs(const GenericConvParams& params, const std::uint32_t& tile_k)
 {
-    constexpr std::uint32_t VectorC = 8;
-
     MisaConvArgs args{};
 
     args.hi = params.h;
@@ -309,14 +309,14 @@ MisaConvArgs buildMisaConvArgs(const GenericConvParams& params, const std::uint3
     args.g = params.groups;
     args.ho = params.outH;
     args.wo = params.outW;
-    args.inStrideN  = sizeof(uint16) * params.c * params.h * params.w;
-    args.inStrideC  = sizeof(uint16) * VectorC;
-    args.inStrideH  = sizeof(uint16) * params.c * params.w;
-    args.inStrideW  = sizeof(uint16) * params.c;
-    args.outStrideN = sizeof(uint16) * params.k * params.outH * params.outW;
-    args.outStrideK = sizeof(uint16) * VectorC;
-    args.outStrideH = sizeof(uint16) * params.k * params.outW;
-    args.outStrideW = sizeof(uint16) * params.k;
+    args.inStrideN  = sizeof(std::uint16_t) * params.c * params.h * params.w;
+    args.inStrideC  = sizeof(std::uint16_t) * VectorC;
+    args.inStrideH  = sizeof(std::uint16_t) * params.c * params.w;
+    args.inStrideW  = sizeof(std::uint16_t) * params.c;
+    args.outStrideN = sizeof(std::uint16_t) * params.k * params.outH * params.outW;
+    args.outStrideK = sizeof(std::uint16_t) * VectorC;
+    args.outStrideH = sizeof(std::uint16_t) * params.k * params.outW;
+    args.outStrideW = sizeof(std::uint16_t) * params.k;
     args.strideHw   = (params.convStrideY << 16) | params.convStrideX;
     args.dilationHw = (params.filterStrideY << 16) | params.filterStrideX;
     args.padHw      = (params.startPadY << 16) | params.startPadX;

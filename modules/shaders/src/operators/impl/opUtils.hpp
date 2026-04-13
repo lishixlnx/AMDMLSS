@@ -8,12 +8,12 @@ namespace mlss::op::utils
     {
         struct
         {
-            uint32 support     :  1; // Basic support, there may be performance and precision issues
-            uint32 fullSupport :  1; // Full support
-            uint32 reserved    : 30;
+            std::uint32_t support     :  1;
+            std::uint32_t fullSupport :  1;
+            std::uint32_t reserved    : 30;
         };
-    
-        uint32 values;
+
+        std::uint32_t values;
     };
     
 } // namespace mlss::op::utils

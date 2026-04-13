@@ -20,9 +20,9 @@ namespace mlss::conv::mxn::winograd::base::fp16
 // - k = range(1, 16) + range(24, 267, 8)
 // - x&y = range(1, 16) + range(24, 267, 8)
 // If you change these, make sure they fit in 8 bits! There's a warning in the script to help catch it.
-constexpr WinogradHyperSet HyperSetNavi31 =
+const WinogradHyperSet HyperSetNavi31 =
 {
-{
+{{
     { 0, 0, 0, 114, }, // accuracy: 85.0%, 3x3, stride 1, backward, fp16
     { 0, 0, 0, 139, }, // accuracy: 79.3%, 3x3, stride 1, backward, fp32
     { 0, 0, 0, 181, }, // accuracy: 84.2%, 3x3, stride 1, forward,  fp16
@@ -31,8 +31,8 @@ constexpr WinogradHyperSet HyperSetNavi31 =
     { 3, 0, 0, 274, }, // accuracy: 87.3%, 3x3, stride 2, backward, fp32
     { 0, 0, 25, 161,}, // accuracy: 92.2%, 3x3, stride 2, forward,  fp16
     AlwaysFail,        // accuracy: 84.6%, 3x3, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 23, 48,}, // accuracy: 96.9%, 5x5, stride 1, backward, fp16
     { 0, 0, 23, 52,}, // accuracy: 97.2%, 5x5, stride 1, backward, fp32
     { 1, 0, 22, 56,}, // accuracy: 97.1%, 5x5, stride 1, forward,  fp16
@@ -41,8 +41,8 @@ constexpr WinogradHyperSet HyperSetNavi31 =
     { 0, 0, 0,  95,}, // accuracy: 94.2%, 5x5, stride 2, backward, fp32
     { 2, 0, 19, 49,}, // accuracy: 96.1%, 5x5, stride 2, forward,  fp16
     { 1, 0, 27, 48,}, // accuracy: 94.3%, 5x5, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 23, 47, }, // accuracy: 96.7%, 7x7, stride 1, backward, fp16
     { 0, 0, 23, 46, }, // accuracy: 96.9%, 7x7, stride 1, backward, fp32
     { 1, 0, 23, 57, }, // accuracy: 97.4%, 7x7, stride 1, forward,  fp16
@@ -51,12 +51,12 @@ constexpr WinogradHyperSet HyperSetNavi31 =
     { 0, 0, 7,  106,}, // accuracy: 95.1%, 7x7, stride 2, backward, fp32
     { 1, 0, 23, 57, }, // accuracy: 94.9%, 7x7, stride 2, forward,  fp16
     { 2, 0, 39, 44, }, // accuracy: 93.1, 7x7, stride 2, forward,  fp32
-},
+}},
 };
 
-constexpr WinogradHyperSet HyperSetNavi32 =
+const WinogradHyperSet HyperSetNavi32 =
 {
-{
+{{
     { 0, 0, 0, 114, }, // accuracy: 85.0%, 3x3, stride 1, backward, fp16
     { 0, 0, 0, 139, }, // accuracy: 79.3%, 3x3, stride 1, backward, fp32
     { 0, 0, 0, 181, }, // accuracy: 84.2%, 3x3, stride 1, forward,  fp16
@@ -65,8 +65,8 @@ constexpr WinogradHyperSet HyperSetNavi32 =
     { 3, 0, 0, 274, }, // accuracy: 87.3%, 3x3, stride 2, backward, fp32
     { 0, 0, 25, 161,}, // accuracy: 92.2%, 3x3, stride 2, forward,  fp16
     AlwaysFail,        // accuracy: 84.6%, 3x3, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 14, 43,}, // accuracy: 95.2%, 5x5, stride 1, backward, fp16
     { 0, 0, 23, 52,}, // accuracy: 97.2%, 5x5, stride 1, backward, fp32
     { 1, 0, 14, 45,}, // accuracy: 95.6%, 5x5, stride 1, forward,  fp16
@@ -75,8 +75,8 @@ constexpr WinogradHyperSet HyperSetNavi32 =
     { 0, 0, 0,  89,}, // accuracy: 95.1%, 5x5, stride 2, backward, fp32
     { 1, 0, 15, 42,}, // accuracy: 95.5%, 5x5, stride 2, forward,  fp16
     { 1, 0, 23, 36,}, // accuracy: 94.7%, 5x5, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 14, 43, }, // accuracy: 95.8%, 7x7, stride 1, backward, fp16
     { 0, 0, 22, 50, }, // accuracy: 96.8%, 7x7, stride 1, backward, fp32
     { 1, 0, 12, 48, }, // accuracy: 94.9%, 7x7, stride 1, forward,  fp16
@@ -85,12 +85,12 @@ constexpr WinogradHyperSet HyperSetNavi32 =
     { 0, 0, 7,  106,}, // accuracy: 95.1%, 7x7, stride 2, backward, fp32
     { 1, 0, 23, 33, }, // accuracy: 94.7%, 7x7, stride 2, forward,  fp16
     { 1, 0, 27, 42, }, // accuracy: 93.8%, 7x7, stride 2, forward,  fp32
-},
+}},
 };
 
-constexpr WinogradHyperSet HyperSetNavi33 =
+const WinogradHyperSet HyperSetNavi33 =
 {
-{
+{{
     { 0, 0, 0, 58,  }, // accuracy: 90.0%, 3x3, stride 1, backward, fp16
     { 0, 0, 0, 86,  }, // accuracy: 86.4%, 3x3, stride 1, backward, fp32
     { 0, 0, 0, 115, }, // accuracy: 89.0%, 3x3, stride 1, forward,  fp16
@@ -99,8 +99,8 @@ constexpr WinogradHyperSet HyperSetNavi33 =
     { 3, 0, 0, 274, }, // accuracy: 87.3%, 3x3, stride 2, backward, fp32
     { 0, 0, 25, 161,}, // accuracy: 92.2%, 3x3, stride 2, forward,  fp16
     AlwaysFail,        // accuracy: 84.6%, 3x3, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 12, 29,}, // accuracy: 92.0%, 5x5, stride 1, backward, fp16
     { 0, 0, 23, 52,}, // accuracy: 97.2%, 5x5, stride 1, backward, fp32
     { 0, 0, 13, 49,}, // accuracy: 93.5%, 5x5, stride 1, forward,  fp16
@@ -109,8 +109,8 @@ constexpr WinogradHyperSet HyperSetNavi33 =
     { 0, 0, 0,  60,}, // accuracy: 94.0%, 5x5, stride 2, backward, fp32
     { 1, 0, 15, 30,}, // accuracy: 94.0%, 5x5, stride 2, forward,  fp16
     { 1, 0, 23, 35,}, // accuracy: 94.4%, 5x5, stride 2, forward,  fp32
-},
-{
+}},
+{{
     { 0, 0, 23, 47, }, // accuracy: 96.7%, 7x7, stride 1, backward, fp16
     { 0, 0, 23, 46, }, // accuracy: 96.9%, 7x7, stride 1, backward, fp32
     { 0, 0, 23, 44, }, // accuracy: 96.1%, 7x7, stride 1, forward,  fp16
@@ -119,7 +119,7 @@ constexpr WinogradHyperSet HyperSetNavi33 =
     { 0, 0, 7,  106,}, // accuracy: 95.1%, 7x7, stride 2, backward, fp32
     { 0, 0, 24, 34, }, // accuracy: 94.5%, 7x7, stride 2, forward,  fp16
     { 0, 0, 32, 24, }, // accuracy: 93.0,  7x7, stride 2, forward,  fp32
-},
+}},
 };
 
 

@@ -7,7 +7,7 @@ namespace mlss::conv::mxn::winograd::fury::fp16::gfx1100
 {
 // 3_1_0/NAVI31_fp16_fp16acc_f2x3_c16_stride1.elf
 // Assembled for Gfx11. The FURY Winograd convolution shader Navi31/Navi32/StrixHalo/GorgonHalo 16bit internal accum granularity
-constexpr StaticShaderType<29628> ConvFury_Navi31_F2x3_C16_Stride1_Elf =
+const StaticShaderType<29628> ConvFury_Navi31_F2x3_C16_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -1502,7 +1502,7 @@ constexpr StaticShaderType<29628> ConvFury_Navi31_F2x3_C16_Stride1_Elf =
 
 // 3_1_0/NAVI31_fp16_fp16acc_f2x3_c32_stride1.elf
 // Assembled for Gfx11. The FURY Winograd convolution shader Navi31/Navi32/StrixHalo/GorgonHalo 32bit internal accum granularity
-constexpr StaticShaderType<33212> ConvFury_Navi31_F2x3_C32_Stride1_Elf =
+const StaticShaderType<33212> ConvFury_Navi31_F2x3_C32_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -3176,7 +3176,7 @@ constexpr StaticShaderType<33212> ConvFury_Navi31_F2x3_C32_Stride1_Elf =
 
 // 3_1_0/NAVI33_fp16_fp16acc_f2x3_c16_stride1.elf
 // Assembled for Gfx11. The FURY Winograd convolution shader Navi33/Strix1 16bit internal accum granularity.
-constexpr StaticShaderType<28092> ConvFury_Navi33_F2x3_C16_Stride1_Elf =
+const StaticShaderType<28092> ConvFury_Navi33_F2x3_C16_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -4594,7 +4594,7 @@ constexpr StaticShaderType<28092> ConvFury_Navi33_F2x3_C16_Stride1_Elf =
 
 // 3_1_0/GFX11_sync_init.elf
 // Assembled for Gfx11. Sync buffer clear shader for the FURY Winograd convolution shaders.
-constexpr StaticShaderType<3768> GFX11_Sync_Init_Elf =
+const StaticShaderType<3768> GFX11_Sync_Init_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,

@@ -5,7 +5,7 @@
 
 namespace mlss::conv::mxn::misa::fp16::gfx1201
 {
-    constexpr StaticShaderType<13272> MisaConv_Bias_Relu_gfx12 =
+    const StaticShaderType<13272> MisaConv_Bias_Relu_gfx12 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -846,7 +846,7 @@ namespace mlss::conv::mxn::misa::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::UNKNOWN
         };
         
-        constexpr StaticShaderType<12656> MisaConv_Relu_gfx12 =
+        const StaticShaderType<12656> MisaConv_Relu_gfx12 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -1648,7 +1648,7 @@ namespace mlss::conv::mxn::misa::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::UNKNOWN
         };
         
-        constexpr StaticShaderType<12856> MisaConv_Bias_gfx12 =
+        const StaticShaderType<12856> MisaConv_Bias_gfx12 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -2463,7 +2463,7 @@ namespace mlss::conv::mxn::misa::fp16::gfx1201
             .m_shaderType = ShaderTypesFlags::UNKNOWN
         };
         
-        constexpr StaticShaderType<13008> MisaConv_gfx12 =
+        const StaticShaderType<13008> MisaConv_gfx12 =
         {
             .m_binary = {
         0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

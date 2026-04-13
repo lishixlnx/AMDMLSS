@@ -1,6 +1,6 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "hipConv1x1ShadersOp.hpp"
-#include "../../../utils.hpp"
+#include "../../utils.hpp"
 #include "wmma/shadersUtils.hpp"
 #include "core/core.hpp"
 

@@ -7,7 +7,7 @@ namespace mlss::conv::dilated::hip::wmma::fp16::gfx1150
 {
 // CK kernel for convolution
 // This kernel is general conv kernel but we use it for dilated convolution only
-constexpr StaticShaderType<28440> grouped_conv_fwd_bias_relu_add_wmma_fp16_hip_amdgcn_amd_amdhsa_gfx1150_coba =
+const StaticShaderType<28440> grouped_conv_fwd_bias_relu_add_wmma_fp16_hip_amdgcn_amd_amdhsa_gfx1150_coba =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x40,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

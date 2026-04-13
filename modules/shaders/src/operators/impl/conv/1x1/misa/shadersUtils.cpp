@@ -1,8 +1,8 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "fp16/gfx1100/shadersBin.hpp"
-#include "fp16/gfx1201/shadersBin.hpp"
+#include "gfx1100/fp16/shadersBin.hpp"
+#include "gfx1201/fp16/shadersBin.hpp"
 
 #include <mutex>
 #include <unordered_map>
@@ -51,7 +51,7 @@ namespace mlss::conv::one_by_one::misa
             return IP_GFX_UNKNOWN;
         }
 
-        std::expected<const DynamicShaderType*, std::error_code> getOrComputeCached(const GfxIpTriple& gfxip)
+        std::expected<const DynamicShaderType*, std::error_code> getOrComputeCached(const GfxIpTriple& gfxip, const GenericConvParams& params)
         {
             auto key = static_cast<std::uint64_t>(gfxIpPacked(gfxip));
 
@@ -64,7 +64,7 @@ namespace mlss::conv::one_by_one::misa
                 }
             }
 
-            auto relocDescriptor = selectRelocatableShader(gfxip);
+            auto relocDescriptor = selectRelocatableShader(gfxip, params);
             if (relocDescriptor.m_binary.empty())
             {
                 return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
@@ -314,8 +314,8 @@ namespace mlss::conv::one_by_one::misa
          {
             constexpr std::uint64_t maxUint32 = static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max());
 
-            const std::uint64 memorySizeInput = static_cast<std::uint64_t>(params.c) * params.h * params.w * sizeof(std::uint16_t);
-            const std::uint64 memorySizeOutput = static_cast<std::uint64_t>(params.k) * params.outH * params.outW * sizeof(std::uint16_t);
+            const std::uint64_t memorySizeInput = static_cast<std::uint64_t>(params.c) * params.h * params.w * sizeof(std::uint16_t);
+            const std::uint64_t memorySizeOutput = static_cast<std::uint64_t>(params.k) * params.outH * params.outW * sizeof(std::uint16_t);
 
             if((memorySizeInput > maxUint32) || (memorySizeOutput > maxUint32))
             {
@@ -355,7 +355,7 @@ namespace mlss::conv::one_by_one::misa
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
         }
 
-        auto cachedResult = getOrComputeCached(gfxip);
+        auto cachedResult = getOrComputeCached(gfxip, params);
         if (!cachedResult.has_value())
         {
             return std::unexpected(cachedResult.error());

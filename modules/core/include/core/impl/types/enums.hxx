@@ -197,6 +197,13 @@ namespace mlss
         unknown
     };
 
+    enum class BinaryTypeFlags : std::uint32_t
+    {
+        ELF  = 0x01u,
+        DXIL = 0x02u,
+    };
+
+    //=====================================================================================================================
     enum class ShaderTypesFlags : std::uint64_t
     {
         UNKNOWN = 1 << 0,

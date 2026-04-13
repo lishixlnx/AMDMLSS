@@ -205,7 +205,7 @@ namespace mlss::conv::one_by_one::hip::wmma
             }
             else if (gfxip == IP_GFX1201 || gfxip == IP_GFX1200)
             {
-                constexpr auto Navi48Labels = std::to_array<std::int32_t>({
+                constexpr std::array<std::int32_t, 7> Navi48Labels = {
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x16x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x128x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x256x16WMMA_NN),
@@ -213,7 +213,7 @@ namespace mlss::conv::one_by_one::hip::wmma
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader128x128x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader128x64x32WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader256x16x16WMMA_NN)
-                });
+                };
 
                 shader = static_cast<HipConv1x1Shader>(
                     predictHelper(fp16::Navi48HipGemmFp16Tree, std::span{features},
@@ -221,7 +221,7 @@ namespace mlss::conv::one_by_one::hip::wmma
             }
             else if (gfxip == IP_GFX1210 || gfxip == IP_GFX1211)
             {
-                constexpr auto Navi44Labels = std::to_array<std::int32_t>({
+                constexpr std::array<std::int32_t, 7> Navi44Labels = {
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x16x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x128x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader16x256x16WMMA_NN),
@@ -229,7 +229,7 @@ namespace mlss::conv::one_by_one::hip::wmma
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader128x128x16WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader128x64x32WMMA_NN),
                     static_cast<std::int32_t>(HipConv1x1Shader::Shader256x16x16WMMA_NN)
-                });
+                };
 
                 shader = static_cast<HipConv1x1Shader>(
                     predictHelper(fp16::Navi44HipGemmFp16Tree, std::span{features},
@@ -256,10 +256,10 @@ namespace mlss::conv::one_by_one::hip::wmma
             return shader;
         }
 
-        inline constexpr auto HyperSetNavi31 = std::to_array<HyperConsts>({{0,3,0,26}, {0,0,0,1}, AlwaysFail, AlwaysFail});
-        inline constexpr auto HyperSetNavi32 = std::to_array<HyperConsts>({{0,3,0,1}, {1,1,0,41}, AlwaysFail, AlwaysFail});
-        inline constexpr auto HyperSetNavi33 = std::to_array<HyperConsts>({{0,0,0,1}, {3,0,0,201}, AlwaysFail, AlwaysFail});
-        inline constexpr auto HyperSetPhoenix = std::to_array<HyperConsts>({{2,3,0,40}, {2,3,28,84}, AlwaysFail, AlwaysFail});
+        inline constexpr std::array<HyperConsts, 4> HyperSetNavi31 = {HyperConsts{0,3,0,26}, HyperConsts{0,0,0,1}, AlwaysFail, AlwaysFail};
+        inline constexpr std::array<HyperConsts, 4> HyperSetNavi32 = {HyperConsts{0,3,0,1}, HyperConsts{1,1,0,41}, AlwaysFail, AlwaysFail};
+        inline constexpr std::array<HyperConsts, 4> HyperSetNavi33 = {HyperConsts{0,0,0,1}, HyperConsts{3,0,0,201}, AlwaysFail, AlwaysFail};
+        inline constexpr std::array<HyperConsts, 4> HyperSetPhoenix = {HyperConsts{2,3,0,40}, HyperConsts{2,3,28,84}, AlwaysFail, AlwaysFail};
 
         bool chooseTuning(const GfxIpTriple& gfxip, const GenericConvParams& params)
         {

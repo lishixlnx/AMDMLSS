@@ -10,7 +10,7 @@ namespace mlss
         std::array<std::int32_t, N> m_rightChildren;
         std::array<float, N> m_thresholds;
         std::array<std::int32_t, N> m_indices; 
-        std::array<std::array<std::int32_t, NumClasses>, N> m_classes;
+        std::int32_t m_classes[N][NumClasses];
     };
 
     template<std::size_t N, std::size_t NumClasses>

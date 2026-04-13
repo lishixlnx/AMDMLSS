@@ -10,7 +10,7 @@ namespace mlss
         return std::make_unique<Binaries::Blob>(Binaries::Blob{
             shader.m_binary.data(),
             shader.m_binary.size(),
-            MLSS_BINARY_TYPE_ELF,
+            static_cast<std::uint32_t>(BinaryTypeFlags::ELF),
             0,
             name});
     }
@@ -22,7 +22,7 @@ namespace mlss
         return std::make_unique<Binaries::Blob>(Binaries::Blob{
             shader.m_binary.data(),
             shader.m_binary.size(),
-            MLSS_BINARY_TYPE_ELF,
+            static_cast<std::uint32_t>(BinaryTypeFlags::ELF),
             0,
             name});
     }

@@ -7,7 +7,7 @@ namespace mlss::conv::mxn::winograd::rage::fp16::gfx1201
 {
 // 4_6_0/GFX12_fp16_fp32acc_f2x3_stride1.elf
 // Assembled for Gfx12. The v4_6_0 RAGE Winograd convolution shader Navi48 16bit internal accum granularity
-constexpr StaticShaderType<41916> ConvRage_460_Navi48_Fp16_F2x3_Stride1_Elf =
+const StaticShaderType<41916> ConvRage_460_Navi48_Fp16_F2x3_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -2116,7 +2116,7 @@ constexpr StaticShaderType<41916> ConvRage_460_Navi48_Fp16_F2x3_Stride1_Elf =
 
 // 4_9_0/GFX12_fp16_fp32acc_f2x3_stride1.elf
 // Assembled for Gfx12. The v4_9_0 RAGE Winograd convolution shader Navi48 16bit internal accum granularity
-constexpr StaticShaderType<42692> ConvRage_490_Navi48_Fp16_F2x3_Stride1_Elf =
+const StaticShaderType<42692> ConvRage_490_Navi48_Fp16_F2x3_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,

@@ -509,7 +509,6 @@ enum MLSSTypesFlag
     MLSS_CUSTOM_TYPE_START = 0x01000000 // Start of custom type ID range
 };
 
-
 enum MLSSStatusFlag
 {
     MLSS_SUCCESS = 0,

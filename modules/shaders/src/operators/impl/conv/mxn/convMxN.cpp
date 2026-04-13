@@ -1,5 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "convMxN.hpp"
+#include "../utils.hpp"
 #include "Misa/misaShadersOp.hpp"
 #include "Winograd/Base/winogradBaseShadersOp.hpp"
 #include "Winograd/Rage/winogradRageShadersOp.hpp"

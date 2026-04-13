@@ -40,14 +40,6 @@ struct GfxIpLevel
     explicit operator std::wstring() const { return std::format(L"gfx{}{}", major, minor); }
 };
 
-struct GfxIpTripleHash
-{
-    std::size_t operator()(const GfxIpTriple& ip) const noexcept
-    {
-        return std::hash<std::uint32_t>{}(gfxIpPacked(ip));
-    }
-};
-
 //=====================================================================================================================
 //                                     Comparison & utility
 //=====================================================================================================================
@@ -61,6 +53,14 @@ struct GfxIpTripleHash
 {
     return static_cast<std::uint32_t>(ip);
 }
+
+struct GfxIpTripleHash
+{
+    std::size_t operator()(const GfxIpTriple& ip) const noexcept
+    {
+        return std::hash<std::uint32_t>{}(gfxIpPacked(ip));
+    }
+};
 
 
 constexpr bool operator==(GfxIpTriple lhs, GfxIpTriple rhs) noexcept

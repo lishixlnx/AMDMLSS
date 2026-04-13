@@ -64,7 +64,7 @@ namespace mlss::conv::mxn::winograd::rage
             constexpr std::uint64_t nhwFactor  = 0x3Eu;
             constexpr std::uint64_t kFactor    = 0x20u;
             constexpr std::uint64_t cFactor    = 0x10u;
-            constexpr std::uint64_t nhwFactorG = roundUpToMultiple(nhwFactor, std::uint64_t{0x20u});
+            const std::uint64_t nhwFactorG = roundUpToMultiple(nhwFactor, std::uint64_t{0x20u});
 
             const std::uint64_t s  = params.s;
             const std::uint64_t r  = params.r;

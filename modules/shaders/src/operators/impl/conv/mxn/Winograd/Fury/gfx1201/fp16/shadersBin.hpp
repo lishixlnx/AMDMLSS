@@ -7,7 +7,7 @@ namespace mlss::conv::mxn::winograd::fury::fp16::gfx1201
 {
 // 4_1_0/GFX12_fp16_fp32acc_f2x3_c16_stride1.elf
 // Assembled for Gfx12. The FURY Winograd convolution shader Navi48 16bit internal accum granularity
-constexpr StaticShaderType<33212> ConvFury_Navi48_F2x3_C16_Stride1_Elf =
+const StaticShaderType<33212> ConvFury_Navi48_F2x3_C16_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -1681,7 +1681,7 @@ constexpr StaticShaderType<33212> ConvFury_Navi48_F2x3_C16_Stride1_Elf =
 
 // 4_1_0/GFX12_fp16_fp32acc_f2x3_c32_stride1.elf
 // Assembled for Gfx12. The FURY Winograd convolution shader Navi48 32bit internal accum granularity
-constexpr StaticShaderType<35004> ConvFury_Navi48_F2x3_C32_Stride1_Elf =
+const StaticShaderType<35004> ConvFury_Navi48_F2x3_C32_Stride1_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
@@ -3445,7 +3445,7 @@ constexpr StaticShaderType<35004> ConvFury_Navi48_F2x3_C32_Stride1_Elf =
 
 // 4_1_0/GFX12_sync_init.elf
 // Assembled for Gfx12. Sync buffer clear shader for the FURY Winograd convolution shaders.
-constexpr StaticShaderType<3768> GFX12_Sync_Init_Elf =
+const StaticShaderType<3768> GFX12_Sync_Init_Elf =
 {
     .m_binary = {
     0x7f,0x45,0x4c,0x46,0x02,0x01,0x01,0x41,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0xe0,0x00,
