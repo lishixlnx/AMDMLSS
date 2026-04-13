@@ -2,20 +2,14 @@
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
 
-import multi_head_attention_shaders_gfx1100_reloc;
-import multi_head_attention_shaders_gfx1100_non_reloc;
-import multi_head_attention_shaders_gfx1150_reloc;
-import multi_head_attention_shaders_gfx1150_non_reloc;
-import multi_head_attention_shaders_gfx1201_reloc;
-import multi_head_attention_shaders_gfx1201_non_reloc;
+#include "gfx1100/fp16/shadersBin.hpp"
+#include "gfx1150/fp16/shadersBin.hpp"
+#include "gfx1201/fp16/shadersBin.hpp"
 
-namespace gfx1100_rel = ::mha::wmma::gfx1100::rel;
-namespace gfx1100_nonrel = ::mha::wmma::gfx1100::nonrel;
-namespace gfx1150_rel = ::mha::wmma::gfx1150::rel;
-namespace gfx1150_nonrel = ::mha::wmma::gfx1150::nonrel;
-namespace gfx1201_rel = ::mha::wmma::gfx1201::rel;
-namespace gfx1201_nonrel = ::mha::wmma::gfx1201::nonrel;
-namespace fp16_constants = ::mlss::mha::ck::wmma::fp16;
+namespace gfx1100 = mlss::mha::ck::wmma::fp16::gfx1100;
+namespace gfx1150 = mlss::mha::ck::wmma::fp16::gfx1150;
+namespace gfx1201 = mlss::mha::ck::wmma::fp16::gfx1201;
+namespace fp16_constants = mlss::mha::ck::wmma::fp16;
 
 namespace mlss::mha::ck::wmma
 {
@@ -72,36 +66,23 @@ namespace mlss::mha::ck::wmma
             const std::uint32_t& batchSize, const std::uint32_t& headCount,
             const std::uint32_t& kvSequenceLength, const std::uint32_t& qSequenceLength,
             const std::uint32_t& headDim,
-            const auto& shaderRel, const auto& shaderNonRel,
-            const auto& shaderRelWithStrides, const auto& shaderNonRelWithStrides,
+            const auto& shader,
             const auto& constants, const auto& argConstants, const auto& argConstantsWithStrides)
         {
             auto [grid, blocks] = calcGridAndBlocks<MPerBlock, NPerBlock, BlockSize>(batchSize, headCount, kvSequenceLength, qSequenceLength, headDim);
 
-            Blob relBlob = std::move(*make_binary_blob(shaderRel));
-            relBlob = constants;
-            relBlob = argConstants;
-            relBlob.setGridBlocks(grid, blocks);
+            Blob blob = std::move(*make_binary_blob(shader));
+            blob = constants;
+            blob = argConstants;
+            blob.setGridBlocks(grid, blocks);
 
-            Blob nonRelBlob = std::move(*make_binary_blob(shaderNonRel));
-            nonRelBlob = constants;
-            nonRelBlob = argConstants;
-            nonRelBlob.setGridBlocks(grid, blocks);
+            Blob blobWithStrides = std::move(*make_binary_blob(shader));
+            blobWithStrides = constants;
+            blobWithStrides = argConstantsWithStrides;
+            blobWithStrides.setGridBlocks(grid, blocks);
 
-            Blob relBlobWithStrides = std::move(*make_binary_blob(shaderRelWithStrides));
-            relBlobWithStrides = constants;
-            relBlobWithStrides = argConstantsWithStrides;
-            relBlobWithStrides.setGridBlocks(grid, blocks);
-
-            Blob nonRelBlobWithStrides = std::move(*make_binary_blob(shaderNonRelWithStrides));
-            nonRelBlobWithStrides = constants;
-            nonRelBlobWithStrides = argConstantsWithStrides;
-            nonRelBlobWithStrides.setGridBlocks(grid, blocks);
-
-            binaries.addBlob(std::move(relBlob));
-            binaries.addBlob(std::move(nonRelBlob));
-            binaries.addBlob(std::move(relBlobWithStrides));
-            binaries.addBlob(std::move(nonRelBlobWithStrides));
+            binaries.addBlob(std::move(blob));
+            binaries.addBlob(std::move(blobWithStrides));
         }
 
     } // anonymous namespace
@@ -221,49 +202,94 @@ namespace mlss::mha::ck::wmma
 
         Binaries binaries;
 
-#define MHA_DISPATCH(MPerBlock, NPerBlock, BlockSize, arch, variant, dim_constants, arg_no_strides, arg_with_strides) \
+#define MHA_DISPATCH(MPerBlock, NPerBlock, BlockSize, shaderRef, dim_constants, arg_no_strides, arg_with_strides) \
     populateBlobs<MPerBlock, NPerBlock, BlockSize>(binaries, batchSize, headCount, kvSequenceLength, qSequenceLength, headDim, \
-        arch##_rel::multi_head_attention_typed_double_pointer_##variant##_forward_no_strides_fp16_##arch, \
-        arch##_nonrel::multi_head_attention_typed_double_pointer_##variant##_forward_no_strides_fp16_##arch, \
-        arch##_rel::multi_head_attention_typed_double_pointer_##variant##_forward_with_strides_fp16_##arch, \
-        arch##_nonrel::multi_head_attention_typed_double_pointer_##variant##_forward_with_strides_fp16_##arch, \
-        fp16::dim_constants, fp16::arg_no_strides, fp16::arg_with_strides)
+        shaderRef, \
+        fp16_constants::dim_constants, fp16_constants::arg_no_strides, fp16_constants::arg_with_strides)
 
 #define MHA_ARCH_SWITCH(arch)                                                                                         \
     switch (shader)                                                                                                    \
     {                                                                                                                  \
         case MHAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:                                                      \
-            MHA_DISPATCH(64,80,128, arch, unpacked_128_64x128x80_64x80x64, self_attention_128_64x128x80_64x80x64_forward_CONSTANTS, unpacked_q_k_v_self_attention_ARGS_CONSTANT, unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,80,128, arch::unpacked_self_attention_128_64x128x80_64x80x64_forward_##arch,              \
+                self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,                                              \
+                unpacked_q_k_v_self_attention_ARGS_CONSTANT,                                                          \
+                unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break;                                                   \
         case MHAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:                                                      \
-            MHA_DISPATCH(64,48,128, arch, unpacked_128_64x192x48_64x48x64, self_attention_128_64x192x48_64x48x64_forward_CONSTANTS, unpacked_q_k_v_self_attention_ARGS_CONSTANT, unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::unpacked_self_attention_128_64x192x48_64x48x64_forward_##arch,              \
+                self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,                                              \
+                unpacked_q_k_v_self_attention_ARGS_CONSTANT,                                                          \
+                unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break;                                                   \
         case MHAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:                                                       \
-            MHA_DISPATCH(64,48,128, arch, unpacked_128_64x64x48_64x48x64, cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS, unpacked_q_k_v_cross_attention_ARGS_CONSTANT, unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::unpacked_cross_attention_128_64x64x48_64x48x64_forward_##arch,              \
+                cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,                                              \
+                unpacked_q_k_v_cross_attention_ARGS_CONSTANT,                                                         \
+                unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break;                                                   \
         case MHAAsmShaderWmma::unpacked_fallback_64_32x64x48_32x48x64:                                               \
-            MHA_DISPATCH(32,48,64, arch, unpacked_fallback_64_32x64x48_32x48x64, fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS, unpacked_q_k_v_cross_attention_ARGS_CONSTANT, unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(32,48,64, arch::unpacked_fallback_cross_attention_64_32x64x48_32x48x64_forward_##arch,       \
+                fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,                                      \
+                unpacked_q_k_v_cross_attention_ARGS_CONSTANT,                                                         \
+                unpacked_q_k_v_with_strides_ARGS_CONSTANTS); break;                                                   \
         case MHAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:                                                     \
-            MHA_DISPATCH(64,80,128, arch, packed_kv_128_64x128x80_64x80x64, self_attention_128_64x128x80_64x80x64_forward_CONSTANTS, packed_q_kv_cross_attention_ARGS_CONSTANTS, packed_q_kv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,80,128, arch::self_attention_128_64x128x80_64x80x64_forward_##arch,                       \
+                self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,                                              \
+                packed_q_kv_cross_attention_ARGS_CONSTANTS,                                                            \
+                packed_q_kv_with_strides_ARGS_CONSTANTS); break;                                                      \
         case MHAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:                                                     \
-            MHA_DISPATCH(64,48,128, arch, packed_kv_128_64x192x48_64x48x64, self_attention_128_64x192x48_64x48x64_forward_CONSTANTS, packed_q_kv_cross_attention_ARGS_CONSTANTS, packed_q_kv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::self_attention_128_64x192x48_64x48x64_forward_##arch,                       \
+                self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_q_kv_cross_attention_ARGS_CONSTANTS,                                                            \
+                packed_q_kv_with_strides_ARGS_CONSTANTS); break;                                                      \
         case MHAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:                                                      \
-            MHA_DISPATCH(64,48,128, arch, packed_kv_128_64x64x48_64x48x64, cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS, packed_q_kv_cross_attention_ARGS_CONSTANTS, packed_q_kv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::cross_attention_128_64x64x48_64x48x64_forward_##arch,                       \
+                cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_q_kv_cross_attention_ARGS_CONSTANTS,                                                            \
+                packed_q_kv_with_strides_ARGS_CONSTANTS); break;                                                      \
         case MHAAsmShaderWmma::packed_kv_fallback_64_32x64x48_32x48x64:                                              \
-            MHA_DISPATCH(32,48,64, arch, packed_kv_fallback_64_32x64x48_32x48x64, fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS, packed_q_kv_cross_attention_ARGS_CONSTANTS, packed_q_kv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(32,48,64, arch::fallback_cross_attention_64_32x64x48_32x48x64_forward_##arch,                \
+                fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,                                      \
+                packed_q_kv_cross_attention_ARGS_CONSTANTS,                                                            \
+                packed_q_kv_with_strides_ARGS_CONSTANTS); break;                                                      \
         case MHAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:                                                     \
-            MHA_DISPATCH(64,80,128, arch, packed_qk_128_64x128x80_64x80x64, self_attention_128_64x128x80_64x80x64_forward_CONSTANTS, packed_qk_ARGS_CONSTANTS, packed_qk_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,80,128, arch::self_attention_128_64x128x80_64x80x64_forward_##arch,                       \
+                self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,                                              \
+                packed_qk_ARGS_CONSTANTS,                                                                              \
+                packed_qk_with_strides_ARGS_CONSTANTS); break;                                                        \
         case MHAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:                                                     \
-            MHA_DISPATCH(64,48,128, arch, packed_qk_128_64x192x48_64x48x64, self_attention_128_64x192x48_64x48x64_forward_CONSTANTS, packed_qk_ARGS_CONSTANTS, packed_qk_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::self_attention_128_64x192x48_64x48x64_forward_##arch,                       \
+                self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_qk_ARGS_CONSTANTS,                                                                              \
+                packed_qk_with_strides_ARGS_CONSTANTS); break;                                                        \
         case MHAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:                                                      \
-            MHA_DISPATCH(64,48,128, arch, packed_qk_128_64x64x48_64x48x64, cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS, packed_qk_ARGS_CONSTANTS, packed_qk_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::cross_attention_128_64x64x48_64x48x64_forward_##arch,                       \
+                cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_qk_ARGS_CONSTANTS,                                                                              \
+                packed_qk_with_strides_ARGS_CONSTANTS); break;                                                        \
         case MHAAsmShaderWmma::packed_qk_fallback_64_32x64x48_32x48x64:                                              \
-            MHA_DISPATCH(32,48,64, arch, packed_qk_fallback_64_32x64x48_32x48x64, fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS, packed_qk_ARGS_CONSTANTS, packed_qk_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(32,48,64, arch::fallback_cross_attention_64_32x64x48_32x48x64_forward_##arch,                \
+                fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,                                      \
+                packed_qk_ARGS_CONSTANTS,                                                                              \
+                packed_qk_with_strides_ARGS_CONSTANTS); break;                                                        \
         case MHAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:                                                    \
-            MHA_DISPATCH(64,80,128, arch, packed_qkv_128_64x128x80_64x80x64, self_attention_128_64x128x80_64x80x64_forward_CONSTANTS, packed_qkv_self_attention_ARGS_CONSTANTS, packed_qkv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,80,128, arch::self_attention_128_64x128x80_64x80x64_forward_##arch,                       \
+                self_attention_128_64x128x80_64x80x64_forward_CONSTANTS,                                              \
+                packed_qkv_self_attention_ARGS_CONSTANTS,                                                               \
+                packed_qkv_with_strides_ARGS_CONSTANTS); break;                                                       \
         case MHAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:                                                    \
-            MHA_DISPATCH(64,48,128, arch, packed_qkv_128_64x192x48_64x48x64, self_attention_128_64x192x48_64x48x64_forward_CONSTANTS, packed_qkv_self_attention_ARGS_CONSTANTS, packed_qkv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::self_attention_128_64x192x48_64x48x64_forward_##arch,                       \
+                self_attention_128_64x192x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_qkv_self_attention_ARGS_CONSTANTS,                                                               \
+                packed_qkv_with_strides_ARGS_CONSTANTS); break;                                                       \
         case MHAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:                                                     \
-            MHA_DISPATCH(64,48,128, arch, packed_qkv_128_64x64x48_64x48x64, cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS, packed_qkv_self_attention_ARGS_CONSTANTS, packed_qkv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(64,48,128, arch::cross_attention_128_64x64x48_64x48x64_forward_##arch,                       \
+                cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS,                                              \
+                packed_qkv_self_attention_ARGS_CONSTANTS,                                                               \
+                packed_qkv_with_strides_ARGS_CONSTANTS); break;                                                       \
         case MHAAsmShaderWmma::packed_qkv_fallback_64_32x64x48_32x48x64:                                             \
-            MHA_DISPATCH(32,48,64, arch, packed_qkv_fallback_64_32x64x48_32x48x64, fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS, packed_qkv_self_attention_ARGS_CONSTANTS, packed_qkv_with_strides_ARGS_CONSTANTS); break; \
+            MHA_DISPATCH(32,48,64, arch::fallback_cross_attention_64_32x64x48_32x48x64_forward_##arch,                \
+                fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS,                                      \
+                packed_qkv_self_attention_ARGS_CONSTANTS,                                                               \
+                packed_qkv_with_strides_ARGS_CONSTANTS); break;                                                       \
         default:                                                                                                       \
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedOperator));                         \
     }
