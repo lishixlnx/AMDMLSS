@@ -381,50 +381,41 @@ namespace mlss
 
         std::vector<std::string> kernelNames;
 
-        // Search for kernel symbols
-        // AMD GPU kernels have kernel descriptors with ".kd" suffix in the symbol table
+        // First pass: collect kernel descriptor symbols (*.kd) — the canonical AMDGPU identifiers
         for (std::size_t i = 0; i < numSymbols; ++i)
         {
-            const auto& sym = symbols[i];
-
-            // Skip if name index is out of bounds
-            if (sym.st_name >= strtab->sh_size)
+            if (symbols[i].st_name >= strtab->sh_size)
             {
                 continue;
             }
 
-            const char* symName = strings + sym.st_name;
-            std::string name(symName);
+            std::string name(strings + symbols[i].st_name);
 
-            // AMD GPU kernel descriptors end with ".kd"
             if (endsWith(name, ".kd"))
             {
-                // Remove the ".kd" suffix to get the actual kernel name
                 kernelNames.push_back(name.substr(0, name.size() - 3));
             }
-            // Also check for FUNC symbols that might be kernels (without .kd suffix)
-            else if (ELF64_ST_TYPE(sym.st_info) == STT_FUNC &&
-                     sym.st_shndx != 0 &&
-                     !name.empty() &&
-                     name[0] != '.') // Skip section names
+        }
+
+        // Fallback: if no .kd descriptors, look for mangled FUNC symbols
+        if (kernelNames.empty())
+        {
+            for (std::size_t i = 0; i < numSymbols; ++i)
             {
-                // Check if this looks like a mangled kernel name (starts with _Z for C++ mangling)
-                if (name.size() > 2 && name[0] == '_' && name[1] == 'Z')
+                const auto& sym = symbols[i];
+
+                if (sym.st_name >= strtab->sh_size)
                 {
-                    // Only add if we haven't already found a .kd version
-                    bool alreadyFound = false;
-                    for (const auto& kn : kernelNames)
-                    {
-                        if (kn == name)
-                        {
-                            alreadyFound = true;
-                            break;
-                        }
-                    }
-                    if (!alreadyFound)
-                    {
-                        kernelNames.push_back(name);
-                    }
+                    continue;
+                }
+
+                std::string name(strings + sym.st_name);
+
+                if (ELF64_ST_TYPE(sym.st_info) == STT_FUNC &&
+                    sym.st_shndx != 0 &&
+                    name.size() > 2 && name[0] == '_' && name[1] == 'Z')
+                {
+                    kernelNames.push_back(name);
                 }
             }
         }
