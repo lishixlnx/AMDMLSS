@@ -310,7 +310,7 @@ namespace mlss
     }
 
     bool areGfxIpsCompatible(const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget)
-    {
+    {    
         return (gfxIpHighEnd.major == gfxIpTarget.major) &&
                (gfxIpHighEnd.minor == gfxIpTarget.minor);
     }

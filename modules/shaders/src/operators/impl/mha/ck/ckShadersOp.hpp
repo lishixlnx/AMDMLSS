@@ -11,35 +11,24 @@ namespace mlss::op
 namespace mlss::mha::ck
 {
 
-    // MHA Operator implementation
     class CKMha final : public BackendBase<CKMha, mlss::op::OperatorMHA>
     {
     private:
 
         using base = BackendBase<CKMha, mlss::op::OperatorMHA>;
 
-        friend class BackendBase<CKMha, mlss::op::OperatorMHA>;
-
     public:
 
-        // Default constructor
         CKMha() = default;
 
-        // Constructor
         CKMha(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip);
 
-        // Destructor
         virtual ~CKMha() = default;
 
-        // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-    private:
-
-        // Static method to check capabilities
         static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
     };
 

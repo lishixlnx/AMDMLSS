@@ -6,7 +6,7 @@
 namespace mlss::mha::ck::wmma
 {
 
-    bool isWmmaShadersAvailable(
+    bool isShadersAvailable(
         GfxIpTriple gfxArch,
         const std::uint32_t& sizeHeads,
         const std::uint32_t& kvSequenceLength,
@@ -14,7 +14,7 @@ namespace mlss::mha::ck::wmma
         const std::uint32_t& packing,
         const std::uint32_t& dataType);
 
-    std::expected<Binaries, std::error_code> getWmmaShadersBlob(
+    std::expected<Binaries, std::error_code> getShadersBlob(
         GfxIpTriple gfxArch,
         const std::uint32_t& batchSize,
         const std::uint32_t& headCount,

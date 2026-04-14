@@ -2,33 +2,17 @@
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
 
-import grouped_query_attention_shaders_gfx1100_reloc;
-import grouped_query_attention_shaders_gfx1100_non_reloc;
-import grouped_query_attention_shaders_gfx1150_reloc;
-import grouped_query_attention_shaders_gfx1150_non_reloc;
-import grouped_query_attention_shaders_gfx1201_reloc;
-import grouped_query_attention_shaders_gfx1201_non_reloc;
+#include "gfx1100/fp16/shadersBin.hpp"
+#include "gfx1150/fp16/shadersBin.hpp"
+#include "gfx1201/fp16/shadersBin.hpp"
+
+namespace gfx1100 = mlss::gqa::ck::wmma::fp16::gfx1100;
+namespace gfx1150 = mlss::gqa::ck::wmma::fp16::gfx1150;
+namespace gfx1201 = mlss::gqa::ck::wmma::fp16::gfx1201;
+namespace fp16_constants = mlss::gqa::ck::wmma::fp16;
 
 namespace mlss::gqa::ck::wmma
 {
-    namespace fp16
-    {
-        namespace gfx1100
-        {
-            namespace rel = ::gqa::wmma::gfx1100::rel;
-            namespace nonrel = ::gqa::wmma::gfx1100::nonrel;
-        } // namespace gfx1100
-        namespace gfx1150
-        {
-            namespace rel = ::gqa::wmma::gfx1150::rel;
-            namespace nonrel = ::gqa::wmma::gfx1150::nonrel;
-        } // namespace gfx1150
-        namespace gfx1201
-        {
-            namespace rel = ::gqa::wmma::gfx1201::rel;
-            namespace nonrel = ::gqa::wmma::gfx1201::nonrel;
-        } // namespace gfx1201
-    } // namespace fp16
     using mlss::isGfx110x;
     using mlss::isGfx115x;
     using mlss::isGfx120x;
@@ -80,41 +64,28 @@ namespace mlss::gqa::ck::wmma
             const std::uint32_t& batchSize, const std::uint32_t& qHeadCount,
             const std::uint32_t& kvSequenceLength, const std::uint32_t& qSequenceLength,
             const std::uint32_t& headDim,
-            const auto& shaderRel, const auto& shaderNonRel,
-            const auto& shaderRelWithStrides, const auto& shaderNonRelWithStrides,
+            const auto& shader,
             const auto& constants, const auto& argConstantsNoStrides, const auto& argConstantsWithStrides)
         {
             auto [grid, blocks] = calcGridAndBlocks<MPerBlock, NPerBlock, BlockSize>(batchSize, qHeadCount, kvSequenceLength, qSequenceLength, headDim);
 
-            Blob relBlob = std::move(*make_binary_blob(shaderRel));
-            relBlob = constants;
-            relBlob = argConstantsNoStrides;
-            relBlob.setGridBlocks(grid, blocks);
+            Blob blob = std::move(*make_binary_blob(shader));
+            blob = constants;
+            blob = argConstantsNoStrides;
+            blob.setGridBlocks(grid, blocks);
 
-            Blob nonRelBlob = std::move(*make_binary_blob(shaderNonRel));
-            nonRelBlob = constants;
-            nonRelBlob = argConstantsNoStrides;
-            nonRelBlob.setGridBlocks(grid, blocks);
+            Blob blobWithStrides = std::move(*make_binary_blob(shader));
+            blobWithStrides = constants;
+            blobWithStrides = argConstantsWithStrides;
+            blobWithStrides.setGridBlocks(grid, blocks);
 
-            Blob relBlobWithStrides = std::move(*make_binary_blob(shaderRelWithStrides));
-            relBlobWithStrides = constants;
-            relBlobWithStrides = argConstantsWithStrides;
-            relBlobWithStrides.setGridBlocks(grid, blocks);
-
-            Blob nonRelBlobWithStrides = std::move(*make_binary_blob(shaderNonRelWithStrides));
-            nonRelBlobWithStrides = constants;
-            nonRelBlobWithStrides = argConstantsWithStrides;
-            nonRelBlobWithStrides.setGridBlocks(grid, blocks);
-
-            binaries.addBlob(std::move(relBlob));
-            binaries.addBlob(std::move(nonRelBlob));
-            binaries.addBlob(std::move(relBlobWithStrides));
-            binaries.addBlob(std::move(nonRelBlobWithStrides));
+            binaries.addBlob(std::move(blob));
+            binaries.addBlob(std::move(blobWithStrides));
         }
 
     } // anonymous namespace
 
-    bool isWmmaShadersAvailable(
+    bool isShadersAvailable(
         GfxIpTriple gfxArch,
         const std::uint32_t& sizeHeads,
         const std::uint32_t& kvSequenceLength,
@@ -134,7 +105,7 @@ namespace mlss::gqa::ck::wmma
         return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || ((qSequenceLength == kvSequenceLength) && (sizeHeads <= 80));
     }
 
-    std::expected<Binaries, std::error_code> getWmmaShadersBlob(
+    std::expected<Binaries, std::error_code> getShadersBlob(
         GfxIpTriple gfxArch,
         const std::uint32_t& batchSize,
         const std::uint32_t& qHeadCount,
@@ -146,7 +117,7 @@ namespace mlss::gqa::ck::wmma
         bool useStrides,
         const std::uint32_t& dataType)
     {
-        if (!isWmmaShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, dataType))
+        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, dataType))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }
@@ -287,49 +258,94 @@ namespace mlss::gqa::ck::wmma
 
         Binaries binaries;
 
-#define GQA_DISPATCH(MPerBlock, NPerBlock, BlockSize, ns, variant, dim_constants, arg_no_strides, arg_with_strides) \
+#define GQA_DISPATCH(MPerBlock, NPerBlock, BlockSize, shaderRef, dim_constants, arg_no_strides, arg_with_strides) \
     populateBlobs<MPerBlock, NPerBlock, BlockSize>(binaries, batchSize, qHeadCount, kvSequenceLength, qSequenceLength, headDim, \
-        fp16::ns::rel::grouped_query_attention_typed_double_pointer_##variant##_forward_wmma_no_strides_fp16_##ns, \
-        fp16::ns::nonrel::grouped_query_attention_typed_double_pointer_##variant##_forward_wmma_no_strides_fp16_##ns, \
-        fp16::ns::rel::grouped_query_attention_typed_double_pointer_##variant##_forward_wmma_with_strides_fp16_##ns, \
-        fp16::ns::nonrel::grouped_query_attention_typed_double_pointer_##variant##_forward_wmma_with_strides_fp16_##ns, \
-        fp16::dim_constants, fp16::arg_no_strides, fp16::arg_with_strides)
+        shaderRef, \
+        fp16_constants::dim_constants, fp16_constants::arg_no_strides, fp16_constants::arg_with_strides)
 
-#define GQA_ARCH_SWITCH(ns)                                                                                           \
+#define GQA_ARCH_SWITCH(arch)                                                                                         \
     switch (shader)                                                                                                    \
     {                                                                                                                  \
         case GQAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:                                                     \
-            GQA_DISPATCH(64,80,128, ns, packed_qk_128_64x128x80_64x80x64, gqa_128_64x128x80_64x80x64_CONSTANTS, packed_qk_double_pointer_ARGS_CONSTANTS, packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,80,128, arch::packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
+                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:                                                     \
-            GQA_DISPATCH(64,48,128, ns, packed_qk_128_64x192x48_64x48x64, gqa_128_64x192x48_64x48x64_CONSTANTS, packed_qk_double_pointer_ARGS_CONSTANTS, packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
+                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:                                                      \
-            GQA_DISPATCH(64,48,128, ns, packed_qk_128_64x64x48_64x48x64, gqa_128_64x64x48_64x48x64_CONSTANTS, packed_qk_double_pointer_ARGS_CONSTANTS, packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
+                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_qk_64_32x64x48_32x48x64:                                                       \
-            GQA_DISPATCH(32,48,64, ns, packed_qk_fallback_64_32x64x48_32x48x64, gqa_fallback_64_32x64x48_32x48x64_CONSTANTS, packed_qk_double_pointer_ARGS_CONSTANTS, packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(32,48,64, arch::packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
+                gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
+                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:                                                     \
-            GQA_DISPATCH(64,80,128, ns, packed_kv_128_64x128x80_64x80x64, gqa_128_64x128x80_64x80x64_CONSTANTS, packed_kv_double_pointer_ARGS_CONSTANTS, packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,80,128, arch::packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
+                packed_kv_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_kv_128_64x192x48_64x48x64:                                                     \
-            GQA_DISPATCH(64,48,128, ns, packed_kv_128_64x192x48_64x48x64, gqa_128_64x192x48_64x48x64_CONSTANTS, packed_kv_double_pointer_ARGS_CONSTANTS, packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
+                packed_kv_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_kv_128_64x64x48_64x48x64:                                                      \
-            GQA_DISPATCH(64,48,128, ns, packed_kv_128_64x64x48_64x48x64, gqa_128_64x64x48_64x48x64_CONSTANTS, packed_kv_double_pointer_ARGS_CONSTANTS, packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
+                packed_kv_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_kv_64_32x64x48_32x48x64:                                                       \
-            GQA_DISPATCH(32,48,64, ns, packed_kv_fallback_64_32x64x48_32x48x64, gqa_fallback_64_32x64x48_32x48x64_CONSTANTS, packed_kv_double_pointer_ARGS_CONSTANTS, packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(32,48,64, arch::packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
+                gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
+                packed_kv_double_pointer_ARGS_CONSTANTS,                                                              \
+                packed_kv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_qkv_128_64x128x80_64x80x64:                                                    \
-            GQA_DISPATCH(64,80,128, ns, packed_qkv_128_64x128x80_64x80x64, gqa_128_64x128x80_64x80x64_CONSTANTS, packed_qkv_double_pointer_ARGS_CONSTANTS, packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,80,128, arch::packed_qkv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,  \
+                gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
+                packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
+                packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
         case GQAAsmShaderWmma::packed_qkv_128_64x192x48_64x48x64:                                                    \
-            GQA_DISPATCH(64,48,128, ns, packed_qkv_128_64x192x48_64x48x64, gqa_128_64x192x48_64x48x64_CONSTANTS, packed_qkv_double_pointer_ARGS_CONSTANTS, packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_qkv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_##arch,  \
+                gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
+                packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
+                packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
         case GQAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:                                                     \
-            GQA_DISPATCH(64,48,128, ns, packed_qkv_128_64x64x48_64x48x64, gqa_128_64x64x48_64x48x64_CONSTANTS, packed_qkv_double_pointer_ARGS_CONSTANTS, packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,   \
+                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
+                packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
+                packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
         case GQAAsmShaderWmma::packed_qkv_64_32x64x48_32x48x64:                                                      \
-            GQA_DISPATCH(32,48,64, ns, packed_qkv_fallback_64_32x64x48_32x48x64, gqa_fallback_64_32x64x48_32x48x64_CONSTANTS, packed_qkv_double_pointer_ARGS_CONSTANTS, packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(32,48,64, arch::packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
+                gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
+                packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
+                packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
         case GQAAsmShaderWmma::unpacked_128_64x128x80_64x80x64:                                                      \
-            GQA_DISPATCH(64,80,128, ns, unpacked_128_64x128x80_64x80x64, gqa_128_64x128x80_64x80x64_CONSTANTS, unpacked_double_pointer_ARGS_CONSTANTS, unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,80,128, arch::unpacked_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,    \
+                gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
+                unpacked_double_pointer_ARGS_CONSTANTS,                                                               \
+                unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break;                                          \
         case GQAAsmShaderWmma::unpacked_128_64x192x48_64x48x64:                                                      \
-            GQA_DISPATCH(64,48,128, ns, unpacked_128_64x192x48_64x48x64, gqa_128_64x192x48_64x48x64_CONSTANTS, unpacked_double_pointer_ARGS_CONSTANTS, unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::unpacked_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_##arch,    \
+                gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
+                unpacked_double_pointer_ARGS_CONSTANTS,                                                               \
+                unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break;                                          \
         case GQAAsmShaderWmma::unpacked_128_64x64x48_64x48x64:                                                       \
-            GQA_DISPATCH(64,48,128, ns, unpacked_128_64x64x48_64x48x64, gqa_128_64x64x48_64x48x64_CONSTANTS, unpacked_double_pointer_ARGS_CONSTANTS, unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(64,48,128, arch::unpacked_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,    \
+                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
+                unpacked_double_pointer_ARGS_CONSTANTS,                                                               \
+                unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break;                                          \
         case GQAAsmShaderWmma::unpacked_64_32x64x48_32x48x64:                                                        \
-            GQA_DISPATCH(32,48,64, ns, unpacked_fallback_64_32x64x48_32x48x64, gqa_fallback_64_32x64x48_32x48x64_CONSTANTS, unpacked_double_pointer_ARGS_CONSTANTS, unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break; \
+            GQA_DISPATCH(32,48,64, arch::unpacked_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
+                gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
+                unpacked_double_pointer_ARGS_CONSTANTS,                                                               \
+                unpacked_with_strides_double_pointer_ARGS_CONSTANTS); break;                                          \
         default:                                                                                                       \
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedOperator));                         \
     }

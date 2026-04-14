@@ -6,7 +6,7 @@
 - Replace hard-coded values with named constants
 - Use descriptive constant names that explain the value's purpose
 - Keep constants at the top of the file or in a dedicated constants file
-- Do not use equation and for integral type constants use hexadecimal values.
+- Do not use equation and for integral type constants use decimal values.
 - For floating points constants use floating point suffix
 
 ### Meaningful Names

@@ -6,10 +6,10 @@ namespace mlss::gqa::ck::wmma::fp16
 {
     // Shader constants for different GQA configurations
     // Format: { MPerBlock, NPerBlock, BlockSize, ... }
-    constexpr auto gqa_128_64x128x80_64x80x64_CONSTANTS = std::to_array<std::uint32_t>({64, 80, 128, 1, 1});
-    constexpr auto gqa_128_64x192x48_64x48x64_CONSTANTS = std::to_array<std::uint32_t>({64, 48, 128, 1, 1});
-    constexpr auto gqa_128_64x64x48_64x48x64_CONSTANTS = std::to_array<std::uint32_t>({64, 48, 128, 1, 1});
-    constexpr auto gqa_fallback_64_32x64x48_32x48x64_CONSTANTS = std::to_array<std::uint32_t>({32, 48, 64, 1, 1});
+    constexpr std::array<std::uint32_t, 5> gqa_128_64x128x80_64x80x64_CONSTANTS = {64, 80, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> gqa_128_64x192x48_64x48x64_CONSTANTS = {64, 48, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> gqa_128_64x64x48_64x48x64_CONSTANTS = {64, 48, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> gqa_fallback_64_32x64x48_32x48x64_CONSTANTS = {32, 48, 64, 1, 1};
 
     // Argument definitions for unpacked GQA (double pointer variant)
     const std::array<MLSSarg, 11> unpacked_double_pointer_ARGS_CONSTANTS = {{{0, MLSS_FLOAT16, true, 2, true, true, false, "Q"},

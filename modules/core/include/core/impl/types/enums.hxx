@@ -3,65 +3,67 @@
 namespace mlss
 {
     //=====================================================================================================================
-    enum class DataTypeFlags : std::uint32_t
+    enum class DataTypeFlags : std::uint64_t
     {
-        INT4,
-        UINT4,
-        INT8,
-        UINT8,
-        INT16,
-        UINT16,
-        INT32,
-        UINT32,
-        INT64,
-        UINT64,
-        FLOAT4,
-        FLOAT8,
-        FLOAT16,
-        FLOAT32,
-        FLOAT64,
-        BFLOAT4,
-        BFLOAT8,
-        BFLOAT16
+        INT4       = MLSS_INT4,
+        UINT4      = MLSS_UINT4,
+        INT8       = MLSS_INT8,
+        UINT8      = MLSS_UINT8,
+        INT16      = MLSS_INT16,
+        UINT16     = MLSS_UINT16,
+        INT32      = MLSS_INT32,
+        UINT32     = MLSS_UINT32,
+        INT64      = MLSS_INT64,
+        UINT64     = MLSS_UINT64,
+        FLOAT4     = MLSS_FLOAT4,
+        FLOAT8     = MLSS_FLOAT8,
+        FLOAT8_FNUZ = MLSS_FLOAT8_FNUZ,
+        FLOAT8_OCP = MLSS_FLOAT8_OCP,
+        FLOAT16    = MLSS_FLOAT16,
+        FLOAT32    = MLSS_FLOAT32,
+        FLOAT64    = MLSS_FLOAT64,
+        BFLOAT4    = MLSS_BFLOAT4,
+        BFLOAT8    = MLSS_BFLOAT8,
+        BFLOAT8_FNUZ = MLSS_BFLOAT8_FNUZ,
+        BFLOAT8_OCP = MLSS_BFLOAT8_OCP,
+        BFLOAT16   = MLSS_BFLOAT16,
     };
 
     //=====================================================================================================================
-    enum class MCDPrecisionFlags : uint64_t
+    enum class PrecisionFlags : std::uint32_t
     {
-        FLOAT32,
-        FLOAT16,
-        FLOAT16_ADD_FLOAT32,
-
-        COUNT,
+        FLOAT32             = MLSS_PRECISION_FLOAT32,
+        FLOAT16             = MLSS_PRECISION_FLOAT16,
+        FLOAT16_ADD_FLOAT32 = MLSS_PRECISION_FLOAT16_ADD_FLOAT32,
+        COUNT               = MLSS_PRECISION_COUNT,
     };
 
     //=====================================================================================================================
-    enum class MCDActivationFunctionFlags : uint64_t
+    enum class ActivationFunctionFlags : std::uint32_t
     {
-        ELU,
-        HARDMAX,
-        HARD_SIGMOID,
-        IDENTITY,
-        LEAKY_RELU,
-        LINEAR,
-        LOG_SOFTMAX,
-        PARAMETERIZED_RELU,
-        PARAMETRIC_SOFTPLUS,
-        RELU,
-        SCALED_ELU,
-        SCALED_TANH,
-        SIGMOID,
-        SOFTMAX,
-        SOFTPLUS,
-        SOFTSIGN,
-        TANH,
-        THRESHOLDED_RELU,
-
-        COUNT,
+        ELU                 = MLSS_ACTIVATION_ELU,
+        HARDMAX             = MLSS_ACTIVATION_HARDMAX,
+        HARD_SIGMOID        = MLSS_ACTIVATION_HARD_SIGMOID,
+        IDENTITY            = MLSS_ACTIVATION_IDENTITY,
+        LEAKY_RELU          = MLSS_ACTIVATION_LEAKY_RELU,
+        LINEAR              = MLSS_ACTIVATION_LINEAR,
+        LOG_SOFTMAX         = MLSS_ACTIVATION_LOG_SOFTMAX,
+        PARAMETERIZED_RELU  = MLSS_ACTIVATION_PARAMETERIZED_RELU,
+        PARAMETRIC_SOFTPLUS = MLSS_ACTIVATION_PARAMETRIC_SOFTPLUS,
+        RELU                = MLSS_ACTIVATION_RELU,
+        SCALED_ELU          = MLSS_ACTIVATION_SCALED_ELU,
+        SCALED_TANH         = MLSS_ACTIVATION_SCALED_TANH,
+        SIGMOID             = MLSS_ACTIVATION_SIGMOID,
+        SOFTMAX             = MLSS_ACTIVATION_SOFTMAX,
+        SOFTPLUS            = MLSS_ACTIVATION_SOFTPLUS,
+        SOFTSIGN            = MLSS_ACTIVATION_SOFTSIGN,
+        TANH                = MLSS_ACTIVATION_TANH,
+        THRESHOLDED_RELU    = MLSS_ACTIVATION_THRESHOLDED_RELU,
+        COUNT                = MLSS_ACTIVATION_COUNT,
     };
 
     //=====================================================================================================================
-    enum class OperatorFlag : uint64_t
+    enum class OperatorFlag : std::uint32_t
     {
         GEMM,
         QUANTIZED_GEMM,
@@ -75,7 +77,7 @@ namespace mlss
     };
 
     //=====================================================================================================================
-    enum class GpuCodenameFlags
+    enum class GpuCodenameFlags : std::uint32_t
     {
         Tahiti,
         Pitcairn,
@@ -187,7 +189,7 @@ namespace mlss
         Unknown
     };
 
-    enum class AsicsTypesFlags
+    enum class AsicsTypesFlags : std::uint32_t
     {
         APU,
         dGPU,
@@ -195,7 +197,14 @@ namespace mlss
         unknown
     };
 
-    enum class ShaderTypesFlags
+    enum class BinaryTypeFlags : std::uint32_t
+    {
+        ELF  = 0x01u,
+        DXIL = 0x02u,
+    };
+
+    //=====================================================================================================================
+    enum class ShaderTypesFlags : std::uint64_t
     {
         UNKNOWN = 1 << 0,
         WMMA = 1 << 1,
