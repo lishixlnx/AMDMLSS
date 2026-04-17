@@ -50,6 +50,7 @@ build_single() {
     
     # Configure with CMake preset
     echo "Configuring with CMake preset: $preset..."
+	pwd
     cmake --preset "$preset"
     
     if [ $? -ne 0 ]; then
@@ -253,6 +254,17 @@ if [[ "$COMPILER" == "all" ]]; then
     
     # Build all combinations
     for build_type in "${BUILD_TYPES[@]}"; do
+        # Build with vs2026
+        echo "========================================"
+        echo "Building with vs2026-${build_type}"
+        echo "========================================"
+        build_single "vs2026-${build_type}"
+        if [ $? -ne 0 ]; then
+            echo "vs2026-${build_type} build failed!"
+            exit 1
+        fi
+        echo ""
+        
         # Build with vs2022
         echo "========================================"
         echo "Building with vs2022-${build_type}"
@@ -297,7 +309,7 @@ if [[ "$COMPILER" == "all" ]]; then
 fi
 
 # Validate single compiler
-if [[ "$COMPILER" != "vs2022" && "$COMPILER" != "clang" ]]; then
+if [[ "$COMPILER" != "vs2022" && "$COMPILER" != "vs2026" && "$COMPILER" != "clang" ]]; then
     echo "Invalid compiler: $COMPILER"
     usage
 fi
