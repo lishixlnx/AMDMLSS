@@ -177,7 +177,6 @@ flowchart TD
         opMha[OperatorMHA]
         cases[CaseRegistry]
         backs[BackendRegistry]
-        selector[BackendSelector]
     end
     samples --> entry
     entry --> backend
@@ -185,8 +184,7 @@ flowchart TD
     backend --> opMha
     opConv --> cases
     cases --> backs
-    opMha --> selector
-    selector --> backs
+    opMha --> backs
 ```
 
 ### Example scene: convolution (`MLSS_CONV`)
@@ -293,13 +291,13 @@ flowchart LR
 
 Inside **Conv1x1** caps when `R,S == 1`, backends are consulted **Misa first, else HIP** ([conv1x1.cpp](modules/shaders/src/operators/impl/conv/1x1/conv1x1.cpp)). Inside **ConvMxN** caps, backends are tried **Rage, then Fury, then Base** until one yields a non-zero score ([convMxN.cpp](modules/shaders/src/operators/impl/conv/mxn/convMxN.cpp)). **DilatedConv** caps use the HIP entry when registered ([dilatedConv.cpp](modules/shaders/src/operators/impl/conv/dilated/dilatedConv.cpp)).
 
-**Contrast with MHA/GQA:** those operators use **`BackendSelector`**: every registered backend gets a caps score and the **highest score wins**. Convolution instead uses **hand-written case and backend order** in the `.cpp` files above, so the diagram is the literal control flow.
+**Contrast with MHA/GQA:** those operators use **`BackendSelector`** at the operator level: every registered backend gets a caps score and the **highest score wins**. The three **live** Conv cases (Conv1x1, ConvMxN, DilatedConv) instead use **hand-written backend order** in the `.cpp` files above, so the diagrams are the literal control flow. However, `BackendSelector` is not exclusive to operator-level selection — individual **Conv cases** can use it too. `DepthWiseConv` (WIP, not on the live dispatch path yet) already delegates to `BackendSelector<DepthWiseConv>::select` in its `getBinaries` ([depthWiseConv.cpp](modules/shaders/src/operators/impl/conv/depthWise/depthWiseConv.cpp)), establishing the pattern for future cases that prefer score-based selection over a fixed try order.
 
 | Concept | Template / type | Role |
 |---------|-----------------|------|
 | Case | `CaseBase<Derived, OperatorType>` | Registers one **algorithm family** in `CaseRegistry<OperatorType>` (Conv). |
 | Backend | `BackendBase<Derived, ParentType>` | Registers one **implementation** in `BackendRegistry<ParentType>`. |
-| Auto pick | `BackendSelector<OperatorMHA>` (etc.) | Picks backend with best **caps score** among registered backends. |
+| Auto pick | `BackendSelector<OperatorMHA>` (etc.), `BackendSelector<DepthWiseConv>` (WIP) | Picks backend with best **caps score** among registered backends. Used at operator level (MHA, GQA) or at case level (DepthWiseConv). |
 
 **Registration trick:** static members run `registerCase` / `registerBackend` at startup. You still add **`template class mlss::CaseBase<…>`** or **`template class mlss::BackendBase<…>`** in a `.cpp` so the linker instantiates that registration (examples: [conv.cpp](modules/shaders/src/operators/conv.cpp), [mha.cpp](modules/shaders/src/operators/mha.cpp), [convMxN.cpp](modules/shaders/src/operators/impl/conv/mxn/convMxN.cpp)).
 
