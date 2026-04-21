@@ -12,6 +12,7 @@ usage() {
     echo "  --clean-up               Remove all build directories before building"
     echo "  --build-sample-tests     Build sample tests but don't run them"
     echo "  --run-sample-tests       Build and run sample tests (or just run if already built)"
+    echo "  --build-all-tests        Build sample tests, mlss-tester and unit tests"
     echo "  -d, --deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)"
     echo ""
     echo "  When using -c all, builds with all supported compilers."
@@ -67,7 +68,67 @@ build_single() {
     fi
     
     echo "$preset build completed successfully!"
-    
+
+    # Build all tests (mlss-tester + unit tests + sample tests)
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+        echo ""
+        echo "Building amd-mlss-tester library..."
+        local tester_src="${BASH_SOURCE[0]%/*}/3rdparty/amd-mlss-tester"
+        local tester_build="build/mlss-tester-${preset}"
+        local tester_install="${tester_src}/install"
+
+        local tester_cmake_args=(-DCMAKE_BUILD_TYPE="${build_config^}"
+                                  -DCMAKE_INSTALL_PREFIX="$tester_install"
+                                  -DMLSS_ENABLE_HIP=ON
+                                  -DBUILD_APP=OFF
+                                  -DBUILD_TESTING=OFF)
+
+        if [[ "$preset" == clang-* ]]; then
+            tester_cmake_args+=(-G Ninja
+                                -DCMAKE_CXX_COMPILER="${HIP_PATH:-/opt/rocm}/bin/clang++"
+                                "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
+        elif [[ "$preset" == vs2022-* ]]; then
+            tester_cmake_args+=(-G "Visual Studio 17 2022" -A x64)
+        fi
+
+        cmake "${tester_cmake_args[@]}" -S "$tester_src" -B "$tester_build"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester configuration failed!"
+            return 1
+        fi
+
+        cmake --build "$tester_build" --config "${build_config^}"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester build failed!"
+            return 1
+        fi
+
+        cmake --install "$tester_build" --config "${build_config^}"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester install failed!"
+            return 1
+        fi
+        echo "amd-mlss-tester built and installed successfully!"
+
+        echo ""
+        echo "Reconfiguring with BUILD_SAMPLES=ON for $preset..."
+        cmake --preset "$preset" -DBUILD_SAMPLES=ON
+
+        if [ $? -ne 0 ]; then
+            echo "CMake reconfiguration failed for $preset!"
+            return 1
+        fi
+
+        echo "Building all tests for $preset..."
+        cmake --build "build/${preset}" --config "${build_config^}"
+
+        if [ $? -ne 0 ]; then
+            echo "All-tests build failed for $preset!"
+            return 1
+        fi
+        echo "All tests built successfully!"
+    fi
+
     # Build sample tests if requested
     if [[ "$BUILD_SAMPLE_TESTS" == "true" ]] || [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
         echo ""
@@ -155,6 +216,7 @@ BUILD_TYPE_SPECIFIED=false
 CLEAN_UP_REQUESTED=false
 BUILD_SAMPLE_TESTS=false
 RUN_SAMPLE_TESTS=false
+BUILD_ALL_TESTS=false
 DEPLOY=false
 DEPLOY_PATH="./amdmlss_redist"
 
@@ -182,6 +244,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --run-sample-tests)
             RUN_SAMPLE_TESTS=true
+            shift
+            ;;
+        --build-all-tests)
+            BUILD_ALL_TESTS=true
             shift
             ;;
         -d|--deploy)
