@@ -153,23 +153,23 @@ GenericConvParams buildConvParams(const std::vector<Attribute>& attributes)
         }
         else if (attribute.is(MLSS_ATTR_CONV_DOFFSET))
         {
-            params.dOffset = attribute.value<std::uint64_t>();
+            params.dOffset = attribute.value<std::uint32_t>();
         }
         else if (attribute.is(MLSS_ATTR_CONV_OOFFSET))
         {
-            params.oOffset = attribute.value<std::uint64_t>();
+            params.oOffset = attribute.value<std::uint32_t>();
         }
         else if (attribute.is(MLSS_ATTR_CONV_FOFFSET))
         {
-            params.fOffset = attribute.value<std::uint64_t>();
+            params.fOffset = attribute.value<std::uint32_t>();
         }
         else if (attribute.is(MLSS_ATTR_CONV_BOFFSET))
         {
-            params.bOffset = attribute.value<std::uint64_t>();
+            params.bOffset = attribute.value<std::uint32_t>();
         }
         else if (attribute.is(MLSS_ATTR_CONV_DATATYPE))
         {
-            params.dataType = static_cast<DataTypeFlags>(attribute.value<std::uint64_t>());
+            params.dataType = static_cast<DataTypeFlags>(attribute.value<std::uint32_t>());
         }
         else if (attribute.is(MLSS_ATTR_CONV_PRECISION))
         {

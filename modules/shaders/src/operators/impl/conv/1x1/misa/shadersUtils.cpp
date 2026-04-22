@@ -332,7 +332,7 @@ namespace mlss::conv::one_by_one::misa
             }
          }
 
-         isFullySupported = isSupported && ((params.filterStrideY != 1) || (params.filterStrideX != 1));
+         isFullySupported = isSupported && ((params.filterStrideX == 1) || (params.filterStrideY == 1));
 
          MetaCmdCaps ret;
 

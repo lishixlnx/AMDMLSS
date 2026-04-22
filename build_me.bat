@@ -11,8 +11,6 @@ set BUILD_ALL_TESTS=0
 set DEPLOY=
 set DEPLOY_PATH=./amdmlss_redist
 
-goto :parse_args
-
 :: Function to display usage
 :usage
 echo Usage: %0 [-c^|--compiler ^<compiler^>] [-b^|--build ^<build_type^>] [options]
@@ -153,6 +151,18 @@ if /i "%COMPILER%"=="all" (
     
     :: Build all combinations
     for %%t in (%BUILD_TYPES%) do (
+        :: Build with vs2026
+        echo ========================================
+        echo Building with vs2026-%%t
+        echo ========================================
+        set PRESET=vs2026-%%t
+        call :build_single
+        if !errorlevel! neq 0 (
+            echo vs2026-%%t build failed!
+            exit /b 1
+        )
+        echo.
+        
         :: Build with vs2022
         echo ========================================
         echo Building with vs2022-%%t
@@ -198,7 +208,7 @@ if /i "%COMPILER%"=="all" (
 )
 
 :: Validate single compiler
-if /i not "%COMPILER%"=="vs2022" if /i not "%COMPILER%"=="clang" (
+if /i not "%COMPILER%"=="vs2022" if /i not "%COMPILER%"=="vs2026" if /i not "%COMPILER%"=="clang" (
     echo Invalid compiler: %COMPILER%
     goto :usage
 )
