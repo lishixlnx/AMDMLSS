@@ -12,6 +12,7 @@ usage() {
     echo "  --clean-up               Remove all build directories before building"
     echo "  --build-sample-tests     Build sample tests but don't run them"
     echo "  --run-sample-tests       Build and run sample tests (or just run if already built)"
+    echo "  --build-all-tests        Build sample tests, mlss-tester and unit tests"
     echo "  -d, --deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)"
     echo ""
     echo "  When using -c all, builds with all supported compilers."
@@ -48,27 +49,88 @@ build_single() {
     local preset=$1
     local build_config=${preset##*-}  # Extract build type from preset name
     
+    # Build mlss-tester BEFORE the main project so the correct config is installed
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+        echo ""
+        echo "Building amd-mlss-tester library..."
+        local tester_src="${BASH_SOURCE[0]%/*}/3rdparty/amd-mlss-tester"
+        local tester_install="${tester_src}/install"
+
+        # Map main-project preset to the matching mlss-tester preset
+        local tester_preset=""
+        case "$preset" in
+            clang-debug)    tester_preset="clang-lib-static-debug"   ;;
+            clang-release)  tester_preset="clang-lib-static-release" ;;
+            vs2022-*)       tester_preset="vs2022-lib-static"        ;;
+            vs2026-*)       tester_preset="vs2026-lib-static"        ;;
+            *)
+                echo "No matching mlss-tester preset for '$preset'!"
+                return 1
+                ;;
+        esac
+
+        export HIP_PATH="${HIP_PATH:-C:/opt/rocm}"
+
+        local tester_config_args=(--preset "$tester_preset"
+                                  -DCMAKE_INSTALL_PREFIX="$tester_install"
+                                  -DMLSS_ENABLE_HIP=ON
+                                  -DBUILD_APP=OFF
+                                  -DBUILD_TESTING=OFF)
+
+        if [[ "$preset" == clang-* ]]; then
+            tester_config_args+=("-DCMAKE_CXX_COMPILER=${HIP_PATH}/bin/clang++.exe"
+                                 "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
+        fi
+
+        cmake "${tester_config_args[@]}" -S "$tester_src"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester configuration failed!"
+            return 1
+        fi
+
+        cmake --build "${tester_src}/build/${tester_preset}" --config "${build_config^}"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester build failed!"
+            return 1
+        fi
+
+        cmake --install "${tester_src}/build/${tester_preset}" --config "${build_config^}"
+        if [ $? -ne 0 ]; then
+            echo "amd-mlss-tester install failed!"
+            return 1
+        fi
+        echo "amd-mlss-tester built and installed successfully!"
+    fi
+
     # Configure with CMake preset
+    echo ""
     echo "Configuring with CMake preset: $preset..."
-	pwd
-    cmake --preset "$preset"
-    
+    local config_args=(--preset "$preset")
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+        config_args+=(-DBUILD_SAMPLES=ON)
+    fi
+    cmake "${config_args[@]}"
+
     if [ $? -ne 0 ]; then
         echo "CMake configuration failed for $preset!"
         return 1
     fi
-    
-    # Build the project
+
+    # Build the project (including unit tests when mlss-tester is available)
     echo "Building project..."
     cmake --build "build/${preset}" --config "${build_config^}"
-    
+
     if [ $? -ne 0 ]; then
         echo "Build failed for $preset!"
         return 1
     fi
-    
+
     echo "$preset build completed successfully!"
-    
+
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+        echo "All tests built successfully!"
+    fi
+
     # Build sample tests if requested
     if [[ "$BUILD_SAMPLE_TESTS" == "true" ]] || [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
         echo ""
@@ -156,6 +218,7 @@ BUILD_TYPE_SPECIFIED=false
 CLEAN_UP_REQUESTED=false
 BUILD_SAMPLE_TESTS=false
 RUN_SAMPLE_TESTS=false
+BUILD_ALL_TESTS=false
 DEPLOY=false
 DEPLOY_PATH="./amdmlss_redist"
 
@@ -183,6 +246,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --run-sample-tests)
             RUN_SAMPLE_TESTS=true
+            shift
+            ;;
+        --build-all-tests)
+            BUILD_ALL_TESTS=true
             shift
             ;;
         -d|--deploy)

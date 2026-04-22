@@ -1,0 +1,3 @@
+[submodule "3rdparty/amd-mlss-tester"]
+	path = 3rdparty/amd-mlss-tester
+	url = git@github.com:AMD-Radeon-ML/amd-mlss-tester.git
