@@ -304,16 +304,79 @@ for %%a in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
 )
 set BUILD_CONFIG_CAPITALIZED=%FIRST_LETTER%%REST%
 
+:: Build mlss-tester BEFORE the main project so the correct config is installed
+if %BUILD_ALL_TESTS%==1 goto :build_tester
+goto :skip_tester
+
+:build_tester
+echo.
+echo Building amd-mlss-tester library...
+
+set TESTER_SRC=3rdparty\amd-mlss-tester
+set TESTER_INSTALL=%TESTER_SRC%\install
+
+:: Map main-project preset to the matching mlss-tester preset
+set FIRST_TOKEN=%PRESET:~0,5%
+set TESTER_PRESET=
+if /i "%FIRST_TOKEN%"=="clang" (
+    if /i "%BUILD_CONFIG%"=="debug" (
+        set TESTER_PRESET=clang-lib-static-debug
+    ) else (
+        set TESTER_PRESET=clang-lib-static-release
+    )
+)
+if /i "%PRESET:~0,6%"=="vs2022" set TESTER_PRESET=vs2022-lib-static
+if /i "%PRESET:~0,6%"=="vs2026" set TESTER_PRESET=vs2026-lib-static
+
+if "%TESTER_PRESET%"=="" (
+    echo No matching mlss-tester preset for '%PRESET%'!
+    exit /b 1
+)
+
+if "%HIP_PATH%"=="" set HIP_PATH=C:\opt\rocm
+
+set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DBUILD_APP=OFF -DBUILD_TESTING=OFF
+
+if /i "%FIRST_TOKEN%"=="clang" (
+    set TESTER_CONFIG_ARGS=%TESTER_CONFIG_ARGS% -DCMAKE_CXX_COMPILER=%HIP_PATH%/bin/clang++.exe "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
+)
+
+cmake %TESTER_CONFIG_ARGS% -S %TESTER_SRC%
+if %errorlevel% neq 0 (
+    echo amd-mlss-tester configuration failed!
+    exit /b 1
+)
+
+cmake --build "%TESTER_SRC%\build\%TESTER_PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
+if %errorlevel% neq 0 (
+    echo amd-mlss-tester build failed!
+    exit /b 1
+)
+
+cmake --install "%TESTER_SRC%\build\%TESTER_PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
+if %errorlevel% neq 0 (
+    echo amd-mlss-tester install failed!
+    exit /b 1
+)
+echo amd-mlss-tester built and installed successfully!
+
+:skip_tester
+
 :: Configure with CMake preset
+echo.
 echo Configuring with CMake preset: %PRESET%...
-cmake --preset %PRESET%
+if %BUILD_ALL_TESTS%==1 (
+    cmake --preset %PRESET% -DBUILD_SAMPLES=ON
+) else (
+    cmake --preset %PRESET%
+)
 
 if %errorlevel% neq 0 (
     echo CMake configuration failed for %PRESET%!
     exit /b 1
 )
 
-:: Build the project
+:: Build the project (including unit tests when mlss-tester is available)
 echo Building project...
 cmake --build "build\%PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
 
@@ -324,66 +387,9 @@ if %errorlevel% neq 0 (
 
 echo %PRESET% build completed successfully!
 
-:: Build all tests (mlss-tester + unit tests + sample tests) if requested
-if %BUILD_ALL_TESTS%==1 goto :build_all_tests
-goto :skip_all_tests
-
-:build_all_tests
-echo.
-echo Building amd-mlss-tester library...
-
-set TESTER_SRC=3rdparty\amd-mlss-tester
-set TESTER_BUILD=build\mlss-tester-%PRESET%
-set TESTER_INSTALL=%TESTER_SRC%\install
-
-set TESTER_ARGS=-DCMAKE_BUILD_TYPE=%BUILD_CONFIG_CAPITALIZED% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DBUILD_APP=OFF -DBUILD_TESTING=OFF
-
-:: Pick the right generator / compiler for the tester
-set FIRST_TOKEN=%PRESET:~0,5%
-if /i "%FIRST_TOKEN%"=="clang" (
-    set TESTER_GEN=-G Ninja -DCMAKE_CXX_COMPILER=%HIP_PATH%/bin/clang++.exe "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
-) else (
-    set TESTER_GEN=-G "Visual Studio 17 2022" -A x64
+if %BUILD_ALL_TESTS%==1 (
+    echo All tests built successfully!
 )
-
-cmake %TESTER_GEN% %TESTER_ARGS% -S %TESTER_SRC% -B %TESTER_BUILD%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester configuration failed!
-    exit /b 1
-)
-
-cmake --build %TESTER_BUILD% --config %BUILD_CONFIG_CAPITALIZED%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester build failed!
-    exit /b 1
-)
-
-cmake --install %TESTER_BUILD% --config %BUILD_CONFIG_CAPITALIZED%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester install failed!
-    exit /b 1
-)
-echo amd-mlss-tester built and installed successfully!
-
-echo.
-echo Reconfiguring with BUILD_SAMPLES=ON for %PRESET%...
-cmake --preset %PRESET% -DBUILD_SAMPLES=ON
-
-if %errorlevel% neq 0 (
-    echo CMake reconfiguration failed for %PRESET%!
-    exit /b 1
-)
-
-echo Building all tests for %PRESET%...
-cmake --build "build\%PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
-
-if %errorlevel% neq 0 (
-    echo All-tests build failed for %PRESET%!
-    exit /b 1
-)
-echo All tests built successfully!
-
-:skip_all_tests
 
 :: Build sample tests if requested
 if %BUILD_SAMPLE_TESTS%==1 goto :build_samples

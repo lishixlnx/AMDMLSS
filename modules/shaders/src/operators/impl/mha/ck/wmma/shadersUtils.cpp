@@ -6,6 +6,9 @@
 #include "gfx1150/fp16/shadersBin.hpp"
 #include "gfx1201/fp16/shadersBin.hpp"
 
+#include <mutex>
+#include <unordered_map>
+
 namespace gfx1100 = mlss::mha::ck::wmma::fp16::gfx1100;
 namespace gfx1150 = mlss::mha::ck::wmma::fp16::gfx1150;
 namespace gfx1201 = mlss::mha::ck::wmma::fp16::gfx1201;
@@ -45,6 +48,66 @@ namespace mlss::mha::ck::wmma
             count
         };
 
+        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
+        {
+            if (gfxip.major == 0x0Bu && gfxip.minor == 0x00u) return {0x0Bu, 0x00u, 0x00u};
+            if (gfxip.major == 0x0Bu && gfxip.minor == 0x05u) return {0x0Bu, 0x05u, 0x00u};
+            if (gfxip.major == 0x0Cu)                         return {0x0Cu, 0x00u, 0x01u};
+            return IP_GFX_UNKNOWN;
+        }
+
+        std::uint64_t makeCacheKey(const GfxIpTriple& gfxip, MHAAsmShaderWmma shaderEnum)
+        {
+            return (static_cast<std::uint64_t>(gfxIpPacked(gfxip)) << 0x20u)
+                 | static_cast<std::uint64_t>(shaderEnum);
+        }
+
+        std::mutex s_cacheMutex;
+        std::unordered_map<std::uint64_t, DynamicShaderType> s_shaderCache;
+
+        template<typename ShaderT>
+        const DynamicShaderType* getOrComputeCached(
+            const GfxIpTriple& gfxip,
+            MHAAsmShaderWmma shaderEnum,
+            const ShaderT& shader)
+        {
+            auto key = makeCacheKey(gfxip, shaderEnum);
+
+            {
+                std::lock_guard lock(s_cacheMutex);
+                auto it = s_shaderCache.find(key);
+                if (it != s_shaderCache.end())
+                {
+                    return &it->second;
+                }
+            }
+
+            auto relocDescriptor = make_shader_descriptor(shader);
+            if (relocDescriptor.m_binary.empty())
+            {
+                return nullptr;
+            }
+
+            auto sourceArch = sourceArchForTarget(gfxip);
+            auto nonRelocResult = getNonRelocatable(relocDescriptor.m_binary, sourceArch, gfxip);
+            if (!nonRelocResult.has_value())
+            {
+                return nullptr;
+            }
+
+            DynamicShaderType cached;
+            cached.m_binary.assign(nonRelocResult->begin(), nonRelocResult->end());
+            cached.m_kernelName = relocDescriptor.m_kernelName;
+            cached.m_compilerVersion = relocDescriptor.m_compilerVersion;
+            cached.m_codeObjectVersion = relocDescriptor.m_codeObjectVersion;
+            cached.m_isRelocatable = false;
+            cached.m_shaderType = relocDescriptor.m_shaderType;
+
+            std::lock_guard lock(s_cacheMutex);
+            auto [it, inserted] = s_shaderCache.emplace(key, std::move(cached));
+            return &it->second;
+        }
+
         template<std::uint32_t MPerBlock, std::uint32_t NPerBlock, std::uint32_t BlockSize>
         std::pair<MLSSdim3, MLSSdim3> calcGridAndBlocks(
             const std::uint32_t& batchSize, const std::uint32_t& headCount,
@@ -63,6 +126,8 @@ namespace mlss::mha::ck::wmma
         template<std::uint32_t MPerBlock, std::uint32_t NPerBlock, std::uint32_t BlockSize>
         void populateBlobs(
             Binaries& binaries,
+            const GfxIpTriple& gfxArch,
+            MHAAsmShaderWmma shaderEnum,
             const std::uint32_t& batchSize, const std::uint32_t& headCount,
             const std::uint32_t& kvSequenceLength, const std::uint32_t& qSequenceLength,
             const std::uint32_t& headDim,
@@ -83,6 +148,25 @@ namespace mlss::mha::ck::wmma
 
             binaries.addBlob(std::move(blob));
             binaries.addBlob(std::move(blobWithStrides));
+
+            const auto* cachedShader = getOrComputeCached(gfxArch, shaderEnum, shader);
+            if (cachedShader)
+            {
+                auto nonRelocDescriptor = make_shader_descriptor(*cachedShader);
+
+                Blob nonRelocBlob = std::move(*make_binary_blob(nonRelocDescriptor));
+                nonRelocBlob = constants;
+                nonRelocBlob = argConstants;
+                nonRelocBlob.setGridBlocks(grid, blocks);
+
+                Blob nonRelocBlobStrides = std::move(*make_binary_blob(nonRelocDescriptor));
+                nonRelocBlobStrides = constants;
+                nonRelocBlobStrides = argConstantsWithStrides;
+                nonRelocBlobStrides.setGridBlocks(grid, blocks);
+
+                binaries.addBlob(std::move(nonRelocBlob));
+                binaries.addBlob(std::move(nonRelocBlobStrides));
+            }
         }
 
     } // anonymous namespace
@@ -203,7 +287,7 @@ namespace mlss::mha::ck::wmma
         Binaries binaries;
 
 #define MHA_DISPATCH(MPerBlock, NPerBlock, BlockSize, shaderRef, dim_constants, arg_no_strides, arg_with_strides) \
-    populateBlobs<MPerBlock, NPerBlock, BlockSize>(binaries, batchSize, headCount, kvSequenceLength, qSequenceLength, headDim, \
+    populateBlobs<MPerBlock, NPerBlock, BlockSize>(binaries, gfxArch, shader, batchSize, headCount, kvSequenceLength, qSequenceLength, headDim, \
         shaderRef, \
         fp16_constants::dim_constants, fp16_constants::arg_no_strides, fp16_constants::arg_with_strides)
 

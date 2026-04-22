@@ -662,19 +662,10 @@ namespace mlss
         {
             Binaries binaries;
 
-            // Set GFX architecture based on ASIC string
             GfxIpTriple gfxArch = IP_GFX_UNKNOWN;
-            if (ctx->m_asic == "MLSS_GFX1100")
+            if (auto gfxIp = architectureStringToGfxIpTriple(ctx->m_asic); gfxIp.has_value())
             {
-                gfxArch = IP_GFX1100;
-            }
-            else if (ctx->m_asic == "MLSS_GFX1150")
-            {
-                gfxArch = IP_GFX1150;
-            }
-            else if (ctx->m_asic == "MLSS_GFX1201")
-            {
-                gfxArch = IP_GFX1201;
+                gfxArch = gfxIp.value();
             }
 
             // Use operator classes for all operations
@@ -763,7 +754,7 @@ namespace mlss
             }
 
             // Helper lambda to create MLSSbinary from a Blob
-            auto createBinaryInfo = [&collection, &op, &ctx](const Binaries::Blob& shader_blob, bool isRelocatable) -> MLSSbinary
+            auto createBinaryInfo = [&collection, &op, &ctx](const Binaries::Blob& shader_blob) -> MLSSbinary
             {
                 MLSSbinary binary_info = {};
 
@@ -810,18 +801,26 @@ namespace mlss
                 // Store binary data pointer and size
                 binary_info.m_binaries = const_cast<MLSSvoid*>(shader_blob.m_pBinary);
                 binary_info.m_binarySize = shader_blob.m_size;
+
+                bool isRelocatable = false;
+                if (shader_blob.m_size >= 18u)
+                {
+                    const auto* raw = static_cast<const std::uint8_t*>(shader_blob.m_pBinary);
+                    if (raw[0] == 0x7Fu && raw[1] == 0x45u && raw[2] == 0x4Cu && raw[3] == 0x46u)
+                    {
+                        std::uint16_t eType = static_cast<std::uint16_t>(raw[16])
+                                            | (static_cast<std::uint16_t>(raw[17]) << 8u);
+                        isRelocatable = (eType == 1u);
+                    }
+                }
                 binary_info.m_isRelocatable = isRelocatable;
 
                 return binary_info;
             };
 
-            // Add all binaries from the result
-            // Convention: first blob is relocatable, remaining are non-relocatable
-            bool isFirst = true;
             for (const auto& blob : binaries)
             {
-                collection.binary_infos.emplace_back(createBinaryInfo(blob, isFirst));
-                isFirst = false;
+                collection.binary_infos.emplace_back(createBinaryInfo(blob));
             }
         }
 
@@ -1268,19 +1267,10 @@ namespace mlss
 
             try
             {
-                // Get GFX architecture
                 GfxIpTriple gfxArch = IP_GFX_UNKNOWN;
-                if (ctx->m_asic == "MLSS_GFX1100")
+                if (auto gfxIp = architectureStringToGfxIpTriple(ctx->m_asic); gfxIp.has_value())
                 {
-                    gfxArch = IP_GFX1100;
-                }
-                else if (ctx->m_asic == "MLSS_GFX1150")
-                {
-                    gfxArch = IP_GFX1150;
-                }
-                else if (ctx->m_asic == "MLSS_GFX1201")
-                {
-                    gfxArch = IP_GFX1201;
+                    gfxArch = gfxIp.value();
                 }
 
                 // Use OperatorBase::getCaps for each operator type

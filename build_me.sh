@@ -49,83 +49,85 @@ build_single() {
     local preset=$1
     local build_config=${preset##*-}  # Extract build type from preset name
     
-    # Configure with CMake preset
-    echo "Configuring with CMake preset: $preset..."
-    cmake --preset "$preset"
-    
-    if [ $? -ne 0 ]; then
-        echo "CMake configuration failed for $preset!"
-        return 1
-    fi
-    
-    # Build the project
-    echo "Building project..."
-    cmake --build "build/${preset}" --config "${build_config^}"
-    
-    if [ $? -ne 0 ]; then
-        echo "Build failed for $preset!"
-        return 1
-    fi
-    
-    echo "$preset build completed successfully!"
-
-    # Build all tests (mlss-tester + unit tests + sample tests)
+    # Build mlss-tester BEFORE the main project so the correct config is installed
     if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
         echo ""
         echo "Building amd-mlss-tester library..."
         local tester_src="${BASH_SOURCE[0]%/*}/3rdparty/amd-mlss-tester"
-        local tester_build="build/mlss-tester-${preset}"
         local tester_install="${tester_src}/install"
 
-        local tester_cmake_args=(-DCMAKE_BUILD_TYPE="${build_config^}"
+        # Map main-project preset to the matching mlss-tester preset
+        local tester_preset=""
+        case "$preset" in
+            clang-debug)    tester_preset="clang-lib-static-debug"   ;;
+            clang-release)  tester_preset="clang-lib-static-release" ;;
+            vs2022-*)       tester_preset="vs2022-lib-static"        ;;
+            vs2026-*)       tester_preset="vs2026-lib-static"        ;;
+            *)
+                echo "No matching mlss-tester preset for '$preset'!"
+                return 1
+                ;;
+        esac
+
+        export HIP_PATH="${HIP_PATH:-C:/opt/rocm}"
+
+        local tester_config_args=(--preset "$tester_preset"
                                   -DCMAKE_INSTALL_PREFIX="$tester_install"
                                   -DMLSS_ENABLE_HIP=ON
                                   -DBUILD_APP=OFF
                                   -DBUILD_TESTING=OFF)
 
         if [[ "$preset" == clang-* ]]; then
-            tester_cmake_args+=(-G Ninja
-                                -DCMAKE_CXX_COMPILER="${HIP_PATH:-/opt/rocm}/bin/clang++"
-                                "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
-        elif [[ "$preset" == vs2022-* ]]; then
-            tester_cmake_args+=(-G "Visual Studio 17 2022" -A x64)
+            tester_config_args+=("-DCMAKE_CXX_COMPILER=${HIP_PATH}/bin/clang++.exe"
+                                 "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
         fi
 
-        cmake "${tester_cmake_args[@]}" -S "$tester_src" -B "$tester_build"
+        cmake "${tester_config_args[@]}" -S "$tester_src"
         if [ $? -ne 0 ]; then
             echo "amd-mlss-tester configuration failed!"
             return 1
         fi
 
-        cmake --build "$tester_build" --config "${build_config^}"
+        cmake --build "${tester_src}/build/${tester_preset}" --config "${build_config^}"
         if [ $? -ne 0 ]; then
             echo "amd-mlss-tester build failed!"
             return 1
         fi
 
-        cmake --install "$tester_build" --config "${build_config^}"
+        cmake --install "${tester_src}/build/${tester_preset}" --config "${build_config^}"
         if [ $? -ne 0 ]; then
             echo "amd-mlss-tester install failed!"
             return 1
         fi
         echo "amd-mlss-tester built and installed successfully!"
+    fi
 
-        echo ""
-        echo "Reconfiguring with BUILD_SAMPLES=ON for $preset..."
-        cmake --preset "$preset" -DBUILD_SAMPLES=ON
+    # Configure with CMake preset
+    echo ""
+    echo "Configuring with CMake preset: $preset..."
+    local config_args=(--preset "$preset")
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+        config_args+=(-DBUILD_SAMPLES=ON)
+    fi
+    cmake "${config_args[@]}"
 
-        if [ $? -ne 0 ]; then
-            echo "CMake reconfiguration failed for $preset!"
-            return 1
-        fi
+    if [ $? -ne 0 ]; then
+        echo "CMake configuration failed for $preset!"
+        return 1
+    fi
 
-        echo "Building all tests for $preset..."
-        cmake --build "build/${preset}" --config "${build_config^}"
+    # Build the project (including unit tests when mlss-tester is available)
+    echo "Building project..."
+    cmake --build "build/${preset}" --config "${build_config^}"
 
-        if [ $? -ne 0 ]; then
-            echo "All-tests build failed for $preset!"
-            return 1
-        fi
+    if [ $? -ne 0 ]; then
+        echo "Build failed for $preset!"
+        return 1
+    fi
+
+    echo "$preset build completed successfully!"
+
+    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
         echo "All tests built successfully!"
     fi
 

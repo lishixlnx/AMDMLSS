@@ -2,6 +2,8 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -10,12 +12,18 @@
 #include <numeric>
 #include <random>
 #include <string>
+#include <tuple>
+#include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #include <amdmlss/amdmlss_api.h>
 
 #include "shaders/shaders.hpp"
 using ShaderDescriptor = mlss::shaders::ShaderDescriptor;
+
+#include "common/kernelArg.hpp"
+#include "host/tensor_host.h"
 
 constexpr int kSkipExitCode = 77;
 
@@ -53,85 +61,183 @@ inline ShaderDescriptor buildShaderDescriptor(const MLSSbinary& bin)
 inline const MLSSbinary* findBinary(const MLSSbinary* binaries, MLSSsize count,
                                     bool wantRelocatable)
 {
-    for (MLSSsize i = 0; i < count; ++i)
+    const MLSSbinary* best = nullptr;
+
+    for (const auto* p = binaries; p < binaries + count; ++p)
     {
-        if (static_cast<bool>(binaries[i].m_isRelocatable) == wantRelocatable)
+        if (static_cast<bool>(p->m_isRelocatable) == wantRelocatable)
+            best = p;
+    }
+
+    return best;
+}
+
+// ---------------------------------------------------------------------------
+// Build kernel arguments from MLSSbinary.m_argList
+//
+// Reads the self-describing argument list via mlssVectorRetrieveData, then
+// assembles a vector<KernelArg> in m_place order by looking up each argument
+// name in the caller-provided map.
+// ---------------------------------------------------------------------------
+
+inline std::vector<KernelArg> buildArgsFromBinary(
+    const MLSSbinary& bin,
+    const std::unordered_map<std::string, KernelArg>& argMap)
+{
+    MLSSvoid* rawData  = nullptr;
+    MLSSsize  argCount = 0;
+    MLSSenum  argType  = 0;
+
+    if (mlssVectorRetrieveData(bin.m_argList, &rawData, &argCount, &argType) != MLSS_SUCCESS
+        || rawData == nullptr || argCount == 0)
+    {
+        std::cerr << "buildArgsFromBinary: failed to retrieve m_argList\n";
+        return {};
+    }
+
+    const auto* mlssArgs = static_cast<const MLSSarg*>(rawData);
+
+    std::vector<std::size_t> order(static_cast<std::size_t>(argCount));
+    std::iota(order.begin(), order.end(), std::size_t{0});
+    std::sort(order.begin(), order.end(), [&](std::size_t a, std::size_t b)
+    {
+        return mlssArgs[a].m_place < mlssArgs[b].m_place;
+    });
+
+    std::vector<KernelArg> args;
+    args.reserve(static_cast<std::size_t>(argCount));
+
+    for (std::size_t idx : order)
+    {
+        const MLSSarg& arg = mlssArgs[idx];
+        const std::string name = arg.m_name ? arg.m_name : "";
+        auto it = argMap.find(name);
+        if (it == argMap.end())
         {
-            return &binaries[i];
+            std::cerr << "buildArgsFromBinary: no value for argument '"
+                      << name << "' (place=" << arg.m_place << ")\n";
+            return {};
         }
+        args.push_back(it->second);
     }
-    return nullptr;
+
+    return args;
 }
 
 // ---------------------------------------------------------------------------
-// Minimal fp16 <-> float conversion (IEEE 754 half-precision)
+// fp16 type alias — prefer std::float16_t (C++23), fall back to _Float16
 // ---------------------------------------------------------------------------
 
-inline std::uint16_t floatToHalf(float value)
+#if defined(__STDCPP_FLOAT16_T__)
+#include <stdfloat>
+using float16_t = std::float16_t;
+#elif defined(__FLT16_MAX__)
+using float16_t = _Float16;
+#else
+struct float16_storage
 {
-    std::uint32_t fbits = 0;
-    std::memcpy(&fbits, &value, sizeof(fbits));
+    std::uint16_t bits = 0;
+};
+using float16_t = float16_storage;
 
-    const std::uint32_t sign = (fbits >> 16u) & 0x8000u;
-    const std::int32_t exponent = static_cast<std::int32_t>((fbits >> 23u) & 0xFFu) - 127;
-    const std::uint32_t mantissa = fbits & 0x007FFFFFu;
+#endif
 
-    if (exponent > 15)
-    {
-        return static_cast<std::uint16_t>(sign | 0x7C00u);
-    }
-    if (exponent < -14)
-    {
-        return static_cast<std::uint16_t>(sign);
-    }
+static_assert(sizeof(float16_t) == 2);
 
-    return static_cast<std::uint16_t>(
-        sign | (static_cast<std::uint32_t>(exponent + 15) << 10u) | (mantissa >> 13u));
-}
+// ---------------------------------------------------------------------------
+// fp16 <-> float conversion
+// ---------------------------------------------------------------------------
 
-inline float halfToFloat(std::uint16_t h)
+#if defined(__STDCPP_FLOAT16_T__)
+
+inline float16_t floatToHalf(float value) { return static_cast<float16_t>(value); }
+inline float halfToFloat(float16_t h)     { return static_cast<float>(h); }
+
+#else
+
+inline float16_t floatToHalf(float value)
 {
-    const std::uint32_t sign = static_cast<std::uint32_t>(h & 0x8000u) << 16u;
-    std::uint32_t exponent = (h >> 10u) & 0x1Fu;
-    std::uint32_t mantissa = static_cast<std::uint32_t>(h & 0x03FFu) << 13u;
+    std::uint32_t fbits;
+    std::memcpy(&fbits, &value, sizeof(float));
 
-    if (exponent == 0x1Fu)
-    {
-        exponent = 0xFFu;
-    }
-    else if (exponent == 0u)
-    {
-        exponent = 0u;
-        mantissa = 0u;
-    }
+    const std::uint32_t sign = (fbits >> 16) & 0x8000u;
+    const std::int32_t  exp  = static_cast<std::int32_t>((fbits >> 23) & 0xFFu) - 127 + 15;
+    const std::uint32_t frac = (fbits >> 13) & 0x03FFu;
+
+    std::uint16_t half;
+    if (exp <= 0)
+        half = static_cast<std::uint16_t>(sign);
+    else if (exp >= 31)
+        half = static_cast<std::uint16_t>(sign | 0x7C00u);
     else
-    {
-        exponent += 112u;
-    }
+        half = static_cast<std::uint16_t>(sign | (static_cast<std::uint32_t>(exp) << 10) | frac);
 
-    const std::uint32_t fbits = sign | (exponent << 23u) | mantissa;
-    float result = 0.0f;
-    std::memcpy(&result, &fbits, sizeof(result));
+    float16_t result;
+    std::memcpy(&result, &half, sizeof(float16_t));
     return result;
 }
 
-inline std::vector<std::uint16_t> floatsToHalves(const std::vector<float>& src)
+inline float halfToFloat(float16_t h)
 {
-    std::vector<std::uint16_t> dst(src.size());
-    for (std::size_t i = 0; i < src.size(); ++i)
-    {
-        dst[i] = floatToHalf(src[i]);
-    }
-    return dst;
+    std::uint16_t hbits;
+    std::memcpy(&hbits, &h, sizeof(std::uint16_t));
+
+    const std::uint32_t sign = static_cast<std::uint32_t>(hbits & 0x8000u) << 16;
+    const std::uint32_t exp  = (hbits >> 10) & 0x1Fu;
+    const std::uint32_t frac = hbits & 0x03FFu;
+
+    std::uint32_t fbits;
+    if (exp == 0)
+        fbits = sign;
+    else if (exp == 31)
+        fbits = sign | 0x7F800000u | (frac << 13);
+    else
+        fbits = sign | ((exp - 15 + 127) << 23) | (frac << 13);
+
+    float result;
+    std::memcpy(&result, &fbits, sizeof(float));
+    return result;
 }
 
-inline std::vector<float> halvesToFloats(const std::vector<std::uint16_t>& src)
+#endif
+
+// ---------------------------------------------------------------------------
+// TensorHost <-> fp16 vector conversion (GPU upload / download)
+// ---------------------------------------------------------------------------
+
+inline std::vector<float16_t> tensorToHalves(const TensorHost<float>& t)
+{
+    std::vector<float16_t> out(t.numel());
+    const float* src = t.data();
+    for (std::size_t i = 0; i < t.numel(); ++i)
+        out[i] = floatToHalf(src[i]);
+    return out;
+}
+
+inline TensorHost<float> halvesToTensor(const std::vector<float16_t>& halves,
+                                        std::vector<std::uint32_t> shape)
+{
+    TensorHost<float> t(std::move(shape));
+    assert(t.numel() == halves.size());
+    for (std::size_t i = 0; i < t.numel(); ++i)
+        t.data()[i] = halfToFloat(halves[i]);
+    return t;
+}
+
+inline TensorHost<float> vectorToTensor(const std::vector<float>& src,
+                                        std::vector<std::uint32_t> shape)
+{
+    TensorHost<float> t(std::move(shape));
+    assert(t.numel() == src.size());
+    std::memcpy(t.data(), src.data(), src.size() * sizeof(float));
+    return t;
+}
+
+inline std::vector<float> halvesToFloats(const std::vector<float16_t>& src)
 {
     std::vector<float> dst(src.size());
     for (std::size_t i = 0; i < src.size(); ++i)
-    {
         dst[i] = halfToFloat(src[i]);
-    }
     return dst;
 }
 
@@ -139,12 +245,12 @@ inline std::vector<float> halvesToFloats(const std::vector<std::uint16_t>& src)
 // Element-wise comparison with tolerance
 // ---------------------------------------------------------------------------
 
-inline bool compareBuffers(const std::vector<float>& a, const std::vector<float>& b,
+inline bool compareBuffers(const TensorHost<float>& a, const TensorHost<float>& b,
                            float tolerance, const std::string& label)
 {
-    if (a.size() != b.size())
+    if (a.numel() != b.numel())
     {
-        std::cerr << label << ": size mismatch (" << a.size() << " vs " << b.size() << ")\n";
+        std::cerr << label << ": size mismatch (" << a.numel() << " vs " << b.numel() << ")\n";
         return false;
     }
 
@@ -152,15 +258,15 @@ inline bool compareBuffers(const std::vector<float>& a, const std::vector<float>
     std::size_t mismatchCount = 0;
     constexpr std::size_t kMaxPrinted = 10;
 
-    for (std::size_t i = 0; i < a.size(); ++i)
+    for (std::size_t i = 0; i < a.numel(); ++i)
     {
-        const float diff = std::fabs(a[i] - b[i]);
+        const float diff = std::fabs(a.data()[i] - b.data()[i]);
         if (diff > tolerance)
         {
             if (mismatchCount < kMaxPrinted)
             {
                 std::cerr << label << ": mismatch at [" << i << "] "
-                          << a[i] << " vs " << b[i] << " diff=" << diff << '\n';
+                          << a.data()[i] << " vs " << b.data()[i] << " diff=" << diff << '\n';
             }
             ++mismatchCount;
             pass = false;
@@ -177,7 +283,7 @@ inline bool compareBuffers(const std::vector<float>& a, const std::vector<float>
 }
 
 // ---------------------------------------------------------------------------
-// Naive host-side scaled dot-product attention (float precision)
+// Host-side scaled dot-product attention using TensorHost + BLAS
 //
 // Q:      [batch, q_heads, q_seq, head_dim]
 // K:      [batch, kv_heads, kv_seq, head_dim]
@@ -188,21 +294,23 @@ inline bool compareBuffers(const std::vector<float>& a, const std::vector<float>
 // For GQA:  q_heads is a multiple of kv_heads (grouped)
 // ---------------------------------------------------------------------------
 
-inline std::vector<float> referenceAttention(
-    const std::vector<float>& Q,
-    const std::vector<float>& K,
-    const std::vector<float>& V,
-    std::uint32_t batchSize,
-    std::uint32_t qHeads,
-    std::uint32_t kvHeads,
-    std::uint32_t qSeq,
-    std::uint32_t kvSeq,
-    std::uint32_t headDim,
+inline TensorHost<float> referenceAttention(
+    const TensorHost<float>& Q,
+    const TensorHost<float>& K,
+    const TensorHost<float>& V,
     float scale)
 {
+    const auto& qShape = Q.shape();
+    const std::uint32_t batchSize = qShape[0];
+    const std::uint32_t qHeads   = qShape[1];
+    const std::uint32_t qSeq     = qShape[2];
+    const std::uint32_t headDim  = qShape[3];
+
+    const std::uint32_t kvHeads = K.shape()[1];
+    const std::uint32_t kvSeq   = K.shape()[2];
     const std::uint32_t headsPerGroup = qHeads / kvHeads;
-    const std::size_t outputSize = static_cast<std::size_t>(batchSize) * qHeads * qSeq * headDim;
-    std::vector<float> output(outputSize, 0.0f);
+
+    TensorHost<float> output(batchSize, qHeads, qSeq, headDim);
 
     for (std::uint32_t b = 0; b < batchSize; ++b)
     {
@@ -210,52 +318,40 @@ inline std::vector<float> referenceAttention(
         {
             const std::uint32_t kvh = qh / headsPerGroup;
 
+            // scores = Q[b,qh] @ K[b,kvh]^T * scale   →  [qSeq x kvSeq]
+            TensorHost<float> scores(qSeq, kvSeq);
+
+            th_blas::gemm<float>(
+                false, true,
+                qSeq, kvSeq, headDim,
+                scale,  &Q(b, qh, 0u, 0u), headDim,
+                        &K(b, kvh, 0u, 0u), headDim,
+                0.0f,   scores.data(), kvSeq);
+
+            // row-wise softmax
             for (std::uint32_t qs = 0; qs < qSeq; ++qs)
             {
-                // scores[kvSeq] = Q[b,qh,qs,:] @ K[b,kvh,:,:]^T * scale
-                std::vector<float> scores(kvSeq, 0.0f);
+                float maxVal = scores(qs, 0u);
+                for (std::uint32_t ks = 1; ks < kvSeq; ++ks)
+                    maxVal = std::max(maxVal, scores(qs, ks));
+
+                float sumExp = 0.0f;
                 for (std::uint32_t ks = 0; ks < kvSeq; ++ks)
                 {
-                    float dot = 0.0f;
-                    for (std::uint32_t d = 0; d < headDim; ++d)
-                    {
-                        const std::size_t qIdx =
-                            (static_cast<std::size_t>(b) * qHeads * qSeq + qh * qSeq + qs) * headDim + d;
-                        const std::size_t kIdx =
-                            (static_cast<std::size_t>(b) * kvHeads * kvSeq + kvh * kvSeq + ks) * headDim + d;
-                        dot += Q[qIdx] * K[kIdx];
-                    }
-                    scores[ks] = dot * scale;
+                    scores(qs, ks) = std::exp(scores(qs, ks) - maxVal);
+                    sumExp += scores(qs, ks);
                 }
-
-                // softmax
-                float maxScore = *std::max_element(scores.begin(), scores.end());
-                float sumExp = 0.0f;
-                for (auto& s : scores)
-                {
-                    s = std::exp(s - maxScore);
-                    sumExp += s;
-                }
-                for (auto& s : scores)
-                {
-                    s /= sumExp;
-                }
-
-                // output[b,qh,qs,:] = scores @ V[b,kvh,:,:]
-                for (std::uint32_t d = 0; d < headDim; ++d)
-                {
-                    float val = 0.0f;
-                    for (std::uint32_t ks = 0; ks < kvSeq; ++ks)
-                    {
-                        const std::size_t vIdx =
-                            (static_cast<std::size_t>(b) * kvHeads * kvSeq + kvh * kvSeq + ks) * headDim + d;
-                        val += scores[ks] * V[vIdx];
-                    }
-                    const std::size_t oIdx =
-                        (static_cast<std::size_t>(b) * qHeads * qSeq + qh * qSeq + qs) * headDim + d;
-                    output[oIdx] = val;
-                }
+                for (std::uint32_t ks = 0; ks < kvSeq; ++ks)
+                    scores(qs, ks) /= sumExp;
             }
+
+            // output[b,qh] = scores @ V[b,kvh]   →  [qSeq x headDim]
+            th_blas::gemm<float>(
+                false, false,
+                qSeq, headDim, kvSeq,
+                1.0f,  scores.data(), kvSeq,
+                       &V(b, kvh, 0u, 0u), headDim,
+                0.0f,  &output(b, qh, 0u, 0u), headDim);
         }
     }
 
@@ -263,18 +359,158 @@ inline std::vector<float> referenceAttention(
 }
 
 // ---------------------------------------------------------------------------
-// Random fp16-representable float generator (small magnitude for stability)
+// 4D tensor axis-1/axis-2 transpose: [B, X, Y, D] ↔ [B, Y, X, D]
+//
+// Used to convert between BHSD (host reference) and BSHD (GPU kernel layout).
+// The operation is self-inverse: applying it twice yields the original tensor.
 // ---------------------------------------------------------------------------
 
-inline std::vector<float> generateRandomFloats(std::size_t count, float lo, float hi,
-                                               std::uint32_t seed = 42)
+inline TensorHost<float> transposeHeadSeq(const TensorHost<float>& t)
 {
+    const auto& sh = t.shape();
+    const std::uint32_t d0 = sh[0];
+    const std::uint32_t d1 = sh[1];
+    const std::uint32_t d2 = sh[2];
+    const std::uint32_t d3 = sh[3];
+
+    TensorHost<float> out(d0, d2, d1, d3);
+    for (std::uint32_t i0 = 0; i0 < d0; ++i0)
+        for (std::uint32_t i1 = 0; i1 < d1; ++i1)
+            for (std::uint32_t i2 = 0; i2 < d2; ++i2)
+                for (std::uint32_t i3 = 0; i3 < d3; ++i3)
+                    out(i0, i2, i1, i3) = t(i0, i1, i2, i3);
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// Random fp16-representable TensorHost generator (small magnitude for stability)
+// ---------------------------------------------------------------------------
+
+inline TensorHost<float> generateRandomTensor(std::vector<std::uint32_t> shape,
+                                              float lo, float hi,
+                                              std::uint32_t seed = 42)
+{
+    TensorHost<float> t(std::move(shape));
     std::mt19937 rng(seed);
     std::uniform_real_distribution<float> dist(lo, hi);
-    std::vector<float> v(count);
-    for (auto& x : v)
+    for (std::size_t i = 0; i < t.numel(); ++i)
+        t.data()[i] = halfToFloat(floatToHalf(dist(rng)));
+    return t;
+}
+
+using index_t = std::int32_t;
+
+enum class GQAPackingFlags : std::uint32_t
+{
+    ROW_MAJOR              = 1u << 0,
+    COLUMN_MAJOR           = 1u << 1,
+    BYPASS                 = 1u << 2,
+    PACKED                 = 1u << 3,
+    UNPACKED               = 1u << 4,
+    QUERY                  = 1u << 5,
+    KEY                    = 1u << 6,
+    VALUE                  = 1u << 7,
+    OUTPUT                 = 1u << 8,
+    UNPACKED_QUERY_ROW     = UNPACKED | QUERY | ROW_MAJOR,
+    UNPACKED_QUERY_COL     = UNPACKED | QUERY | COLUMN_MAJOR,
+    UNPACKED_QUERY_BYPASS  = UNPACKED | QUERY | BYPASS,
+    UNPACKED_KEY_ROW       = UNPACKED | KEY | ROW_MAJOR,
+    UNPACKED_KEY_COL       = UNPACKED | KEY | COLUMN_MAJOR,
+    UNPACKED_KEY_BYPASS    = UNPACKED | KEY | BYPASS,
+    UNPACKED_VALUE_ROW     = UNPACKED | VALUE | ROW_MAJOR,
+    UNPACKED_VALUE_COL     = UNPACKED | VALUE | COLUMN_MAJOR,
+    UNPACKED_VALUE_BYPASS  = UNPACKED | VALUE | BYPASS,
+    UNPACKED_OUTPUT_ROW    = UNPACKED | OUTPUT | ROW_MAJOR,
+    UNPACKED_OUTPUT_COL    = UNPACKED | OUTPUT | COLUMN_MAJOR,
+    UNPACKED_OUTPUT_BYPASS = UNPACKED | OUTPUT | BYPASS,
+    PACKED_QK              = PACKED | QUERY | KEY,
+    PACKED_KV              = PACKED | KEY | VALUE,
+    PACKED_QKV             = PACKED | QUERY | KEY | VALUE
+};
+
+constexpr bool has_flag(GQAPackingFlags value, GQAPackingFlags flag)
+{
+    using U = std::underlying_type_t<GQAPackingFlags>;
+    return (static_cast<U>(value) & static_cast<U>(flag)) == static_cast<U>(flag);
+}
+
+// ============================================================================
+// ============================================================================
+// calcStrides: Computes tensor strides based on packing configuration
+// ============================================================================
+template <GQAPackingFlags PackingFlag>
+inline auto calcStrides(const index_t& batch_size,
+                        const index_t& q_head_num,
+                        const index_t& kv_head_num,
+                        const index_t& q_sequence_length,
+                        const index_t& kv_sequence_length,
+                        const index_t& head_dim)
+{
+    using Strides4D = std::array<index_t, 4>;
+
+    const auto make_query_strides = [&](index_t head_count, index_t sequence_length) -> Strides4D {
+        return {sequence_length * head_count * head_dim, head_dim, head_count * head_dim, 1};
+    };
+    const auto make_value_strides = [&](index_t head_count, index_t sequence_length) -> Strides4D {
+        return {sequence_length * head_count * head_dim, head_dim, 1, head_count * head_dim};
+    };
+
+    if constexpr(has_flag(PackingFlag, GQAPackingFlags::PACKED))
     {
-        x = halfToFloat(floatToHalf(dist(rng)));
+        const bool includesQuery = has_flag(PackingFlag, GQAPackingFlags::QUERY);
+        const bool includesKey   = has_flag(PackingFlag, GQAPackingFlags::KEY);
+        const bool includesValue = has_flag(PackingFlag, GQAPackingFlags::VALUE);
+
+        if(includesQuery && includesKey && includesValue)
+        {
+            const index_t s0 = q_sequence_length * q_head_num * 3 * head_dim;
+            const index_t s1 = 3 * head_dim;
+            const index_t s2 = q_head_num * 3 * head_dim;
+            const index_t s4 = 1;
+
+            const Strides4D q_strides{s0, s1, s2, s4};
+            const Strides4D k_strides{q_strides};
+            const Strides4D v_strides{s0, s1, s4, s2};
+            const Strides4D out_strides = make_query_strides(q_head_num, q_sequence_length);
+
+            return std::make_tuple(q_strides, k_strides, v_strides, out_strides);
+        }
+
+        if(includesQuery && includesKey)
+        {
+            const index_t s0 = q_sequence_length * q_head_num * 2 * head_dim;
+            const index_t s1 = 2 * head_dim;
+            const index_t s2 = q_head_num * 2 * head_dim;
+            const index_t s4 = 1;
+
+            const Strides4D q_strides{s0, s1, s2, s4};
+            const Strides4D k_strides{q_strides};
+            const Strides4D v_strides   = make_value_strides(q_head_num, q_sequence_length);
+            const Strides4D out_strides = make_query_strides(q_head_num, q_sequence_length);
+
+            return std::make_tuple(q_strides, k_strides, v_strides, out_strides);
+        }
+
+        if(includesKey && includesValue)
+        {
+            const index_t s0 = kv_sequence_length * kv_head_num * 2 * head_dim;
+            const index_t s1 = 2 * head_dim;
+            const index_t s2 = kv_head_num * 2 * head_dim;
+            const index_t s4 = 1;
+
+            const Strides4D q_strides = make_query_strides(q_head_num, q_sequence_length);
+            const Strides4D k_strides{s0, s1, s2, s4};
+            const Strides4D v_strides{s0, s1, s4, s2};
+            const Strides4D out_strides = make_query_strides(q_head_num, q_sequence_length);
+
+            return std::make_tuple(q_strides, k_strides, v_strides, out_strides);
+        }
     }
-    return v;
+
+    const Strides4D q_strides   = make_query_strides(q_head_num, q_sequence_length);
+    const Strides4D k_strides   = make_query_strides(kv_head_num, kv_sequence_length);
+    const Strides4D v_strides   = make_value_strides(kv_head_num, kv_sequence_length);
+    const Strides4D out_strides = make_query_strides(q_head_num, q_sequence_length);
+
+    return std::make_tuple(q_strides, k_strides, v_strides, out_strides);
 }

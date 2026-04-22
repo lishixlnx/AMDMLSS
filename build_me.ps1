@@ -118,16 +118,78 @@ function Build-Single {
     $buildConfig = $Preset.Split('-')[-1]
     $buildConfigCapitalized = (Get-Culture).TextInfo.ToTitleCase($buildConfig)
     
+    # Build mlss-tester BEFORE the main project so the correct config is installed
+    if ($BuildAllTests) {
+        Write-Host ""
+        Write-Host "Building amd-mlss-tester library..."
+
+        $testerSrc = "3rdparty/amd-mlss-tester"
+        $testerInstall = "$testerSrc/install"
+
+        # Map main-project preset to the matching mlss-tester preset
+        $testerPreset = switch -Wildcard ($Preset) {
+            'clang-debug'      { 'clang-lib-static-debug'   }
+            'clang-release'    { 'clang-lib-static-release'  }
+            'vs2022-*'         { 'vs2022-lib-static'         }
+            'vs2026-*'         { 'vs2026-lib-static'         }
+            default            { '' }
+        }
+
+        if ($testerPreset -eq '') {
+            Write-Host "No matching mlss-tester preset for '$Preset'!"
+            return $false
+        }
+
+        if (-not $env:HIP_PATH) { $env:HIP_PATH = 'C:/opt/rocm' }
+
+        $testerConfigArgs = @(
+            "--preset", $testerPreset,
+            "-DCMAKE_INSTALL_PREFIX=$testerInstall",
+            "-DMLSS_ENABLE_HIP=ON",
+            "-DBUILD_APP=OFF",
+            "-DBUILD_TESTING=OFF"
+        )
+
+        if ($Preset -like 'clang-*') {
+            $testerConfigArgs += @(
+                "-DCMAKE_CXX_COMPILER=$env:HIP_PATH/bin/clang++.exe",
+                "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
+            )
+        }
+
+        cmake @testerConfigArgs -S $testerSrc | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "amd-mlss-tester configuration failed!"
+            return $false
+        }
+
+        cmake --build "$testerSrc/build/$testerPreset" --config $buildConfigCapitalized | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "amd-mlss-tester build failed!"
+            return $false
+        }
+
+        cmake --install "$testerSrc/build/$testerPreset" --config $buildConfigCapitalized | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "amd-mlss-tester install failed!"
+            return $false
+        }
+        Write-Host "amd-mlss-tester built and installed successfully!"
+    }
+
     # Configure with CMake preset
+    Write-Host ""
     Write-Host "Configuring with CMake preset: $Preset..."
-    cmake --preset $Preset | Out-Host
+    $configArgs = @("--preset", $Preset)
+    if ($BuildAllTests) { $configArgs += "-DBUILD_SAMPLES=ON" }
+    cmake @configArgs | Out-Host
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "CMake configuration failed for $Preset!"
         return $false
     }
     
-    # Build the project
+    # Build the project (including unit tests when mlss-tester is available)
     Write-Host "Building project..."
     cmake --build "build/$Preset" --config $buildConfigCapitalized | Out-Host
     
@@ -138,69 +200,7 @@ function Build-Single {
     
     Write-Host "$Preset build completed successfully!"
 
-    # Build all tests (mlss-tester + unit tests + sample tests)
     if ($BuildAllTests) {
-        Write-Host ""
-        Write-Host "Building amd-mlss-tester library..."
-
-        $testerSrc = "3rdparty/amd-mlss-tester"
-        $testerBuild = "build/mlss-tester-$Preset"
-        $testerInstall = "$testerSrc/install"
-
-        $testerArgs = @(
-            "-DCMAKE_BUILD_TYPE=$buildConfigCapitalized",
-            "-DCMAKE_INSTALL_PREFIX=$testerInstall",
-            "-DMLSS_ENABLE_HIP=ON",
-            "-DBUILD_APP=OFF",
-            "-DBUILD_TESTING=OFF"
-        )
-
-        if ($Preset -like 'clang-*') {
-            $hipPath = if ($env:HIP_PATH) { $env:HIP_PATH } else { 'C:/opt/rocm' }
-            $testerArgs += @(
-                "-G", "Ninja",
-                "-DCMAKE_CXX_COMPILER=$hipPath/bin/clang++.exe",
-                "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
-            )
-        } else {
-            $testerArgs += @("-G", "Visual Studio 17 2022", "-A", "x64")
-        }
-
-        & cmake @testerArgs -S $testerSrc -B $testerBuild | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "amd-mlss-tester configuration failed!"
-            return $false
-        }
-
-        cmake --build $testerBuild --config $buildConfigCapitalized | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "amd-mlss-tester build failed!"
-            return $false
-        }
-
-        cmake --install $testerBuild --config $buildConfigCapitalized | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "amd-mlss-tester install failed!"
-            return $false
-        }
-        Write-Host "amd-mlss-tester built and installed successfully!"
-
-        Write-Host ""
-        Write-Host "Reconfiguring with BUILD_SAMPLES=ON for $Preset..."
-        cmake --preset $Preset -DBUILD_SAMPLES=ON | Out-Host
-
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "CMake reconfiguration failed for $Preset!"
-            return $false
-        }
-
-        Write-Host "Building all tests for $Preset..."
-        cmake --build "build/$Preset" --config $buildConfigCapitalized | Out-Host
-
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "All-tests build failed for $Preset!"
-            return $false
-        }
         Write-Host "All tests built successfully!"
     }
 

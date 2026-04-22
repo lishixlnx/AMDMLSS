@@ -19,26 +19,7 @@ namespace mlss
             }
         }
 
-        // Convert string to GfxIpTriple and refine to high-end variant
-        if (auto gfxIp = architectureStringToGfxIpTriple(m_asic); gfxIp.has_value())
-        {
-            if (auto highEndArch = getHighEndGfxIpTriple(gfxIp.value()); highEndArch.has_value())
-            {
-                if (auto archString = gfxIpTripleToString(highEndArch.value()); archString.has_value())
-                {
-                    m_asic = archString.value();
-                }
-                else
-                {
-                    m_lastError = archString.error();
-                }
-            }
-            else
-            {
-                m_lastError = highEndArch.error();
-            }
-        }
-        else
+        if (auto gfxIp = architectureStringToGfxIpTriple(m_asic); !gfxIp.has_value())
         {
             m_lastError = gfxIp.error();
         }

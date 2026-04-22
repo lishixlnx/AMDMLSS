@@ -1,7 +1,9 @@
 # GPU kernel integration tests for MLSS operators.
 # Requires mlss-tester (installed) and the amdmlss C API.
 
-set(_MLSS_TESTER_INSTALL "${CMAKE_SOURCE_DIR}/3rdparty/amd-mlss-tester/install")
+set(MLSS_TESTER_INSTALL_DIR "${CMAKE_SOURCE_DIR}/3rdparty/amd-mlss-tester/install"
+    CACHE PATH "Path to the installed mlss-tester library")
+set(_MLSS_TESTER_INSTALL "${MLSS_TESTER_INSTALL_DIR}")
 find_package(mlss-tester REQUIRED
     PATHS "${_MLSS_TESTER_INSTALL}"
     PATH_SUFFIXES lib/cmake/mlss-tester
@@ -18,11 +20,10 @@ include(CTest)
 # Locate the ROCm HIP runtime DLL so the test can find hipLibrary* symbols
 set(_runtime_dlls "")
 
-if(MLSS_ENABLE_HIP AND hip_DIR)
-    get_filename_component(_hip_root "${hip_DIR}/../../.." ABSOLUTE)
+if(HIP_DIR)
     find_file(_HIP_RUNTIME_DLL
         NAMES amdhip64_7.dll amdhip64.dll
-        PATHS "${_hip_root}/bin"
+        PATHS "${HIP_DIR}/bin"
         NO_DEFAULT_PATH
     )
     if(_HIP_RUNTIME_DLL)

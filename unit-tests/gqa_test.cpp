@@ -4,14 +4,15 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #include <hip/hip_runtime.h>
 
 #include "test_helpers.hpp"
 
-#include "common/kernelArg.hpp"
 #include "hip/memory.hpp"
 #include "hip/module.hpp"
 #include "hip/shader.hpp"
@@ -20,6 +21,10 @@
 #include "d3d/memory.hpp"
 #include "d3d/module.hpp"
 #include "d3d/shader.hpp"
+#else
+struct D3D12ManagedModule {};
+struct D3D12DeviceMemory {};
+struct D3D12Shader {};
 #endif
 
 #ifdef MLSS_CL_ENABLED
@@ -27,6 +32,11 @@
 #include "cl/memory.hpp"
 #include "cl/module.hpp"
 #include "cl/shader.hpp"
+#else
+struct ClContext {};
+struct ClManagedModule {};
+struct ClDeviceMemory {};
+struct ClShader {};
 #endif
 
 namespace
@@ -36,7 +46,7 @@ constexpr std::uint32_t kBatchSize  = 1;
 constexpr std::uint32_t kQHeadNum   = 4;
 constexpr std::uint32_t kKVHeadNum  = 2;
 constexpr std::uint32_t kQSeq       = 64;
-constexpr std::uint32_t kKVSeq      = 32;
+constexpr std::uint32_t kKVSeq      = 64;
 constexpr std::uint32_t kHeadDim    = 48;
 const     float         kScale      = 1.0f / std::sqrt(static_cast<float>(kHeadDim));
 constexpr float         kTolerance  = 5e-2f;
@@ -45,10 +55,6 @@ constexpr std::size_t kQSize   = static_cast<std::size_t>(kBatchSize) * kQHeadNu
 constexpr std::size_t kKSize   = static_cast<std::size_t>(kBatchSize) * kKVHeadNum * kKVSeq * kHeadDim;
 constexpr std::size_t kVSize   = kKSize;
 constexpr std::size_t kOutSize = kQSize;
-
-constexpr std::size_t kQBatchStride   = static_cast<std::size_t>(kQHeadNum)  * kQSeq  * kHeadDim;
-constexpr std::size_t kKVBatchStride  = static_cast<std::size_t>(kKVHeadNum) * kKVSeq * kHeadDim;
-constexpr std::size_t kOutBatchStride = kQBatchStride;
 
 // ---------------------------------------------------------------------------
 // MLSS C API — obtain compiled GQA binaries
@@ -64,7 +70,7 @@ struct MlssBinaries
 MlssBinaries getGqaBinaries(MLSSstring asic)
 {
     MlssBinaries out{};
-    MLSSstring   opName   = MLSS_GQA;
+    MLSSstring   opName   = const_cast<MLSSstring>(MLSS_GQA);
     MLSSenum     dataType = MLSS_FLOAT16;
     std::uint32_t packing  = MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED;
     std::uint32_t kvDim    = 0;
@@ -105,13 +111,11 @@ MlssBinaries getGqaBinaries(MLSSstring asic)
 // Host reference — grouped-query attention in fp32
 // ---------------------------------------------------------------------------
 
-std::vector<float> runGqaHost(const std::vector<float>& qf,
-                              const std::vector<float>& kf,
-                              const std::vector<float>& vf)
+TensorHost<float> runGqaHost(const TensorHost<float>& Q,
+                             const TensorHost<float>& K,
+                             const TensorHost<float>& V)
 {
-    return referenceAttention(qf, kf, vf,
-                              kBatchSize, kQHeadNum, kKVHeadNum,
-                              kQSeq, kKVSeq, kHeadDim, kScale);
+    return referenceAttention(Q, K, V, kScale);
 }
 
 // ---------------------------------------------------------------------------
@@ -120,14 +124,13 @@ std::vector<float> runGqaHost(const std::vector<float>& qf,
 
 template<typename Module, typename Memory, typename Shader>
 std::vector<float> runGqaGpu(const MLSSbinary& bin,
-                             const std::vector<std::uint16_t>& hostQ,
-                             const std::vector<std::uint16_t>& hostK,
-                             const std::vector<std::uint16_t>& hostV)
+                             const std::vector<float16_t>& hostQ,
+                             const std::vector<float16_t>& hostK,
+                             const std::vector<float16_t>& hostV)
 {
     auto desc = buildShaderDescriptor(bin);
 
     // --- module construction -----------------------------------------------
-#ifdef MLSS_CL_ENABLED
     [[maybe_unused]] ClContext backendCtx{};
     Module module = [&]() -> Module
     {
@@ -136,9 +139,6 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
         else
             return Module(desc);
     }();
-#else
-    Module module(desc);
-#endif
 
     if (!module.isLoaded())
     {
@@ -173,24 +173,16 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
     }
 
     // --- memory allocation helper ------------------------------------------
-    constexpr std::size_t fp16Bytes = sizeof(std::uint16_t);
+    constexpr std::size_t fp16Bytes = sizeof(float16_t);
 
     auto allocMem = [&](std::size_t bytes) -> Memory
     {
-        (void)bytes;
-#ifdef MLSS_D3D_ENABLED
         if constexpr (std::is_same_v<Memory, D3D12DeviceMemory>)
             return Memory(module.getDevice()->handle().Get(), bytes);
+        else if constexpr (std::is_same_v<Memory, ClDeviceMemory>)
+            return Memory(backendCtx, bytes);
         else
-#endif
-        {
-#ifdef MLSS_CL_ENABLED
-            if constexpr (std::is_same_v<Memory, ClDeviceMemory>)
-                return Memory(backendCtx, bytes);
-            else
-#endif
-                return Memory(bytes);
-        }
+            return Memory(bytes);
     };
 
     Memory devQ   = allocMem(fp16Bytes * kQSize);
@@ -202,63 +194,12 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
     devK.upload(hostK);
     devV.upload(hostV);
 
-    // --- batch pointer indirection -----------------------------------------
-    Memory devQPtrs   = allocMem(sizeof(void*) * kBatchSize);
-    Memory devKPtrs   = allocMem(sizeof(void*) * kBatchSize);
-    Memory devVPtrs   = allocMem(sizeof(void*) * kBatchSize);
-    Memory devOutPtrs = allocMem(sizeof(void*) * kBatchSize);
+    devQ.setDoublePointer();
+    devK.setDoublePointer();
+    devV.setDoublePointer();
+    devOut.setDoublePointer();
 
-    using PtrType = typename Memory::pointer_type;
-
-    if constexpr (std::is_pointer_v<PtrType>)
-    {
-        std::vector<PtrType> hQPtrs(kBatchSize);
-        std::vector<PtrType> hKPtrs(kBatchSize);
-        std::vector<PtrType> hVPtrs(kBatchSize);
-        std::vector<PtrType> hOutPtrs(kBatchSize);
-
-        for (std::uint32_t b = 0; b < kBatchSize; ++b)
-        {
-            auto byteOffset = [](PtrType base, std::size_t elems) -> PtrType
-            {
-                return reinterpret_cast<PtrType>(
-                    reinterpret_cast<std::uint8_t*>(base) + elems * fp16Bytes);
-            };
-            hQPtrs[b]   = byteOffset(devQ.data(),   b * kQBatchStride);
-            hKPtrs[b]   = byteOffset(devK.data(),   b * kKVBatchStride);
-            hVPtrs[b]   = byteOffset(devV.data(),   b * kKVBatchStride);
-            hOutPtrs[b] = byteOffset(devOut.data(),  b * kOutBatchStride);
-        }
-
-        devQPtrs.upload(hQPtrs);
-        devKPtrs.upload(hKPtrs);
-        devVPtrs.upload(hVPtrs);
-        devOutPtrs.upload(hOutPtrs);
-    }
-#ifdef MLSS_D3D_ENABLED
-    else if constexpr (std::is_same_v<Memory, D3D12DeviceMemory>)
-    {
-        std::vector<std::uint64_t> hQPtrs(kBatchSize);
-        std::vector<std::uint64_t> hKPtrs(kBatchSize);
-        std::vector<std::uint64_t> hVPtrs(kBatchSize);
-        std::vector<std::uint64_t> hOutPtrs(kBatchSize);
-
-        for (std::uint32_t b = 0; b < kBatchSize; ++b)
-        {
-            hQPtrs[b]   = devQ.gpuVA()   + b * kQBatchStride   * fp16Bytes;
-            hKPtrs[b]   = devK.gpuVA()   + b * kKVBatchStride  * fp16Bytes;
-            hVPtrs[b]   = devV.gpuVA()   + b * kKVBatchStride  * fp16Bytes;
-            hOutPtrs[b] = devOut.gpuVA()  + b * kOutBatchStride * fp16Bytes;
-        }
-
-        devQPtrs.upload(hQPtrs);
-        devKPtrs.upload(hKPtrs);
-        devVPtrs.upload(hVPtrs);
-        devOutPtrs.upload(hOutPtrs);
-    }
-#endif
-
-    // --- kernel arguments --------------------------------------------------
+    // --- kernel arguments (built dynamically from m_argList) ----------------
     std::int32_t argBatch    = static_cast<std::int32_t>(kBatchSize);
     std::int32_t argQSeq     = static_cast<std::int32_t>(kQSeq);
     std::int32_t argKVSeq    = static_cast<std::int32_t>(kKVSeq);
@@ -267,18 +208,48 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
     std::int32_t argHeadDim  = static_cast<std::int32_t>(kHeadDim);
     float        argScale    = kScale;
 
-    std::vector<KernelArg> args;
-    args.emplace_back(devQPtrs.data());
-    args.emplace_back(devKPtrs.data());
-    args.emplace_back(devVPtrs.data());
-    args.emplace_back(devOutPtrs.data());
-    args.emplace_back(argBatch);
-    args.emplace_back(argQSeq);
-    args.emplace_back(argKVSeq);
-    args.emplace_back(argQHeads);
-    args.emplace_back(argKVHeads);
-    args.emplace_back(argHeadDim);
-    args.emplace_back(argScale);
+    std::unordered_map<std::string, KernelArg> argMap;
+    argMap.emplace("Q",      KernelArg(devQ.getDoublePointer()));
+    argMap.emplace("K",      KernelArg(devK.getDoublePointer()));
+    argMap.emplace("V",      KernelArg(devV.getDoublePointer()));
+    argMap.emplace("output", KernelArg(devOut.getDoublePointer()));
+
+    argMap.emplace("batch_size",         KernelArg(argBatch));
+    argMap.emplace("q_sequence_length",  KernelArg(argQSeq));
+    argMap.emplace("kv_sequence_length", KernelArg(argKVSeq));
+    argMap.emplace("q_head_num",         KernelArg(argQHeads));
+    argMap.emplace("kv_head_num",        KernelArg(argKVHeads));
+    argMap.emplace("head_dim",           KernelArg(argHeadDim));
+    argMap.emplace("scale",              KernelArg(argScale));
+
+    const auto [qStrides, kStrides, vStrides, outStrides] =
+        calcStrides<GQAPackingFlags::UNPACKED_QUERY_ROW>(
+            static_cast<index_t>(kBatchSize),
+            static_cast<index_t>(kQHeadNum),
+            static_cast<index_t>(kKVHeadNum),
+            static_cast<index_t>(kQSeq),
+            static_cast<index_t>(kKVSeq),
+            static_cast<index_t>(kHeadDim));
+
+    for (std::uint32_t d = 0; d < 4; ++d)
+    {
+        argMap.emplace("q_stride_d"      + std::to_string(d), KernelArg(qStrides[d]));
+        argMap.emplace("k_stride_d"      + std::to_string(d), KernelArg(kStrides[d]));
+        argMap.emplace("v_stride_d"      + std::to_string(d), KernelArg(vStrides[d]));
+        argMap.emplace("output_stride_d" + std::to_string(d), KernelArg(outStrides[d]));
+    }
+
+    auto args = buildArgsFromBinary(bin, argMap);
+    if (args.empty())
+    {
+        std::cerr << "GPU: failed to build kernel arguments from m_argList\n";
+        return {};
+    }
+
+    constexpr std::size_t kDvInsertPos = 10;
+    std::int32_t argDv = argHeadDim;
+    args.insert(args.begin() + static_cast<std::ptrdiff_t>(kDvInsertPos),
+                KernelArg(argDv));
 
     // --- launch ------------------------------------------------------------
     const dim3 grid(bin.m_grid.m_x,   bin.m_grid.m_y,   bin.m_grid.m_z);
@@ -291,7 +262,7 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
     }
 
     // --- readback ----------------------------------------------------------
-    std::vector<std::uint16_t> outFp16(kOutSize);
+    std::vector<float16_t> outFp16(kOutSize);
     devOut.download(outFp16);
     return halvesToFloats(outFp16);
 }
@@ -310,7 +281,7 @@ int main()
         }
         std::cout << "Detected GPU: " << props.gcnArchName << "\n\n";
 
-        MLSSstring asic = MLSS_GFXAUTOFIND;
+        MLSSstring asic = const_cast<MLSSstring>(MLSS_GFXAUTOFIND);
         CHECK_STATUS(mlssSetVerboseLevel(0));
 
         auto mlssBins = getGqaBinaries(asic);
@@ -325,33 +296,36 @@ int main()
             return EXIT_FAILURE;
         }
 
-        auto hostQf  = generateRandomFloats(kQSize,  -0.5f, 0.5f, 10);
-        auto hostKf  = generateRandomFloats(kKSize,  -0.5f, 0.5f, 20);
-        auto hostVf  = generateRandomFloats(kVSize,  -0.5f, 0.5f, 30);
-        auto hostQ16 = floatsToHalves(hostQf);
-        auto hostK16 = floatsToHalves(hostKf);
-        auto hostV16 = floatsToHalves(hostVf);
+        auto hostQ = generateRandomTensor({kBatchSize, kQHeadNum, kQSeq, kHeadDim},  -0.5f, 0.5f, 10);
+        auto hostK = generateRandomTensor({kBatchSize, kKVHeadNum, kKVSeq, kHeadDim}, -0.5f, 0.5f, 20);
+        auto hostV = generateRandomTensor({kBatchSize, kKVHeadNum, kKVSeq, kHeadDim}, -0.5f, 0.5f, 30);
 
-        hostQf = halvesToFloats(hostQ16);
-        hostKf = halvesToFloats(hostK16);
-        hostVf = halvesToFloats(hostV16);
+        auto gpuQ  = transposeHeadSeq(hostQ);
+        auto gpuK  = transposeHeadSeq(hostK);
+        auto gpuV  = transposeHeadSeq(hostV);
+        auto hostQ16 = tensorToHalves(gpuQ);
+        auto hostK16 = tensorToHalves(gpuK);
+        auto hostV16 = tensorToHalves(gpuV);
 
-        auto hostRef = runGqaHost(hostQf, hostKf, hostVf);
+        auto hostRef = runGqaHost(hostQ, hostK, hostV);
 
         bool allPassed = true;
+
+        const std::vector<std::uint32_t> gpuOutShape = {kBatchSize, kQSeq, kQHeadNum, kHeadDim};
 
         // --- HIP (non-relocatable) -----------------------------------------
         if (nonReloc != nullptr)
         {
             std::cout << "\n--- HIP (non-relocatable) ---\n";
-            auto result = runGqaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
-                              *nonReloc, hostQ16, hostK16, hostV16);
-            if (result.empty())
+            auto resultVec = runGqaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
+                                 *nonReloc, hostQ16, hostK16, hostV16);
+            if (resultVec.empty())
             {
                 std::cerr << "FAIL: HIP GQA kernel produced no results\n";
                 allPassed = false;
             }
-            else if (!compareBuffers(result, hostRef, kTolerance, "HIP vs Host"))
+            else if (!compareBuffers(transposeHeadSeq(vectorToTensor(resultVec, gpuOutShape)),
+                                     hostRef, kTolerance, "HIP vs Host"))
             {
                 allPassed = false;
             }
@@ -366,14 +340,15 @@ int main()
         if (reloc != nullptr)
         {
             std::cout << "\n--- D3D12 (relocatable) ---\n";
-            auto result = runGqaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
-                              *reloc, hostQ16, hostK16, hostV16);
-            if (result.empty())
+            auto resultVec = runGqaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
+                                 *reloc, hostQ16, hostK16, hostV16);
+            if (resultVec.empty())
             {
                 std::cerr << "FAIL: D3D GQA kernel produced no results\n";
                 allPassed = false;
             }
-            else if (!compareBuffers(result, hostRef, kTolerance, "D3D vs Host"))
+            else if (!compareBuffers(transposeHeadSeq(vectorToTensor(resultVec, gpuOutShape)),
+                                     hostRef, kTolerance, "D3D vs Host"))
             {
                 allPassed = false;
             }
@@ -389,13 +364,14 @@ int main()
         if (nonReloc != nullptr)
         {
             std::cout << "\n--- OpenCL (non-relocatable) ---\n";
-            auto result = runGqaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
-                              *nonReloc, hostQ16, hostK16, hostV16);
-            if (result.empty())
+            auto resultVec = runGqaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
+                                 *nonReloc, hostQ16, hostK16, hostV16);
+            if (resultVec.empty())
             {
                 std::cerr << "WARN: CL GQA kernel produced no results\n";
             }
-            else if (!compareBuffers(result, hostRef, kTolerance, "CL vs Host"))
+            else if (!compareBuffers(transposeHeadSeq(vectorToTensor(resultVec, gpuOutShape)),
+                                     hostRef, kTolerance, "CL vs Host"))
             {
                 allPassed = false;
             }
