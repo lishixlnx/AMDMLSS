@@ -199,28 +199,15 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
     devV.setDoublePointer();
     devOut.setDoublePointer();
 
-    // --- kernel arguments (built dynamically from m_argList) ----------------
+    // --- kernel arguments (manual construction matching kernel ABI) ---------
     std::int32_t argBatch    = static_cast<std::int32_t>(kBatchSize);
     std::int32_t argQSeq     = static_cast<std::int32_t>(kQSeq);
     std::int32_t argKVSeq    = static_cast<std::int32_t>(kKVSeq);
     std::int32_t argQHeads   = static_cast<std::int32_t>(kQHeadNum);
     std::int32_t argKVHeads  = static_cast<std::int32_t>(kKVHeadNum);
     std::int32_t argHeadDim  = static_cast<std::int32_t>(kHeadDim);
+    std::int32_t argDv       = static_cast<std::int32_t>(kHeadDim);
     float        argScale    = kScale;
-
-    std::unordered_map<std::string, KernelArg> argMap;
-    argMap.emplace("Q",      KernelArg(devQ.getDoublePointer()));
-    argMap.emplace("K",      KernelArg(devK.getDoublePointer()));
-    argMap.emplace("V",      KernelArg(devV.getDoublePointer()));
-    argMap.emplace("output", KernelArg(devOut.getDoublePointer()));
-
-    argMap.emplace("batch_size",         KernelArg(argBatch));
-    argMap.emplace("q_sequence_length",  KernelArg(argQSeq));
-    argMap.emplace("kv_sequence_length", KernelArg(argKVSeq));
-    argMap.emplace("q_head_num",         KernelArg(argQHeads));
-    argMap.emplace("kv_head_num",        KernelArg(argKVHeads));
-    argMap.emplace("head_dim",           KernelArg(argHeadDim));
-    argMap.emplace("scale",              KernelArg(argScale));
 
     const auto [qStrides, kStrides, vStrides, outStrides] =
         calcStrides<GQAPackingFlags::UNPACKED_QUERY_ROW>(
@@ -231,25 +218,29 @@ std::vector<float> runGqaGpu(const MLSSbinary& bin,
             static_cast<index_t>(kKVSeq),
             static_cast<index_t>(kHeadDim));
 
-    for (std::uint32_t d = 0; d < 4; ++d)
-    {
-        argMap.emplace("q_stride_d"      + std::to_string(d), KernelArg(qStrides[d]));
-        argMap.emplace("k_stride_d"      + std::to_string(d), KernelArg(kStrides[d]));
-        argMap.emplace("v_stride_d"      + std::to_string(d), KernelArg(vStrides[d]));
-        argMap.emplace("output_stride_d" + std::to_string(d), KernelArg(outStrides[d]));
-    }
+    // CK kernel ABI order: Q**, K**, V**, Out**, M, N, K, O, G0, G1, G1kv, alpha, strides...
+    // M=q_seq, N=kv_seq, K=head_dim, O=d_v, G0=batch, G1=q_heads, G1kv=kv_heads
+    std::vector<KernelArg> args;
+    args.reserve(28);
 
-    auto args = buildArgsFromBinary(bin, argMap);
-    if (args.empty())
-    {
-        std::cerr << "GPU: failed to build kernel arguments from m_argList\n";
-        return {};
-    }
+    args.push_back(KernelArg(devQ.getDoublePointer()));
+    args.push_back(KernelArg(devK.getDoublePointer()));
+    args.push_back(KernelArg(devV.getDoublePointer()));
+    args.push_back(KernelArg(devOut.getDoublePointer()));
 
-    constexpr std::size_t kDvInsertPos = 10;
-    std::int32_t argDv = argHeadDim;
-    args.insert(args.begin() + static_cast<std::ptrdiff_t>(kDvInsertPos),
-                KernelArg(argDv));
+    args.push_back(KernelArg(argQSeq));
+    args.push_back(KernelArg(argKVSeq));
+    args.push_back(KernelArg(argHeadDim));
+    args.push_back(KernelArg(argDv));
+    args.push_back(KernelArg(argBatch));
+    args.push_back(KernelArg(argQHeads));
+    args.push_back(KernelArg(argKVHeads));
+    args.push_back(KernelArg(argScale));
+
+    for (std::uint32_t d = 0; d < 4; ++d) args.push_back(KernelArg(qStrides[d]));
+    for (std::uint32_t d = 0; d < 4; ++d) args.push_back(KernelArg(kStrides[d]));
+    for (std::uint32_t d = 0; d < 4; ++d) args.push_back(KernelArg(vStrides[d]));
+    for (std::uint32_t d = 0; d < 4; ++d) args.push_back(KernelArg(outStrides[d]));
 
     // --- launch ------------------------------------------------------------
     const dim3 grid(bin.m_grid.m_x,   bin.m_grid.m_y,   bin.m_grid.m_z);

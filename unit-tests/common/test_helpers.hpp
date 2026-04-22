@@ -56,17 +56,35 @@ inline ShaderDescriptor buildShaderDescriptor(const MLSSbinary& bin)
 // ---------------------------------------------------------------------------
 // Binary finder: returns pointer to the first MLSSbinary with the requested
 // relocatable flag, or nullptr if none found.
+// When preferSmallArgList is true, returns the match with the fewest
+// m_argList entries (i.e. the "no strides" variant).
 // ---------------------------------------------------------------------------
 
 inline const MLSSbinary* findBinary(const MLSSbinary* binaries, MLSSsize count,
-                                    bool wantRelocatable)
+                                    bool wantRelocatable,
+                                    bool preferSmallArgList = false)
 {
     const MLSSbinary* best = nullptr;
 
     for (const auto* p = binaries; p < binaries + count; ++p)
     {
-        if (static_cast<bool>(p->m_isRelocatable) == wantRelocatable)
+        if (static_cast<bool>(p->m_isRelocatable) != wantRelocatable)
+            continue;
+
+        if (best == nullptr)
+        {
             best = p;
+        }
+        else if (preferSmallArgList)
+        {
+            if (p->m_argList.m_size < best->m_argList.m_size)
+                best = p;
+        }
+        else
+        {
+            if (p->m_argList.m_size > best->m_argList.m_size)
+                best = p;
+        }
     }
 
     return best;
