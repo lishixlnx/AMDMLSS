@@ -1,13 +1,14 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "gfx1100/fp16/shadersBin.hpp"
-#include "gfx1100/fp32/shadersBin.hpp"
-#include "gfx1201/fp16/shadersBin.hpp"
-#include "gfx1201/fp32/shadersBin.hpp"
-
-#include <mutex>
-#include <unordered_map>
+#include "gfx1100/fp16/shadersBinReloc.hpp"
+#include "gfx1100/fp16/shadersBinNonReloc.hpp"
+#include "gfx1100/fp32/shadersBinReloc.hpp"
+#include "gfx1100/fp32/shadersBinNonReloc.hpp"
+#include "gfx1201/fp16/shadersBinReloc.hpp"
+#include "gfx1201/fp16/shadersBinNonReloc.hpp"
+#include "gfx1201/fp32/shadersBinReloc.hpp"
+#include "gfx1201/fp32/shadersBinNonReloc.hpp"
 
 using mlss::conv::utils::GenericConvParams;
 
@@ -28,8 +29,27 @@ namespace mlss::conv::mxn::winograd::base
             StrideModeCount
         };
 
-        std::mutex s_cacheMutex;
-        std::unordered_map<std::uint64_t, DynamicShaderType> s_shaderCache;
+        // Pairs the relocatable Winograd ELF (used at the cross-compile entry
+        // point) with its pre-linked, non-relocatable sibling shipped under
+        // shadersBinNonReloc.hpp. The previous design computed the non-reloc
+        // half at runtime via comgr's LINK_RELOCATABLE_TO_EXECUTABLE; that
+        // path silently exits on PAL OS/ABI inputs, which is what every
+        // Winograd ELF is. The shipped _NonReloc binaries are produced offline
+        // by tools/winograd_pal/ from the same relocatables.
+        struct ShaderPair
+        {
+            ShaderDescriptorType reloc;
+            ShaderDescriptorType nonReloc;
+        };
+
+        // Symbol pair shorthand: NS::NAME and NS::NAME_NonReloc live in the
+        // same namespace by construction (see tools/winograd_pal/reemit.py).
+#define MLSS_WINOGRAD_BASE_PAIR(NS, NAME)                                      \
+    ShaderPair                                                                 \
+    {                                                                          \
+        .reloc    = make_shader_descriptor(NS::NAME),                          \
+        .nonReloc = make_shader_descriptor(NS::NAME##_NonReloc),               \
+    }
 
         //=============================================================================================================
         template <class T>
@@ -172,7 +192,7 @@ namespace mlss::conv::mxn::winograd::base
         }
 
         //=============================================================================================================
-        ShaderDescriptorType selectRelocatableShader(
+        ShaderPair selectShaderPair(
             const GfxIpTriple& gfxip,
             bool isFp32,
             StrideMode strideMode,
@@ -184,24 +204,24 @@ namespace mlss::conv::mxn::winograd::base
                 {
                     if (isF3x2)
                     {
-                        if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp32Stride2Dec);
-                        if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp32Stride2Dil);
-                        return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp32Stride1);
+                        if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp32Stride2Dec);
+                        if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp32Stride2Dil);
+                        return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp32Stride1);
                     }
-                    if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp32Stride2Dec);
-                    if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp32Stride2Dil);
-                    return make_shader_descriptor(fp32::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp32Stride1);
+                    if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp32Stride2Dec);
+                    if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp32Stride2Dil);
+                    return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp32Stride1);
                 }
 
                 if (isF3x2)
                 {
-                    if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride2Dec);
-                    if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride2Dil);
-                    return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride1);
+                    if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride2Dec);
+                    if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride2Dil);
+                    return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F3x2_Fp16Dot2Stride1);
                 }
-                if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride2Dec);
-                if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride2Dil);
-                return make_shader_descriptor(fp16::gfx1100::ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride1);
+                if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride2Dec);
+                if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride2Dil);
+                return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1100, ConvWinogradElf_Gfx11_F2x3_Fp16Dot2Stride1);
             }
 
             if (isGfx120x(gfxip))
@@ -210,83 +230,27 @@ namespace mlss::conv::mxn::winograd::base
                 {
                     if (isF3x2)
                     {
-                        if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dec);
-                        if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dil);
-                        return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp32Stride1);
+                        if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dec);
+                        if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp32Stride2Dil);
+                        return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp32Stride1);
                     }
-                    if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dec);
-                    if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dil);
-                    return make_shader_descriptor(fp32::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp32Stride1);
+                    if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dec);
+                    if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp32Stride2Dil);
+                    return MLSS_WINOGRAD_BASE_PAIR(fp32::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp32Stride1);
                 }
 
                 if (isF3x2)
                 {
-                    if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride2Dec);
-                    if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride2Dil);
-                    return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride1);
+                    if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride2Dec);
+                    if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride2Dil);
+                    return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F3x2_Fp16Dot2Stride1);
                 }
-                if (strideMode == StrideModeDecimation) return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride2Dec);
-                if (strideMode == StrideModeDilation)   return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride2Dil);
-                return make_shader_descriptor(fp16::gfx1201::ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride1);
+                if (strideMode == StrideModeDecimation) return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride2Dec);
+                if (strideMode == StrideModeDilation)   return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride2Dil);
+                return MLSS_WINOGRAD_BASE_PAIR(fp16::gfx1201, ConvWinogradElf_Gfx12_F2x3_Fp16Dot2Stride1);
             }
 
             return {};
-        }
-
-        //=============================================================================================================
-        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
-        {
-            if (gfxip.major == 0x0Au) return {0x0Au, 0x01u, 0x00u};
-            if (gfxip.major == 0x0Bu) return {0x0Bu, 0x00u, 0x00u};
-            if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x01u};
-            return IP_GFX_UNKNOWN;
-        }
-
-        //=============================================================================================================
-        std::expected<const DynamicShaderType*, std::error_code> getOrComputeCached(
-            const GfxIpTriple& gfxip,
-            bool isFp32,
-            StrideMode strideMode,
-            bool isF3x2)
-        {
-            const auto key = (static_cast<std::uint64_t>(gfxIpPacked(gfxip)) << 0x08u)
-                           | (static_cast<std::uint64_t>(isF3x2)  << 0x04u)
-                           | (static_cast<std::uint64_t>(isFp32)  << 0x02u)
-                           | static_cast<std::uint64_t>(strideMode);
-
-            {
-                std::lock_guard lock(s_cacheMutex);
-                auto it = s_shaderCache.find(key);
-                if (it != s_shaderCache.end())
-                {
-                    return &it->second;
-                }
-            }
-
-            auto relocDescriptor = selectRelocatableShader(gfxip, isFp32, strideMode, isF3x2);
-            if (relocDescriptor.m_binary.empty())
-            {
-                return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
-            }
-
-            auto sourceArch = sourceArchForTarget(gfxip);
-            auto nonRelocResult = getNonRelocatable(relocDescriptor.m_binary, sourceArch, gfxip);
-            if (!nonRelocResult.has_value())
-            {
-                return std::unexpected(nonRelocResult.error());
-            }
-
-            DynamicShaderType cached;
-            cached.m_binary.assign(nonRelocResult->begin(), nonRelocResult->end());
-            cached.m_kernelName = relocDescriptor.m_kernelName;
-            cached.m_compilerVersion = relocDescriptor.m_compilerVersion;
-            cached.m_codeObjectVersion = relocDescriptor.m_codeObjectVersion;
-            cached.m_isRelocatable = false;
-            cached.m_shaderType = relocDescriptor.m_shaderType;
-
-            std::lock_guard lock(s_cacheMutex);
-            auto [it, inserted] = s_shaderCache.emplace(key, std::move(cached));
-            return &it->second;
         }
 
         //=============================================================================================================
@@ -505,31 +469,22 @@ namespace mlss::conv::mxn::winograd::base
         const auto numCu = static_cast<std::uint32_t>(numCuResult.value());
         const bool isF3x2 = selectTileShape(params, strideMode, numCu);
 
-        auto relocDescriptor = selectRelocatableShader(gfxip, isFp32, strideMode, isF3x2);
-        if (relocDescriptor.m_binary.empty())
+        const auto shaderPair = selectShaderPair(gfxip, isFp32, strideMode, isF3x2);
+        if (shaderPair.reloc.m_binary.empty() || shaderPair.nonReloc.m_binary.empty())
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
         }
 
-        auto cachedResult = getOrComputeCached(gfxip, isFp32, strideMode, isF3x2);
-        if (!cachedResult.has_value())
-        {
-            return std::unexpected(cachedResult.error());
-        }
-
-        const auto& cachedShader = *cachedResult.value();
-        auto nonRelocDescriptor = make_shader_descriptor(cachedShader);
-
-        auto [grid, blocks] = calcGridAndBlocks(relocDescriptor, numCu, params.groups);
+        auto [grid, blocks] = calcGridAndBlocks(shaderPair.reloc, numCu, params.groups);
 
         Binaries binaries;
 
-        Blob relocBlob = std::move(*make_binary_blob(relocDescriptor));
+        Blob relocBlob = std::move(*make_binary_blob(shaderPair.reloc));
         relocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         relocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(relocBlob));
 
-        Blob nonRelocBlob = std::move(*make_binary_blob(nonRelocDescriptor));
+        Blob nonRelocBlob = std::move(*make_binary_blob(shaderPair.nonReloc));
         nonRelocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         nonRelocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(nonRelocBlob));

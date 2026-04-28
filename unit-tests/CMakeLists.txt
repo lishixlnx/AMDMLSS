@@ -1,21 +1,44 @@
 # GPU kernel integration tests for MLSS operators.
-# Requires mlss-tester (installed) and the amdmlss C API.
+# Requires the mlss-tester library target and the amdmlss C API.
 
-set(MLSS_TESTER_INSTALL_DIR "${CMAKE_SOURCE_DIR}/3rdparty/amd-mlss-tester/install"
-    CACHE PATH "Path to the installed mlss-tester library")
-set(_MLSS_TESTER_INSTALL "${MLSS_TESTER_INSTALL_DIR}")
-find_package(mlss-tester REQUIRED
-    PATHS "${_MLSS_TESTER_INSTALL}"
-    PATH_SUFFIXES lib/cmake/mlss-tester
-    NO_DEFAULT_PATH
-)
+if(NOT TARGET mlss-tester)
+    message(STATUS "mlss-tester target not available; skipping GPU kernel tests")
+    return()
+endif()
 
 if(NOT TARGET c_api)
     message(STATUS "c_api target not available; skipping GPU kernel tests")
     return()
 endif()
 
+# ── Required mlss-tester backends ────────────────────────────────────────────
+# The unit tests exercise every backend the tester supports. We require the
+# HIP, D3D12 and OpenCL backends to be compiled in. The Host tensor library
+# (used for reference computation) is always compiled into mlss-tester.
+set(_MLSS_REQUIRED_BACKENDS HIP D3D CL)
+foreach(_backend IN LISTS _MLSS_REQUIRED_BACKENDS)
+    if(NOT MLSS_ENABLE_${_backend})
+        message(FATAL_ERROR
+            "unit-tests: mlss-tester backend ${_backend} is not enabled "
+            "(MLSS_ENABLE_${_backend}=OFF). The unit tests require HIP, D3D "
+            "and OpenCL backends, plus the always-compiled Host tensor library.")
+    endif()
+endforeach()
+message(STATUS "unit-tests: mlss-tester backends enabled — HIP, D3D, OpenCL, Host")
+
 include(CTest)
+
+# Fetch Catch2 if not already available
+if(NOT TARGET Catch2::Catch2WithMain)
+    include(FetchContent)
+    FetchContent_Declare(Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v3.8.0
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(Catch2)
+    list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
+endif()
 
 # Locate the ROCm HIP runtime DLL so the test can find hipLibrary* symbols
 set(_runtime_dlls "")
@@ -37,7 +60,10 @@ list(REMOVE_DUPLICATES _runtime_dlls)
 function(add_gpu_kernel_test TARGET_NAME SOURCE_FILE)
     add_executable(${TARGET_NAME} "${SOURCE_FILE}")
 
-    target_link_libraries(${TARGET_NAME} PRIVATE mlss::mlss-tester)
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        mlss-tester
+        Catch2::Catch2WithMain
+    )
 
     # Only pull c_api's own headers + the common C defs; avoid transitive shaders include.
     target_link_libraries(${TARGET_NAME} PRIVATE $<TARGET_LINKER_FILE:c_api>)
@@ -75,6 +101,16 @@ function(add_gpu_kernel_test TARGET_NAME SOURCE_FILE)
             COMMENT "Copying ${_dll} for ${TARGET_NAME}"
         )
     endforeach()
+
+    # Copy the mlss-tester DLL next to the test executable
+    if(TARGET mlss-tester AND WIN32)
+        add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:mlss-tester>"
+                "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+            COMMENT "Copying mlss-tester DLL for ${TARGET_NAME}"
+        )
+    endif()
 
     set_target_properties(${TARGET_NAME} PROPERTIES
         FOLDER "Unit Tests"

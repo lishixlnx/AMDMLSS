@@ -11,6 +11,7 @@ namespace mlss::gqa::ck::wmma
         const std::uint32_t& sizeHeads,
         const std::uint32_t& kvSequenceLength,
         const std::uint32_t& qSequenceLength,
+        const std::uint32_t& packing,
         const std::uint32_t& dataType);
 
     std::expected<Binaries, std::error_code> getShadersBlob(

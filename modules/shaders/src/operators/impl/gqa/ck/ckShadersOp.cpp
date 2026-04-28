@@ -101,6 +101,7 @@ namespace mlss::gqa::ck
         std::uint32_t kv_head_count = 0;
         float scale = 0.f;
         std::uint32_t data_type = 0;
+        std::uint32_t packing = MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED;
 
         for (const auto& attribute : attributes)
         {
@@ -136,6 +137,10 @@ namespace mlss::gqa::ck
             {
                 data_type = attribute.value<std::uint32_t>();
             }
+            else if (attribute.is(MLSS_ATTR_GQA_PACKING))
+            {
+                packing = attribute.value<std::uint32_t>();
+            }
         }
 
         // Check required parameters
@@ -145,7 +150,7 @@ namespace mlss::gqa::ck
             return false;
         }
 
-        return wmma::isShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, data_type);
+        return wmma::isShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, packing, data_type);
     }
 
 } // namespace mlss::gqa::ck

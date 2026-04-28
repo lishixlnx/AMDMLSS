@@ -1,10 +1,8 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "gfx1201/fp16/shadersBin.hpp"
-
-#include <mutex>
-#include <unordered_map>
+#include "gfx1201/fp16/shadersBinReloc.hpp"
+#include "gfx1201/fp16/shadersBinNonReloc.hpp"
 
 using mlss::conv::utils::GenericConvParams;
 
@@ -23,8 +21,21 @@ namespace mlss::conv::mxn::winograd::rage
             return integer_divide_ceil(value, multiple) * multiple;
         }
 
-        std::mutex s_cacheMutex;
-        std::unordered_map<std::uint64_t, DynamicShaderType> s_shaderCache;
+        // See Base/shadersUtils.cpp for the rationale: the non-relocatable
+        // ELFs are pre-linked offline by tools/winograd_pal/ because comgr's
+        // LINK_RELOCATABLE_TO_EXECUTABLE silently exits on PAL OS/ABI inputs.
+        struct ShaderPair
+        {
+            ShaderDescriptorType reloc;
+            ShaderDescriptorType nonReloc;
+        };
+
+#define MLSS_WINOGRAD_RAGE_PAIR(NS, NAME)                                      \
+    ShaderPair                                                                 \
+    {                                                                          \
+        .reloc    = make_shader_descriptor(NS::NAME),                          \
+        .nonReloc = make_shader_descriptor(NS::NAME##_NonReloc),               \
+    }
 
         //=============================================================================================================
         ConvRageShader selectShaderVariant(const GenericConvParams& params)
@@ -37,15 +48,15 @@ namespace mlss::conv::mxn::winograd::rage
         }
 
         //=============================================================================================================
-        ShaderDescriptorType selectRelocatableShader(const GfxIpTriple& gfxip, ConvRageShader shader)
+        ShaderPair selectShaderPair(const GfxIpTriple& gfxip, ConvRageShader shader)
         {
             if (isGfx120x(gfxip))
             {
                 if (shader == ConvRageShader::Elf_Gfx12_460)
                 {
-                    return make_shader_descriptor(fp16::gfx1201::ConvRage_460_Navi48_Fp16_F2x3_Stride1_Elf);
+                    return MLSS_WINOGRAD_RAGE_PAIR(fp16::gfx1201, ConvRage_460_Navi48_Fp16_F2x3_Stride1_Elf);
                 }
-                return make_shader_descriptor(fp16::gfx1201::ConvRage_490_Navi48_Fp16_F2x3_Stride1_Elf);
+                return MLSS_WINOGRAD_RAGE_PAIR(fp16::gfx1201, ConvRage_490_Navi48_Fp16_F2x3_Stride1_Elf);
             }
             return {};
         }
@@ -142,56 +153,6 @@ namespace mlss::conv::mxn::winograd::rage
             return bestNGroups;
         }
 
-        //=============================================================================================================
-        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
-        {
-            if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x01u};
-            return IP_GFX_UNKNOWN;
-        }
-
-        //=============================================================================================================
-        std::expected<const DynamicShaderType*, std::error_code> getOrComputeCached(
-            const GfxIpTriple& gfxip,
-            ConvRageShader shader)
-        {
-            const auto key = (static_cast<std::uint64_t>(gfxIpPacked(gfxip)) << 0x04u)
-                           | static_cast<std::uint64_t>(shader);
-
-            {
-                std::lock_guard lock(s_cacheMutex);
-                auto it = s_shaderCache.find(key);
-                if (it != s_shaderCache.end())
-                {
-                    return &it->second;
-                }
-            }
-
-            auto relocDescriptor = selectRelocatableShader(gfxip, shader);
-            if (relocDescriptor.m_binary.empty())
-            {
-                return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
-            }
-
-            auto sourceArch = sourceArchForTarget(gfxip);
-            auto nonRelocResult = getNonRelocatable(relocDescriptor.m_binary, sourceArch, gfxip);
-            if (!nonRelocResult.has_value())
-            {
-                return std::unexpected(nonRelocResult.error());
-            }
-
-            DynamicShaderType cached;
-            cached.m_binary.assign(nonRelocResult->begin(), nonRelocResult->end());
-            cached.m_kernelName = relocDescriptor.m_kernelName;
-            cached.m_compilerVersion = relocDescriptor.m_compilerVersion;
-            cached.m_codeObjectVersion = relocDescriptor.m_codeObjectVersion;
-            cached.m_isRelocatable = false;
-            cached.m_shaderType = relocDescriptor.m_shaderType;
-
-            std::lock_guard lock(s_cacheMutex);
-            auto [it, inserted] = s_shaderCache.emplace(key, std::move(cached));
-            return &it->second;
-        }
-
     } // namespace
 
     mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const GenericConvParams& params)
@@ -268,20 +229,11 @@ namespace mlss::conv::mxn::winograd::rage
 
         const auto shader = selectShaderVariant(params);
 
-        auto relocDescriptor = selectRelocatableShader(gfxip, shader);
-        if (relocDescriptor.m_binary.empty())
+        const auto shaderPair = selectShaderPair(gfxip, shader);
+        if (shaderPair.reloc.m_binary.empty() || shaderPair.nonReloc.m_binary.empty())
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
         }
-
-        auto cachedResult = getOrComputeCached(gfxip, shader);
-        if (!cachedResult.has_value())
-        {
-            return std::unexpected(cachedResult.error());
-        }
-
-        const auto& cachedShader = *cachedResult.value();
-        auto nonRelocDescriptor = make_shader_descriptor(cachedShader);
 
         auto numCuResult = getNumCu(gfxip);
         if (!numCuResult.has_value())
@@ -292,18 +244,18 @@ namespace mlss::conv::mxn::winograd::rage
         const auto numCu = static_cast<std::uint32_t>(numCuResult.value());
         const auto nGroups = computeBestNGroups(params, numCu, shader);
 
-        auto workgroupSizeResult = getWorkgroupSize(relocDescriptor.m_binary);
+        auto workgroupSizeResult = getWorkgroupSize(shaderPair.reloc.m_binary);
         MLSSdim3 blocks = workgroupSizeResult.value_or(MLSSdim3{ 0x01u, 0x01u, 0x01u });
         MLSSdim3 grid{ nGroups * params.groups, 0x01u, 0x01u };
 
         Binaries binaries;
 
-        Blob relocBlob = std::move(*make_binary_blob(relocDescriptor));
+        Blob relocBlob = std::move(*make_binary_blob(shaderPair.reloc));
         relocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         relocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(relocBlob));
 
-        Blob nonRelocBlob = std::move(*make_binary_blob(nonRelocDescriptor));
+        Blob nonRelocBlob = std::move(*make_binary_blob(shaderPair.nonReloc));
         nonRelocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         nonRelocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(nonRelocBlob));

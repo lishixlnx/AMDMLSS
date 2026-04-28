@@ -1,11 +1,10 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "gfx1100/fp16/shadersBin.hpp"
-#include "gfx1201/fp16/shadersBin.hpp"
-
-#include <mutex>
-#include <unordered_map>
+#include "gfx1100/fp16/shadersBinReloc.hpp"
+#include "gfx1100/fp16/shadersBinNonReloc.hpp"
+#include "gfx1201/fp16/shadersBinReloc.hpp"
+#include "gfx1201/fp16/shadersBinNonReloc.hpp"
 
 using mlss::conv::utils::GenericConvParams;
 
@@ -24,8 +23,21 @@ namespace mlss::conv::mxn::winograd::fury
             return integer_divide_ceil(value, multiple) * multiple;
         }
 
-        std::mutex s_cacheMutex;
-        std::unordered_map<std::uint64_t, DynamicShaderType> s_shaderCache;
+        // See Base/shadersUtils.cpp for the rationale: the non-relocatable
+        // ELFs are pre-linked offline by tools/winograd_pal/ because comgr's
+        // LINK_RELOCATABLE_TO_EXECUTABLE silently exits on PAL OS/ABI inputs.
+        struct ShaderPair
+        {
+            ShaderDescriptorType reloc;
+            ShaderDescriptorType nonReloc;
+        };
+
+#define MLSS_WINOGRAD_FURY_PAIR(NS, NAME)                                      \
+    ShaderPair                                                                 \
+    {                                                                          \
+        .reloc    = make_shader_descriptor(NS::NAME),                          \
+        .nonReloc = make_shader_descriptor(NS::NAME##_NonReloc),               \
+    }
 
         //=============================================================================================================
         float computePerfWti(
@@ -138,74 +150,23 @@ namespace mlss::conv::mxn::winograd::fury
         }
 
         //=============================================================================================================
-        ShaderDescriptorType selectRelocatableShader(const GfxIpTriple& gfxip, ConvFuryShader shader)
+        ShaderPair selectShaderPair(ConvFuryShader shader)
         {
             switch (shader)
             {
                 case ConvFuryShader::Elf_Gfx11_C16:
-                    return make_shader_descriptor(fp16::gfx1100::ConvFury_Navi31_F2x3_C16_Stride1_Elf);
+                    return MLSS_WINOGRAD_FURY_PAIR(fp16::gfx1100, ConvFury_Navi31_F2x3_C16_Stride1_Elf);
                 case ConvFuryShader::Elf_Gfx11_C32:
-                    return make_shader_descriptor(fp16::gfx1100::ConvFury_Navi31_F2x3_C32_Stride1_Elf);
+                    return MLSS_WINOGRAD_FURY_PAIR(fp16::gfx1100, ConvFury_Navi31_F2x3_C32_Stride1_Elf);
                 case ConvFuryShader::Elf_Gfx11_Navi33_C16:
-                    return make_shader_descriptor(fp16::gfx1100::ConvFury_Navi33_F2x3_C16_Stride1_Elf);
+                    return MLSS_WINOGRAD_FURY_PAIR(fp16::gfx1100, ConvFury_Navi33_F2x3_C16_Stride1_Elf);
                 case ConvFuryShader::Elf_Gfx12_C16:
-                    return make_shader_descriptor(fp16::gfx1201::ConvFury_Navi48_F2x3_C16_Stride1_Elf);
+                    return MLSS_WINOGRAD_FURY_PAIR(fp16::gfx1201, ConvFury_Navi48_F2x3_C16_Stride1_Elf);
                 case ConvFuryShader::Elf_Gfx12_C32:
-                    return make_shader_descriptor(fp16::gfx1201::ConvFury_Navi48_F2x3_C32_Stride1_Elf);
+                    return MLSS_WINOGRAD_FURY_PAIR(fp16::gfx1201, ConvFury_Navi48_F2x3_C32_Stride1_Elf);
                 default:
                     return {};
             }
-        }
-
-        //=============================================================================================================
-        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
-        {
-            if (gfxip.major == 0x0Bu) return {0x0Bu, 0x00u, 0x00u};
-            if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x01u};
-            return IP_GFX_UNKNOWN;
-        }
-
-        //=============================================================================================================
-        std::expected<const DynamicShaderType*, std::error_code> getOrComputeCached(
-            const GfxIpTriple& gfxip,
-            ConvFuryShader shader)
-        {
-            const auto key = (static_cast<std::uint64_t>(gfxIpPacked(gfxip)) << 0x08u)
-                           | static_cast<std::uint64_t>(shader);
-
-            {
-                std::lock_guard lock(s_cacheMutex);
-                auto it = s_shaderCache.find(key);
-                if (it != s_shaderCache.end())
-                {
-                    return &it->second;
-                }
-            }
-
-            auto relocDescriptor = selectRelocatableShader(gfxip, shader);
-            if (relocDescriptor.m_binary.empty())
-            {
-                return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
-            }
-
-            auto sourceArch = sourceArchForTarget(gfxip);
-            auto nonRelocResult = getNonRelocatable(relocDescriptor.m_binary, sourceArch, gfxip);
-            if (!nonRelocResult.has_value())
-            {
-                return std::unexpected(nonRelocResult.error());
-            }
-
-            DynamicShaderType cached;
-            cached.m_binary.assign(nonRelocResult->begin(), nonRelocResult->end());
-            cached.m_kernelName = relocDescriptor.m_kernelName;
-            cached.m_compilerVersion = relocDescriptor.m_compilerVersion;
-            cached.m_codeObjectVersion = relocDescriptor.m_codeObjectVersion;
-            cached.m_isRelocatable = false;
-            cached.m_shaderType = relocDescriptor.m_shaderType;
-
-            std::lock_guard lock(s_cacheMutex);
-            auto [it, inserted] = s_shaderCache.emplace(key, std::move(cached));
-            return &it->second;
         }
 
     } // namespace
@@ -284,33 +245,24 @@ namespace mlss::conv::mxn::winograd::fury
         const auto numCu = static_cast<std::uint32_t>(numCuResult.value());
         const auto shader = selectShaderVariant(gfxip, params, numCu);
 
-        auto relocDescriptor = selectRelocatableShader(gfxip, shader);
-        if (relocDescriptor.m_binary.empty())
+        const auto shaderPair = selectShaderPair(shader);
+        if (shaderPair.reloc.m_binary.empty() || shaderPair.nonReloc.m_binary.empty())
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
         }
 
-        auto cachedResult = getOrComputeCached(gfxip, shader);
-        if (!cachedResult.has_value())
-        {
-            return std::unexpected(cachedResult.error());
-        }
-
-        const auto& cachedShader = *cachedResult.value();
-        auto nonRelocDescriptor = make_shader_descriptor(cachedShader);
-
-        auto workgroupSizeResult = getWorkgroupSize(relocDescriptor.m_binary);
+        auto workgroupSizeResult = getWorkgroupSize(shaderPair.reloc.m_binary);
         MLSSdim3 blocks = workgroupSizeResult.value_or(MLSSdim3{ 0x01u, 0x01u, 0x01u });
         MLSSdim3 grid{ numCu, 0x01u, 0x01u };
 
         Binaries binaries;
 
-        Blob relocBlob = std::move(*make_binary_blob(relocDescriptor));
+        Blob relocBlob = std::move(*make_binary_blob(shaderPair.reloc));
         relocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         relocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(relocBlob));
 
-        Blob nonRelocBlob = std::move(*make_binary_blob(nonRelocDescriptor));
+        Blob nonRelocBlob = std::move(*make_binary_blob(shaderPair.nonReloc));
         nonRelocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         nonRelocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(nonRelocBlob));

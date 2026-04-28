@@ -174,6 +174,7 @@ namespace mlss::gqa::ck::wmma
         const std::uint32_t& sizeHeads,
         const std::uint32_t& kvSequenceLength,
         const std::uint32_t& qSequenceLength,
+        const std::uint32_t& packing,
         const std::uint32_t& dataType)
     {
         if (!isGfx110x(gfxArch) && !isGfx115x(gfxArch) && !isGfx120x(gfxArch))
@@ -186,7 +187,26 @@ namespace mlss::gqa::ck::wmma
             return false;
         }
 
-        return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || ((qSequenceLength == kvSequenceLength) && (sizeHeads <= 80));
+        const bool isSelfAttention = qSequenceLength == kvSequenceLength;
+
+        // Reject packings that have no compiled CK kernel matching the advertised args layout:
+        //   - PACKED_QK: no `packed_qk_gqa_*` kernel exists in any per-arch shadersBin.hpp; the
+        //     `packed_kv_gqa_*` kernels we previously fell back to expose (Q, KV, ...) buffers,
+        //     not the (QK, V, ...) layout advertised by the args metadata.
+        //   - PACKED_QKV cross-attention: no `packed_qkv_gqa_cross_attn_*` /
+        //     `packed_qkv_gqa_fallback_cross_attn_*` kernel exists, and falling back to a
+        //     `packed_kv_gqa_cross_attn_*` kernel introduces a hard arg-count mismatch
+        //     (10 vs 8, 22 vs 16).
+        if (packing == MLSS_ATTR_CONFIG_GQA_PACKING_PACKED_QK)
+        {
+            return false;
+        }
+        if ((packing == MLSS_ATTR_CONFIG_GQA_PACKING_PACKED_QKV) && !isSelfAttention)
+        {
+            return false;
+        }
+
+        return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || (isSelfAttention && (sizeHeads <= 80));
     }
 
     std::expected<Binaries, std::error_code> getShadersBlob(
@@ -201,7 +221,7 @@ namespace mlss::gqa::ck::wmma
         bool useStrides,
         const std::uint32_t& dataType)
     {
-        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, dataType))
+        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, packing, dataType))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }
@@ -350,26 +370,6 @@ namespace mlss::gqa::ck::wmma
 #define GQA_ARCH_SWITCH(arch)                                                                                         \
     switch (shader)                                                                                                    \
     {                                                                                                                  \
-        case GQAAsmShaderWmma::packed_qk_128_64x128x80_64x80x64:                                                     \
-            GQA_DISPATCH(64,80,128, arch::packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,   \
-                gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
-                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
-                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
-        case GQAAsmShaderWmma::packed_qk_128_64x192x48_64x48x64:                                                     \
-            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_self_attn_128_64x192x48_64x48x64_forward_wmma_fp16_##arch,   \
-                gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
-                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
-                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
-        case GQAAsmShaderWmma::packed_qk_128_64x64x48_64x48x64:                                                      \
-            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,   \
-                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
-                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
-                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
-        case GQAAsmShaderWmma::packed_qk_64_32x64x48_32x48x64:                                                       \
-            GQA_DISPATCH(32,48,64, arch::packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
-                gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
-                packed_qk_double_pointer_ARGS_CONSTANTS,                                                              \
-                packed_qk_with_strides_double_pointer_ARGS_CONSTANTS); break;                                         \
         case GQAAsmShaderWmma::packed_kv_128_64x128x80_64x80x64:                                                     \
             GQA_DISPATCH(64,80,128, arch::packed_kv_gqa_self_attn_128_64x128x80_64x80x64_forward_wmma_fp16_##arch,   \
                 gqa_128_64x128x80_64x80x64_CONSTANTS,                                                                \
@@ -400,13 +400,8 @@ namespace mlss::gqa::ck::wmma
                 gqa_128_64x192x48_64x48x64_CONSTANTS,                                                                \
                 packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
                 packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
-        case GQAAsmShaderWmma::packed_qkv_128_64x64x48_64x48x64:                                                     \
-            GQA_DISPATCH(64,48,128, arch::packed_kv_gqa_cross_attn_128_64x64x48_64x48x64_forward_wmma_fp16_##arch,   \
-                gqa_128_64x64x48_64x48x64_CONSTANTS,                                                                 \
-                packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
-                packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
         case GQAAsmShaderWmma::packed_qkv_64_32x64x48_32x48x64:                                                      \
-            GQA_DISPATCH(32,48,64, arch::packed_kv_gqa_fallback_cross_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
+            GQA_DISPATCH(32,48,64, arch::packed_qkv_gqa_fallback_self_attn_64_32x64x48_32x48x64_forward_wmma_fp16_##arch, \
                 gqa_fallback_64_32x64x48_32x48x64_CONSTANTS,                                                         \
                 packed_qkv_double_pointer_ARGS_CONSTANTS,                                                             \
                 packed_qkv_with_strides_double_pointer_ARGS_CONSTANTS); break;                                        \
