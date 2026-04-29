@@ -32,14 +32,11 @@ add_standalone_headers(common_headers
 option(BUILD_SAMPLES "Build sample/test programs" OFF)
 option(BUILD_TESTS "Build Catch2 unit tests" ON)
 
-# Add Catch2 if tests are enabled and available
-if(BUILD_TESTS)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Catch2/CMakeLists.txt")
-        add_subdirectory(3rdparty/Catch2)
-    else()
-        message(WARNING "Catch2 submodule missing; disabling BUILD_TESTS")
-        set(BUILD_TESTS OFF CACHE BOOL "Build Catch2 unit tests" FORCE)
-    endif()
+# Use a vendored Catch2 checkout when available; otherwise unit-tests/CMakeLists.txt
+# falls back to FetchContent. This keeps builds working both offline (with the
+# submodule populated) and on fresh clones (network fetch).
+if(BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Catch2/CMakeLists.txt")
+    add_subdirectory(3rdparty/Catch2)
 endif()
 
 # Add modules directory
@@ -78,6 +75,7 @@ endif()
 
 # Build mlss-tester library from the submodule (same compiler and build options as the main project)
 set(_MLSS_TESTER_SUBMODULE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester")
+ensure_git_submodule("3rdparty/amd-mlss-tester" "lib/CMakeLists.txt")
 if(EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
     list(APPEND CMAKE_MODULE_PATH "${_MLSS_TESTER_SUBMODULE}/cmake/Modules")
 
