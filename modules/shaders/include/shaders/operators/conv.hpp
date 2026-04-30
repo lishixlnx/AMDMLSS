@@ -4,7 +4,7 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorConv : public OperatorBase<OperatorConv>
     {
@@ -12,30 +12,19 @@ namespace mlss::shaders::op
 
         using base = OperatorBase<OperatorConv>;
 
-        // Friend declaration to allow base class access to private members
-        friend class OperatorBase<OperatorConv>;
-
     public:
 
-        // Default constructor
         OperatorConv() = default;
 
-        // Constructor
-        OperatorConv(const std::vector<Attribute>& attributes, GfxArchitectureFlags gfxip);
+        OperatorConv(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
-        // Destructor
         virtual ~OperatorConv() = default;
 
-        // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-    private:
-
-        // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
     };
 
-} // namespace mlss::shaders::op
+} // namespace mlss::op

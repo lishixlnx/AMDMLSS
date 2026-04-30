@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
 namespace mlss
@@ -95,11 +95,11 @@ namespace mlss
 
     //=====================================================================================================================
     template <class T, class Traits>
-    std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& os, const GfxArchitectureFlags& flag)
+    std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& os, const GfxIpTriple& gfxIp)
     {
         namespace fs = std::filesystem;
 
-        auto result = gfxArchitectureFlagsToString(flag);
+        auto result = gfxIpTripleToString(gfxIp);
         if (!result.has_value())
         {
             os << "Unknown";

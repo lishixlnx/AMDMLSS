@@ -1,4 +1,4 @@
-/* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "core/core.hpp"
 #include <hip/hip_runtime.h>
 
@@ -122,17 +122,13 @@ namespace mlss
 
         if (err != hipSuccess)
         {
-            error_log << "Failed to get device count: " << hipGetErrorString(err) << std::endl;
             return std::unexpected(makeDeviceQueryError(1));
         }
 
         if (deviceCount == 0)
         {
-            warning_log << "No devices found" << std::endl;
             return devices; // Return empty vector
         }
-
-        info_log << "Found " << deviceCount << " device(s)" << std::endl;
 
         for (int i = 0; i < deviceCount; ++i)
         {
@@ -141,7 +137,6 @@ namespace mlss
 
             if (err != hipSuccess)
             {
-                error_log << "Failed to get properties for device " << i << ": " << hipGetErrorString(err) << std::endl;
                 continue;
             }
 
@@ -151,7 +146,6 @@ namespace mlss
             // Skip unsupported architectures
             if (gfxString == MLSS_GFXAUTOFIND)
             {
-                info_log << "Skipping device " << i << " with unsupported architecture: " << props.gcnArchName << std::endl;
                 continue;
             }
 
@@ -172,18 +166,11 @@ namespace mlss
             features.m_isDedicated = (props.integrated == 0);
             features.m_gpuIdx = i;
 
-            debug_log << "Device " << i << ": " << props.name
-                      << ", CUs: " << features.m_numCUs
-                      << ", Shared Mem: " << features.m_sizeShaderMem
-                      << ", GFX: " << gfxString
-                      << ", Dedicated: " << (features.m_isDedicated ? "Yes" : "No") << std::endl;
-
             devices.push_back(features);
         }
 
         if (devices.empty())
         {
-            warning_log << "No supported HIP devices found" << std::endl;
             return std::unexpected(makeDeviceQueryError(3));
         }
 
@@ -202,7 +189,6 @@ namespace mlss
         auto devices = devicesResult.value();
         if (devices.empty())
         {
-            error_log << "No devices available to select optimal device" << std::endl;
             return std::unexpected(makeDeviceQueryError(2));
         }
 
@@ -241,11 +227,6 @@ namespace mlss
         // Return the best device (first after sorting)
         const auto& optimal = devices[0];
 
-        info_log << "Selected optimal device: GPU " << optimal.m_gpuIdx
-                 << ", GFX: " << optimal.m_gfx
-                 << ", Dedicated: " << (optimal.m_isDedicated ? "Yes" : "No")
-                 << ", CUs: " << optimal.m_numCUs << std::endl;
-
         return optimal;
     }
 
@@ -254,77 +235,83 @@ namespace mlss
     //=====================================================================================================================
 
     //=====================================================================================================================
-    bool isGfx110x(const GfxArchitectureFlags& gfx)
+    bool isGfx110x(const GfxIpTriple& gfx)
     {
-        return (gfx == GfxArchitectureFlags::Gfx1100) || (gfx == GfxArchitectureFlags::Gfx1101) ||
-               (gfx == GfxArchitectureFlags::Gfx1102) || (gfx == GfxArchitectureFlags::Gfx1103);
+        return (gfx == IP_GFX1100) || (gfx == IP_GFX1101) ||
+               (gfx == IP_GFX1102) || (gfx == IP_GFX1103);
     }
 
     //=====================================================================================================================
-    bool isGfx115x(const GfxArchitectureFlags& gfx)
+    bool isGfx115x(const GfxIpTriple& gfx)
     {
-        return (gfx == GfxArchitectureFlags::Gfx1150) || (gfx == GfxArchitectureFlags::Gfx1151) ||
-               (gfx == GfxArchitectureFlags::Gfx1152) || (gfx == GfxArchitectureFlags::Gfx1153) ||
-               (gfx == GfxArchitectureFlags::Gfx1154);
+        return (gfx == IP_GFX1150) || (gfx == IP_GFX1151) ||
+               (gfx == IP_GFX1152) || (gfx == IP_GFX1153) ||
+               (gfx == IP_GFX1154);
     }
 
     //=====================================================================================================================
-    bool isGfx117x(const GfxArchitectureFlags& gfx)
+    bool isGfx117x(const GfxIpTriple& gfx)
     {
-        return (gfx == GfxArchitectureFlags::Gfx1170) || (gfx == GfxArchitectureFlags::Gfx1171);
+        return (gfx == IP_GFX1170) || (gfx == IP_GFX1171);
     }
 
     //=====================================================================================================================
-    bool isGfx120x(const GfxArchitectureFlags& gfx)
+    bool isGfx120x(const GfxIpTriple& gfx)
     {
-        return (gfx == GfxArchitectureFlags::Gfx1200) || (gfx == GfxArchitectureFlags::Gfx1201);
+        return (gfx == IP_GFX1200) || (gfx == IP_GFX1201);
     }
 
     //=====================================================================================================================
-    bool isGfx10(const GfxArchitectureFlags& gfx)
+    bool isGfx10(const GfxIpTriple& gfx)
     {
-        return (gfx == GfxArchitectureFlags::Gfx1000) || (gfx == GfxArchitectureFlags::Gfx1010) ||
-               (gfx == GfxArchitectureFlags::Gfx1011) || (gfx == GfxArchitectureFlags::Gfx1012) ||
-               (gfx == GfxArchitectureFlags::Gfx1013) || (gfx == GfxArchitectureFlags::Gfx1020) ||
-               (gfx == GfxArchitectureFlags::Gfx1030) || (gfx == GfxArchitectureFlags::Gfx1031) ||
-               (gfx == GfxArchitectureFlags::Gfx1032) || (gfx == GfxArchitectureFlags::Gfx1033) ||
-               (gfx == GfxArchitectureFlags::Gfx1034) || (gfx == GfxArchitectureFlags::Gfx1035) ||
-               (gfx == GfxArchitectureFlags::Gfx1036) || (gfx == GfxArchitectureFlags::Gfx1050);
+        return (gfx == IP_GFX1000) || (gfx == IP_GFX1010) ||
+               (gfx == IP_GFX1011) || (gfx == IP_GFX1012) ||
+               (gfx == IP_GFX1013) || (gfx == IP_GFX1020) ||
+               (gfx == IP_GFX1030) || (gfx == IP_GFX1031) ||
+               (gfx == IP_GFX1032) || (gfx == IP_GFX1033) ||
+               (gfx == IP_GFX1034) || (gfx == IP_GFX1035) ||
+               (gfx == IP_GFX1036) || (gfx == IP_GFX1050);
     }
 
     //=====================================================================================================================
-    bool isGfx11(const GfxArchitectureFlags& gfx)
+    bool isGfx11(const GfxIpTriple& gfx)
     {
         return isGfx110x(gfx) || isGfx115x(gfx) || isGfx117x(gfx);
     }
 
     //=====================================================================================================================
-    bool isGfx12(const GfxArchitectureFlags& gfx)
+    bool isGfx12(const GfxIpTriple& gfx)
     {
         return isGfx120x(gfx);
     }
 
     //=====================================================================================================================
-    bool isGfx13(const GfxArchitectureFlags& gfx)
+    bool isGfx13(const GfxIpTriple& gfx)
     {
         // GFX13 not yet supported
         return false;
     }
 
     //=====================================================================================================================
-    bool isGfx11Plus(const GfxArchitectureFlags& gfx)
+    bool isGfx11Plus(const GfxIpTriple& gfx)
     {
         return isGfx11(gfx) || isGfx12Plus(gfx);
     }
 
     //=====================================================================================================================
-    bool isGfx12Plus(const GfxArchitectureFlags& gfx)
+    bool isGfx12Plus(const GfxIpTriple& gfx)
     {
         return isGfx12(gfx) || isGfx13(gfx);
     }
 
-    bool isGfx12Max(const GfxArchitectureFlags& gfx)
+    bool isGfx12Max(const GfxIpTriple& gfx)
     {
         return isGfx10(gfx) || isGfx11(gfx) || isGfx12(gfx);
+    }
+
+    bool areGfxIpsCompatible(const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget)
+    {    
+        return (gfxIpHighEnd.major == gfxIpTarget.major) &&
+               (gfxIpHighEnd.minor == gfxIpTarget.minor);
     }
 } // namespace mlss

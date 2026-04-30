@@ -22,7 +22,6 @@
 #include "shaders/shaders.hpp"
 #include "shaders/operators/mha.hpp"
 #include "shaders/operators/conv.hpp"
-#include "shaders/operators/dconv.hpp"
 #include "shaders/operators/gemm.hpp"
 #include "shaders/operators/gqa.hpp"
 #include "shaders/operators/mvn.hpp"
@@ -663,27 +662,18 @@ namespace mlss
         {
             Binaries binaries;
 
-            // Set GFX architecture based on ASIC string
-            GfxArchitectureFlags gfxArch = GfxArchitectureFlags::Unknown;
-            if (ctx->m_asic == "MLSS_GFX1100")
+            GfxIpTriple gfxArch = IP_GFX_UNKNOWN;
+            if (auto gfxIp = architectureStringToGfxIpTriple(ctx->m_asic); gfxIp.has_value())
             {
-                gfxArch = GfxArchitectureFlags::Gfx1100;
-            }
-            else if (ctx->m_asic == "MLSS_GFX1150")
-            {
-                gfxArch = GfxArchitectureFlags::Gfx1150;
-            }
-            else if (ctx->m_asic == "MLSS_GFX1201")
-            {
-                gfxArch = GfxArchitectureFlags::Gfx1201;
+                gfxArch = gfxIp.value();
             }
 
             // Use operator classes for all operations
             if (op.m_op == "MLSS_MHA")
             {
-                shaders::op::OperatorMHA mha_operator;
+                op::OperatorMHA mha_operator;
                 mha_operator.setAttributes(op.m_params);
-                mha_operator.setGfxArchitecture(gfxArch);
+                mha_operator.setGfxIpTriple(gfxArch);
 
                 auto result = mha_operator.getBinaries();
                 if (!result.has_value())
@@ -694,9 +684,9 @@ namespace mlss
             }
             else if (op.m_op == "MLSS_CONV")
             {
-                shaders::op::OperatorConv conv_operator;
+                op::OperatorConv conv_operator;
                 conv_operator.setAttributes(op.m_params);
-                conv_operator.setGfxArchitecture(gfxArch);
+                conv_operator.setGfxIpTriple(gfxArch);
 
                 auto result = conv_operator.getBinaries();
                 if (!result.has_value())
@@ -707,9 +697,9 @@ namespace mlss
             }
             else if (op.m_op == "MLSS_GEMM")
             {
-                shaders::op::OperatorGEMM gemm_operator;
+                op::OperatorGEMM gemm_operator;
                 gemm_operator.setAttributes(op.m_params);
-                gemm_operator.setGfxArchitecture(gfxArch);
+                gemm_operator.setGfxIpTriple(gfxArch);
 
                 auto result = gemm_operator.getBinaries();
                 if (!result.has_value())
@@ -720,9 +710,9 @@ namespace mlss
             }
             else if (op.m_op == "MLSS_GQA")
             {
-                shaders::op::OperatorGQA gqa_operator;
+                op::OperatorGQA gqa_operator;
                 gqa_operator.setAttributes(op.m_params);
-                gqa_operator.setGfxArchitecture(gfxArch);
+                gqa_operator.setGfxIpTriple(gfxArch);
 
                 auto result = gqa_operator.getBinaries();
                 if (!result.has_value())
@@ -733,9 +723,9 @@ namespace mlss
             }
             else if (op.m_op == "MLSS_MVN")
             {
-                shaders::op::OperatorMVN mvn_operator;
+                op::OperatorMVN mvn_operator;
                 mvn_operator.setAttributes(op.m_params);
-                mvn_operator.setGfxArchitecture(gfxArch);
+                mvn_operator.setGfxIpTriple(gfxArch);
 
                 auto result = mvn_operator.getBinaries();
                 if (!result.has_value())
@@ -746,9 +736,9 @@ namespace mlss
             }
             else if (op.m_op == "MLSS_QGEMM")
             {
-                shaders::op::OperatorQGEMM qgemm_operator;
+                op::OperatorQGEMM qgemm_operator;
                 qgemm_operator.setAttributes(op.m_params);
-                qgemm_operator.setGfxArchitecture(gfxArch);
+                qgemm_operator.setGfxIpTriple(gfxArch);
 
                 auto result = qgemm_operator.getBinaries();
                 if (!result.has_value())
@@ -764,7 +754,7 @@ namespace mlss
             }
 
             // Helper lambda to create MLSSbinary from a Blob
-            auto createBinaryInfo = [&collection, &op, &ctx](const Binaries::Blob& shader_blob, bool isRelocatable) -> MLSSbinary
+            auto createBinaryInfo = [&collection, &op, &ctx](const Binaries::Blob& shader_blob) -> MLSSbinary
             {
                 MLSSbinary binary_info = {};
 
@@ -811,18 +801,26 @@ namespace mlss
                 // Store binary data pointer and size
                 binary_info.m_binaries = const_cast<MLSSvoid*>(shader_blob.m_pBinary);
                 binary_info.m_binarySize = shader_blob.m_size;
+
+                bool isRelocatable = false;
+                if (shader_blob.m_size >= 18u)
+                {
+                    const auto* raw = static_cast<const std::uint8_t*>(shader_blob.m_pBinary);
+                    if (raw[0] == 0x7Fu && raw[1] == 0x45u && raw[2] == 0x4Cu && raw[3] == 0x46u)
+                    {
+                        std::uint16_t eType = static_cast<std::uint16_t>(raw[16])
+                                            | (static_cast<std::uint16_t>(raw[17]) << 8u);
+                        isRelocatable = (eType == 1u);
+                    }
+                }
                 binary_info.m_isRelocatable = isRelocatable;
 
                 return binary_info;
             };
 
-            // Add all binaries from the result
-            // Convention: first blob is relocatable, remaining are non-relocatable
-            bool isFirst = true;
             for (const auto& blob : binaries)
             {
-                collection.binary_infos.emplace_back(createBinaryInfo(blob, isFirst));
-                isFirst = false;
+                collection.binary_infos.emplace_back(createBinaryInfo(blob));
             }
         }
 
@@ -1269,19 +1267,10 @@ namespace mlss
 
             try
             {
-                // Get GFX architecture
-                GfxArchitectureFlags gfxArch = GfxArchitectureFlags::Unknown;
-                if (ctx->m_asic == "MLSS_GFX1100")
+                GfxIpTriple gfxArch = IP_GFX_UNKNOWN;
+                if (auto gfxIp = architectureStringToGfxIpTriple(ctx->m_asic); gfxIp.has_value())
                 {
-                    gfxArch = GfxArchitectureFlags::Gfx1100;
-                }
-                else if (ctx->m_asic == "MLSS_GFX1150")
-                {
-                    gfxArch = GfxArchitectureFlags::Gfx1150;
-                }
-                else if (ctx->m_asic == "MLSS_GFX1201")
-                {
-                    gfxArch = GfxArchitectureFlags::Gfx1201;
+                    gfxArch = gfxIp.value();
                 }
 
                 // Use OperatorBase::getCaps for each operator type
@@ -1292,7 +1281,7 @@ namespace mlss
                     // Check if architecture is GFX11+ for MHA
                     if (isGfx11Plus(gfxArch))
                     {
-                        supported = shaders::op::OperatorMHA::getCaps(op.m_params, gfxArch);
+                        supported = op::OperatorMHA::getCaps(op.m_params, gfxArch);
 
                         if (supported)
                         {
@@ -1313,7 +1302,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_CONV")
                 {
-                    supported = shaders::op::OperatorConv::getCaps(op.m_params, gfxArch);
+                    supported = op::OperatorConv::getCaps(op.m_params, gfxArch);
 
                     if (supported)
                     {
@@ -1327,7 +1316,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GEMM")
                 {
-                    supported = shaders::op::OperatorGEMM::getCaps(op.m_params);
+                    supported = op::OperatorGEMM::getCaps(op.m_params);
 
                     if (supported)
                     {
@@ -1341,7 +1330,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GQA")
                 {
-                    supported = shaders::op::OperatorGQA::getCaps(op.m_params, gfxArch);
+                    supported = op::OperatorGQA::getCaps(op.m_params, gfxArch);
 
                     if (supported)
                     {
@@ -1355,7 +1344,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_MVN")
                 {
-                    supported = shaders::op::OperatorMVN::getCaps(op.m_params);
+                    supported = op::OperatorMVN::getCaps(op.m_params);
 
                     if (supported)
                     {
@@ -1369,7 +1358,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_QGEMM")
                 {
-                    supported = shaders::op::OperatorQGEMM::getCaps(op.m_params);
+                    supported = op::OperatorQGEMM::getCaps(op.m_params);
 
                     if (supported)
                     {

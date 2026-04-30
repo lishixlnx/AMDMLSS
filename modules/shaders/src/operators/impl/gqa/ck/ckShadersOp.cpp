@@ -3,14 +3,14 @@
 #include "core/core.hpp"
 #include "wmma/shadersUtils.hpp"
 
-namespace mlss::shaders::gqa::ck
+namespace mlss::gqa::ck
 {
 
     //=====================================================================================================================
     // CKGqa implementation
     //=====================================================================================================================
 
-    CKGqa::CKGqa(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip)
+    CKGqa::CKGqa(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip)
         : base(attributes, gfxip)
     {
         this->m_implName = "CK-GQA-WMMA";
@@ -77,8 +77,8 @@ namespace mlss::shaders::gqa::ck
             }
         }
 
-        return wmma::getWmmaShadersBlob(
-            m_gfxArch,
+        return wmma::getShadersBlob(
+            m_gfxIpTriple,
             batchSize,
             qHeadCount,
             kvHeadCount,
@@ -90,7 +90,7 @@ namespace mlss::shaders::gqa::ck
             dataType);
     }
 
-    bool CKGqa::getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch)
+    bool CKGqa::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
     {
         // Extract GQA parameters from attributes
         std::uint32_t batch = 0;
@@ -101,6 +101,7 @@ namespace mlss::shaders::gqa::ck
         std::uint32_t kv_head_count = 0;
         float scale = 0.f;
         std::uint32_t data_type = 0;
+        std::uint32_t packing = MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED;
 
         for (const auto& attribute : attributes)
         {
@@ -136,6 +137,10 @@ namespace mlss::shaders::gqa::ck
             {
                 data_type = attribute.value<std::uint32_t>();
             }
+            else if (attribute.is(MLSS_ATTR_GQA_PACKING))
+            {
+                packing = attribute.value<std::uint32_t>();
+            }
         }
 
         // Check required parameters
@@ -145,7 +150,7 @@ namespace mlss::shaders::gqa::ck
             return false;
         }
 
-        return wmma::isWmmaShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, data_type);
+        return wmma::isShadersAvailable(gfxArch, size_heads, kv_seq, q_seq, packing, data_type);
     }
 
-} // namespace mlss::shaders::gqa::ck
+} // namespace mlss::gqa::ck

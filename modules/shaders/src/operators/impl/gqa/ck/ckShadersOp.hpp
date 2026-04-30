@@ -4,12 +4,12 @@
 #include "core/core.hpp"
 #include <cstdint>
 
-namespace mlss::shaders::op
+namespace mlss::op
 {
     class OperatorGQA;
 }
 
-namespace mlss::shaders::gqa::ck
+namespace mlss::gqa::ck
 {
 
     // GQA shader variants for CK implementation
@@ -29,38 +29,25 @@ namespace mlss::shaders::gqa::ck
         unpacked_with_strides_64_32x64x48_32x48x64
     };
 
-    // GQA Operator implementation using CK library
-    class CKGqa final : public OperatorBase<CKGqa, OperatorRegistration::Disabled>
+    class CKGqa final : public BackendBase<CKGqa, mlss::op::OperatorGQA>
     {
     private:
 
-        using base = OperatorBase<CKGqa, OperatorRegistration::Disabled>;
-
-        // Friend declaration to allow base class access to private members
-        friend class OperatorBase<CKGqa, OperatorRegistration::Disabled>;
-        friend class mlss::shaders::op::OperatorGQA;
+        using base = BackendBase<CKGqa, mlss::op::OperatorGQA>;
 
     public:
 
-        // Default constructor
         CKGqa() = default;
 
-        // Constructor
-        CKGqa(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxip);
+        CKGqa(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip);
 
-        // Destructor
         virtual ~CKGqa() = default;
 
-        // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-    private:
-
-        // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxArchitectureFlags& gfxArch);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
     };
 
-} // namespace mlss::shaders::gqa::ck
+} // namespace mlss::gqa::ck

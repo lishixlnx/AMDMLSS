@@ -28,6 +28,34 @@
             }
         },
         {
+            "name": "vs2026-debug",
+            "displayName": "Visual Studio 2026 Debug",
+            "description": "Configure with Visual Studio 2026 (Debug)",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "vs2026-release",
+            "displayName": "Visual Studio 2026 Release",
+            "description": "Configure with Visual Studio 2026 (Release)",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
             "name": "vs2022-debug",
             "displayName": "Visual Studio 2022 Debug",
             "description": "Configure with Visual Studio 2022 (Debug)",

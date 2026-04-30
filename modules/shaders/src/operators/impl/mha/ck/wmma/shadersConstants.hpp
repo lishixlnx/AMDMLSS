@@ -4,14 +4,14 @@
 
 #include "core/core.hpp"
 
-namespace mlss::shaders::mha::ck::wmma::fp16
+namespace mlss::mha::ck::wmma::fp16
 {
     // Shader constants for different MHA configurations
-    constexpr auto cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS = std::to_array<std::uint32_t>({64, 48, 128, 1, 1});
-    constexpr auto fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS = std::to_array<std::uint32_t>({32, 48, 64, 1, 1});
-    constexpr auto self_attention_128_64x128x80_64x80x64_forward_CONSTANTS = std::to_array<std::uint32_t>({64, 80, 128, 1, 1});
-    constexpr auto self_attention_128_64x192x48_64x48x64_forward_CONSTANTS = std::to_array<std::uint32_t>({64, 48, 128, 1, 1});
-    constexpr auto fallback_self_attention_64_32x64x48_32x48x64_forward_CONSTANTS = std::to_array<std::uint32_t>({32, 48, 64, 1, 1});
+    constexpr std::array<std::uint32_t, 5> cross_attention_128_64x64x48_64x48x64_forward_CONSTANTS = {64, 48, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> fallback_cross_attention_64_32x64x48_32x48x64_forward_CONSTANTS = {32, 48, 64, 1, 1};
+    constexpr std::array<std::uint32_t, 5> self_attention_128_64x128x80_64x80x64_forward_CONSTANTS = {64, 80, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> self_attention_128_64x192x48_64x48x64_forward_CONSTANTS = {64, 48, 128, 1, 1};
+    constexpr std::array<std::uint32_t, 5> fallback_self_attention_64_32x64x48_32x48x64_forward_CONSTANTS = {32, 48, 64, 1, 1};
 
     // Argument definitions for packed Q-KV cross attention
     const std::array<MLSSarg, 9> packed_q_kv_cross_attention_ARGS_CONSTANTS = {{{0, MLSS_FLOAT16, true, 2, true, true, false, "Q"},
@@ -158,4 +158,4 @@ namespace mlss::shaders::mha::ck::wmma::fp16
                                                                              {13, MLSS_INT32, false, 0, true, true, false, "output_stride_d2"},
                                                                              {14, MLSS_INT32, false, 0, true, true, false, "output_stride_d3"}}};
 
-} // namespace mlss::shaders::mha::ck::wmma::fp16
+} // namespace mlss::mha::ck::wmma::fp16
