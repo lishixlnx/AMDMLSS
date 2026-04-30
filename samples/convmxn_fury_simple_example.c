@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     // Default to DEBUG level verbose mode
     MLSSenum verboseLevel = 4; // DEBUG level
     //MLSSstring asic = MLSS_GFXAUTOFIND;
-    MLSSstring asic = MLSS_GFX1201;
+    MLSSstring asic = MLSS_GFX1100;
     char customAsic[64] = {0};
 
     // Parse command line arguments
@@ -175,11 +175,11 @@ int main(int argc, char* argv[])
     printf("=== CONV1x1 Simple Example ===\n");
     printf("Verbose level set to: %d\n\n", verboseLevel);
 
-    MLSSuint32 w = 56;                  // Input x-dimension size.
-    MLSSuint32 h = 56;                  // Input y-dimension size.
-    MLSSuint32 c = 64;                   // Number of channels.
-    MLSSuint32 n = 1;                    // Number of batches.
-    MLSSuint32 k = 64;                   // Number of features.
+    MLSSuint32 w = 56;                   // Input x-dimension size.
+    MLSSuint32 h = 56;                   // Input y-dimension size.
+    MLSSuint32 c = 1024;                 // Number of channels.
+    MLSSuint32 k = 1024;                 // Number of features.
+    MLSSuint32 n = 10;                   // Number of batches.
     MLSSuint32 s = 3;                    // Filter x-dimension size.
     MLSSuint32 r = 3;                    // Filter y-dimension size.
     MLSSuint32 outW = 1;                 // Output x-dimension size.
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
     MLSSuint32 bOffset = 1;
 
     MLSSuint32 dataType = MLSS_FLOAT16;
-    MLSSuint32 activation = MLSS_ACTIVATION_RELU;
+    MLSSuint32 activation = MLSS_ACTIVATION_LEAKY_RELU;
     MLSSuint32 precision = MLSS_PRECISION_FLOAT16;
 
     MLSScontext context = 0;
@@ -280,23 +280,6 @@ int main(int argc, char* argv[])
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_CONV_ACTIVATION, &activation));
 
     CHECK_STATUS(mlssPrintParameters(context, opName));
-
-
-    // Step 2) Set parameters
-
-    // Set the parameters by name...
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "batchSize", &batch_size));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "qSeqLength", &q_sequence_length));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kvSeqLength", &kv_sequence_length));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kDim", &kvDim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "vDim", &kvDim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "sizeHeads", &head_dim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "packing", &packing));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "headCount", &head_num));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "scale", &scale));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "dataType", &data_type));
-
-    // ... or by enum
 
     if (mlssGetCaps(context, &pStatuses, &nStatuses) != MLSS_SUCCESS)
     {

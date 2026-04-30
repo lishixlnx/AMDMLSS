@@ -282,23 +282,6 @@ int main(int argc, char* argv[])
 
     CHECK_STATUS(mlssPrintParameters(context, opName));
 
-
-    // Step 2) Set parameters
-
-    // Set the parameters by name...
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "batchSize", &batch_size));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "qSeqLength", &q_sequence_length));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kvSeqLength", &kv_sequence_length));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "kDim", &kvDim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "vDim", &kvDim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "sizeHeads", &head_dim));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "packing", &packing));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "headCount", &head_num));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "scale", &scale));
-    // CHECK_STATUS(mlssSetParameterByName(&context, opName, "dataType", &data_type));
-
-    // ... or by enum
-
     if (mlssGetCaps(context, &pStatuses, &nStatuses) != MLSS_SUCCESS)
     {
         printf("Failed to get caps\n");

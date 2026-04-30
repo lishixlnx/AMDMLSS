@@ -222,7 +222,7 @@ MagicDivU32 MagicDivU32Gen(
     }
 
     const std::uint64_t magic = (((1ull << 32) * ((1ull << shift) - d)) / d) + 1;
-    MLSS_ASSERT(magic <= INT32_MAX); // 0xfffffffful
+    MLSS_ASSERT(magic <= (2 * (INT32_MAX + 1) - 1)); // 0xfffffffful
 
     MagicDivU32 result;
     result.magic = static_cast<decltype(result.magic)>(magic);

@@ -30,6 +30,16 @@ namespace mlss::conv::mxn
 
     std::expected<Binaries, std::error_code> ConvMxN::getBinaries() const
     {
+        if (auto* misaEntry = BackendRegistry<ConvMxN>::get<misa::MisaConvMxN>(); misaEntry != nullptr)
+        {
+            auto result = misaEntry->getBinaries(m_attributes, m_gfxIpTriple);
+            if (result.has_value())
+            {
+                m_implName = misaEntry->name;
+                return result;
+            }
+        }
+
         if (auto* rageEntry = BackendRegistry<ConvMxN>::get<winograd::rage::WinogradRageConvMxN>(); rageEntry != nullptr)
         {
             auto result = rageEntry->getBinaries(m_attributes, m_gfxIpTriple);
@@ -75,6 +85,11 @@ namespace mlss::conv::mxn
         else if (!attributes.empty())
         {
             params = buildConvParams(attributes);
+        }
+
+        if (auto* misaEntry = BackendRegistry<ConvMxN>::get<misa::MisaConvMxN>(); misaEntry != nullptr)
+        {
+            caps.values = misaEntry->getCaps(attributes, gfxip, &params);
         }
 
         if (auto* rageEntry = BackendRegistry<ConvMxN>::get<winograd::rage::WinogradRageConvMxN>(); rageEntry != nullptr)

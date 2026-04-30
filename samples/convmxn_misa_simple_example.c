@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     // Default to DEBUG level verbose mode
     MLSSenum verboseLevel = 4; // DEBUG level
     //MLSSstring asic = MLSS_GFXAUTOFIND;
-    MLSSstring asic = MLSS_GFX1201;
+    MLSSstring asic = MLSS_GFX1100;
     char customAsic[64] = {0};
 
     // Parse command line arguments
@@ -175,15 +175,15 @@ int main(int argc, char* argv[])
     printf("=== CONV1x1 Simple Example ===\n");
     printf("Verbose level set to: %d\n\n", verboseLevel);
 
-    MLSSuint32 w = 28;                   // Input x-dimension size.
-    MLSSuint32 h = 28;                   // Input y-dimension size.
-    MLSSuint32 c = 128;                   // Number of channels.
-    MLSSuint32 n = 1;                   // Number of batches.
-    MLSSuint32 k = 128;                   // Number of features.
+    MLSSuint32 w = 160;                  // Input x-dimension size.
+    MLSSuint32 h = 96;                   // Input y-dimension size.
+    MLSSuint32 c = 320;                  // Number of channels.
+    MLSSuint32 k = 320;                  // Number of features.
+    MLSSuint32 n = 1;                    // Number of batches.
     MLSSuint32 s = 3;                    // Filter x-dimension size.
     MLSSuint32 r = 3;                    // Filter y-dimension size.
-    MLSSuint32 outW = 1;                 // Output x-dimension size.
-    MLSSuint32 outH = 1;                 // Output y-dimension size.
+    MLSSuint32 outW = (w + 1 + 1 - s) / 1 + 1;                 // Output x-dimension size.
+    MLSSuint32 outH = (h + 1 + 1 - r) / 1 + 1;                 // Output y-dimension size.
     MLSSuint32 startPadX = 1;            // Zero padding added to the beginning of the input in the x-dimension.
     MLSSuint32 startPadY = 1;            // Zero padding added to the beginning of the input in the y-dimension.
     MLSSuint32 endPadX = 1;              // Zero padding added to the end of the input in the x-dimension.
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     MLSSuint32 filterStrideY = 1;        // Step between dot products in the filter y-dimension. Adds zero padding in the filter.
     MLSSuint32 groups = 1;               // Split c and k into this many filter groups.
     MLSSbool   hasBias = true;           // If there is a bias tensor.
-    MLSSbool   crossCorrelation = false; // If this is a cross correlation instead of a real convolution. Most ML convs are CCs.
+    MLSSbool   crossCorrelation = true; // If this is a cross correlation instead of a real convolution. Most ML convs are CCs.
     MLSSbool   backward = false;         // If this represents a "backward wrt inputs conv"/"transpose conv"/"deconvolution" layer.
                                          // The above parameters have already been adjusted to convert the backwards conv into an
                                          // equivalent forward conv. The meta command implementation must still swap its C and K
@@ -278,7 +278,6 @@ int main(int argc, char* argv[])
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_CONV_DATATYPE, &dataType));
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_CONV_PRECISION, &precision));
     CHECK_STATUS(mlssSetParameterByEnum(&context, opName, MLSS_ATTR_CONV_ACTIVATION, &activation));
-
     CHECK_STATUS(mlssPrintParameters(context, opName));
 
     if (mlssGetCaps(context, &pStatuses, &nStatuses) != MLSS_SUCCESS)

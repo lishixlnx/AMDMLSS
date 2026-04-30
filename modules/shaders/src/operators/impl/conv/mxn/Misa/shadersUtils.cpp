@@ -103,7 +103,7 @@ namespace mlss::conv::mxn::misa
     {
         using mlss::op::utils::MetaCmdCaps;
 
-        bool isArchSupported = isGfx110x(gfxip) || isGfx120x(gfxip);
+        bool isArchSupported = isGfx110x(gfxip);
 
         bool isFp16 = params.dataType == DataTypeFlags::FLOAT16;
         bool isSupported = isArchSupported && isFp16;
@@ -112,6 +112,7 @@ namespace mlss::conv::mxn::misa
 
         if(isSupported)
         {
+            auto a = params.precision;
             if(params.precision != PrecisionFlags::FLOAT16)
             {
                 isSupported = false;
@@ -175,7 +176,7 @@ namespace mlss::conv::mxn::misa
             }
         }
 
-        isFullySupported = isSupported && isGfx120x(gfxip) && (!params.crossCorrelation) && (params.s == 1);
+        isFullySupported = isSupported && isGfx110x(gfxip) && (params.crossCorrelation == true) && (params.s != 1);
 
         MetaCmdCaps caps{.values = 0x00000000u};
         caps.support     = isSupported ;
