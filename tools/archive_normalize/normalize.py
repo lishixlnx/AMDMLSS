@@ -20,7 +20,7 @@ Transformations performed for each ``*.hpp`` under ``archive/``:
 
 * The enclosing namespace is rewritten to ``archive::<dirs>`` derived from
   the file's path under ``archive/``, e.g. ``archive/conv/mxn/Winograd/Base/
-  gfx1100/fp16/shadersBin.hpp`` becomes
+  gfx1100/fp16/shadersBinReloc.hpp`` becomes
   ``namespace archive::conv::mxn::winograd::base::gfx1100::fp16``.
 
 The script is intentionally conservative: any file it cannot fully rewrite

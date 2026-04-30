@@ -1,6 +1,6 @@
 [
   {
-    "file": "archive/conv/1x1/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_misa_1x1_gfx1100",
     "new": "gemm_add_fp16_misa_1x1_add_gfx1100",
     "op": "gemm_add",
@@ -9,7 +9,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_misa_1x1_gfx1201",
     "new": "gemm_add_fp16_misa_1x1_add_gfx1201",
     "op": "gemm_add",
@@ -18,7 +18,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1100",
     "op": "gemm_add",
@@ -27,7 +27,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1100",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1100",
     "op": "gemm_add",
@@ -36,7 +36,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1100",
     "op": "gemm_add",
@@ -45,7 +45,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1100",
     "op": "gemm_add",
@@ -54,7 +54,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1100",
     "op": "gemm_add",
@@ -63,7 +63,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1150",
     "op": "gemm_add",
@@ -72,7 +72,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1150",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1150",
     "op": "gemm_add",
@@ -81,7 +81,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1150",
     "op": "gemm_add",
@@ -90,7 +90,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1150",
     "op": "gemm_add",
@@ -99,7 +99,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1150",
     "op": "gemm_add",
@@ -108,7 +108,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x256x32_2_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_64x256x32_add_2_nn_gfx1150",
     "op": "gemm_add",
@@ -117,7 +117,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x256x32_2_nt_gfx1150",
     "new": "gemm_add_fp16_wmma_64x256x32_add_2_nt_gfx1150",
     "op": "gemm_add",
@@ -126,7 +126,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1201",
     "op": "gemm_add",
@@ -135,7 +135,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1201",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1201",
     "op": "gemm_add",
@@ -144,7 +144,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -153,7 +153,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -162,7 +162,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
@@ -171,7 +171,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/dilated/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/dilated/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_wmma_dilated_grouped_fwd_bias_relu_add_gfx1100",
     "new": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1100",
     "op": "conv_relu_add",
@@ -180,7 +180,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/dilated/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/conv/dilated/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_wmma_dilated_grouped_fwd_bias_relu_add_gfx1150",
     "new": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1150",
     "op": "conv_relu_add",
@@ -189,7 +189,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/dilated/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/dilated/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_dilated_32x32x64_nn_gfx1201",
     "new": "conv_relu_add_fp16_dilated_32x32x64_relu_add_nn_gfx1201",
     "op": "conv_relu_add",
@@ -270,7 +270,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Misa/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Misa/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_misa_bias_relu_gfx1100",
     "new": "conv_relu_add_fp16_misa_relu_add_bias_gfx1100",
     "op": "conv_relu_add",
@@ -279,7 +279,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Misa/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Misa/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_misa_bias_relu_gfx1201",
     "new": "conv_relu_add_fp16_misa_relu_add_bias_gfx1201",
     "op": "conv_relu_add",
@@ -288,7 +288,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride1_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -297,7 +297,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dec_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -306,7 +306,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dil_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -315,7 +315,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride1_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -324,7 +324,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dec_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -333,7 +333,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dil_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1100",
     "op": "conv_relu_add",
@@ -342,7 +342,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride1_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1100",
     "op": "conv_relu_add",
@@ -351,7 +351,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dec_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1100",
     "op": "conv_relu_add",
@@ -360,7 +360,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dil_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1100",
     "op": "conv_relu_add",
@@ -369,7 +369,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride1_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1100",
     "op": "conv_relu_add",
@@ -378,7 +378,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dec_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1100",
     "op": "conv_relu_add",
@@ -387,7 +387,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dil_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1100",
     "op": "conv_relu_add",
@@ -396,7 +396,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride1_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -405,7 +405,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dec_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -414,7 +414,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dil_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -423,7 +423,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride1_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -432,7 +432,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dec_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -441,7 +441,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dil_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1201",
     "op": "conv_relu_add",
@@ -450,7 +450,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -459,7 +459,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dec_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1201",
     "op": "conv_relu_add",
@@ -468,7 +468,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dil_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1201",
     "op": "conv_relu_add",
@@ -477,7 +477,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride1_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -486,7 +486,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dec_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1201",
     "op": "conv_relu_add",
@@ -495,7 +495,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dil_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1201",
     "op": "conv_relu_add",
@@ -504,7 +504,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_f2x3_c16_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1100",
     "op": "conv_relu_add",
@@ -513,7 +513,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_f2x3_c32_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1100",
     "op": "conv_relu_add",
@@ -522,7 +522,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_navi33_f2x3_c16_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_navi33_relu_add_f2x3_c16_stride1_gfx1100",
     "op": "conv_relu_add",
@@ -531,7 +531,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_sync_init_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1100",
     "op": "conv_relu_add",
@@ -540,7 +540,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_f2x3_c16_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -549,7 +549,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_f2x3_c32_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -558,7 +558,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_fury_sync_init_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1201",
     "op": "conv_relu_add",
@@ -567,7 +567,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_rage_460_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_rage_relu_add_460_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -576,7 +576,7 @@
     "notes": []
   },
   {
-    "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "conv_relu_add_fp16_winograd_rage_490_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_rage_relu_add_490_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
@@ -711,7 +711,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/ck/gfx1201/fp32/shadersBin.hpp",
+    "file": "archive/gemm/mxn/ck/gfx1201/fp32/shadersBinReloc.hpp",
     "old": "gemm_add_fp32_dl_nn_gfx1201",
     "new": "gemm_add_fp32_add_dl_nn_gfx1201",
     "op": "gemm_add",
@@ -720,7 +720,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nn_gfx1100",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1100",
     "op": "gemm_add",
@@ -729,7 +729,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nt_gfx1100",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1100",
     "op": "gemm_add",
@@ -738,7 +738,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x128x16_nn_gfx1100",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1100",
     "op": "gemm_add",
@@ -747,7 +747,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x16x16_nn_gfx1100",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1100",
     "op": "gemm_add",
@@ -756,7 +756,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1100",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1100",
     "op": "gemm_add",
@@ -765,7 +765,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nn_gfx1150",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1150",
     "op": "gemm_add",
@@ -774,7 +774,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nt_gfx1150",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1150",
     "op": "gemm_add",
@@ -783,7 +783,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x128x16_nn_gfx1150",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1150",
     "op": "gemm_add",
@@ -792,7 +792,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x16x16_nn_gfx1150",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1150",
     "op": "gemm_add",
@@ -801,7 +801,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1150",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1150",
     "op": "gemm_add",
@@ -810,7 +810,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_128x128x16_nn_gfx1201",
     "new": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -819,7 +819,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_128x64x32_tr_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
@@ -828,7 +828,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_tr_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
@@ -837,7 +837,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x128x16_nn_gfx1201",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -846,7 +846,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x16x16_native_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "op": "gemm_add",
@@ -855,7 +855,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
@@ -864,7 +864,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_256x16x16_2_1_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "op": "gemm_add",
@@ -873,7 +873,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_2_4_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "op": "gemm_add",
@@ -882,7 +882,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x16x16_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -891,7 +891,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x256x16_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -900,7 +900,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1201",
     "op": "gemm_add",
@@ -909,7 +909,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_128x64x32_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_nn_gfx1201",
     "op": "gemm_add",
@@ -918,7 +918,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_256x16x16_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -927,7 +927,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1201",
     "op": "gemm_add",
@@ -936,7 +936,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_128x128x16_nn_gfx1201",
     "new": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -945,7 +945,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_128x64x32_tr_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
@@ -954,7 +954,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_tr_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
@@ -963,7 +963,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x128x16_nn_gfx1201",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
@@ -972,7 +972,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x16x16_native_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "op": "gemm_add",
@@ -981,7 +981,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
@@ -990,7 +990,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_256x16x16_2_1_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "op": "gemm_add",
@@ -999,7 +999,7 @@
     "notes": []
   },
   {
-    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gemm_add_fp16_64x128x32_2_4_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "op": "gemm_add",
@@ -1008,7 +1008,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1017,7 +1017,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1026,7 +1026,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1035,7 +1035,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "op": "gqaattn",
@@ -1044,7 +1044,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1053,7 +1053,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1062,7 +1062,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "op": "gqaattn",
@@ -1071,7 +1071,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1080,7 +1080,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1089,7 +1089,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1098,7 +1098,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1107,7 +1107,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "op": "gqaattn",
@@ -1116,7 +1116,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1125,7 +1125,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1134,7 +1134,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1143,7 +1143,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1152,7 +1152,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "op": "gqaattn",
@@ -1161,7 +1161,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1170,7 +1170,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1179,7 +1179,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "op": "gqaattn",
@@ -1188,7 +1188,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1197,7 +1197,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1206,7 +1206,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1215,7 +1215,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1224,7 +1224,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "op": "gqaattn",
@@ -1233,7 +1233,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1242,7 +1242,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_packed_kv_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1251,7 +1251,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_packed_kv_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1260,7 +1260,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_packed_kv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1269,7 +1269,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "op": "gqaattn",
@@ -1278,7 +1278,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_packed_kv_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1287,7 +1287,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_packed_qkv_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1296,7 +1296,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "op": "gqaattn",
@@ -1305,7 +1305,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_packed_qkv_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1314,7 +1314,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1323,7 +1323,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_unpacked_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1332,7 +1332,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_unpacked_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1341,7 +1341,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "op": "gqaattn",
@@ -1350,7 +1350,7 @@
     "notes": []
   },
   {
-    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1359,7 +1359,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1368,7 +1368,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1377,7 +1377,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1386,7 +1386,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "new": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "op": "gqaattn",
@@ -1395,7 +1395,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1404,7 +1404,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1413,7 +1413,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1422,7 +1422,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "new": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1100",
     "op": "gqaattn",
@@ -1431,7 +1431,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1100",
     "op": "gqaattn",
@@ -1440,7 +1440,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1100/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1100/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1100",
     "op": "gqaattn",
@@ -1449,7 +1449,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1458,7 +1458,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1467,7 +1467,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1476,7 +1476,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "new": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "op": "gqaattn",
@@ -1485,7 +1485,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1494,7 +1494,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1503,7 +1503,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1512,7 +1512,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "new": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1150",
     "op": "gqaattn",
@@ -1521,7 +1521,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1150",
     "op": "gqaattn",
@@ -1530,7 +1530,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1150/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1150/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1150",
     "op": "gqaattn",
@@ -1539,7 +1539,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_mha_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1548,7 +1548,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1557,7 +1557,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1566,7 +1566,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "new": "gqaattn_fp16_mha_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "op": "gqaattn",
@@ -1575,7 +1575,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_mha_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1584,7 +1584,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_mha_cross_wmma_64x64x48_64x48x64_128_gfx1201",
     "op": "gqaattn",
@@ -1593,7 +1593,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_unpacked_mha_cross_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1602,7 +1602,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "new": "gqaattn_fp16_unpacked_mha_self_fallback_wmma_32x64x48_32x48x64_64_gfx1201",
     "op": "gqaattn",
@@ -1611,7 +1611,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x128x80_64x80x64_128_gfx1201",
     "op": "gqaattn",
@@ -1620,7 +1620,7 @@
     "notes": []
   },
   {
-    "file": "archive/mha/wmma/gfx1201/fp16/shadersBin.hpp",
+    "file": "archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp",
     "old": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "new": "gqaattn_fp16_unpacked_mha_self_wmma_64x192x48_64x48x64_128_gfx1201",
     "op": "gqaattn",

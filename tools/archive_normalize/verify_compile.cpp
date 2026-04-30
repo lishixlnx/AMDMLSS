@@ -3,20 +3,20 @@
 //   clang++ -std=c++23 -I .. -c verify_compile.cpp
 // (run from tools/archive_normalize). No project headers are included.
 
-#include "../../archive/conv/1x1/gfx1100/fp16/shadersBin.hpp"
-#include "../../archive/conv/1x1/wmma/gfx1201/fp16/shadersBin.hpp"
+#include "../../archive/conv/1x1/gfx1100/fp16/shadersBinReloc.hpp"
+#include "../../archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp"
 #include "../../archive/conv/1x1/wmma/shadersConstants.hpp"
-#include "../../archive/conv/dilated/gfx1201/fp16/shadersBin.hpp"
+#include "../../archive/conv/dilated/gfx1201/fp16/shadersBinReloc.hpp"
 #include "../../archive/conv/dw/hlsl/fp16/shadersIL.hpp"
-#include "../../archive/conv/mxn/Misa/gfx1100/fp16/shadersBin.hpp"
-#include "../../archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBin.hpp"
-#include "../../archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBin.hpp"
-#include "../../archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBin.hpp"
+#include "../../archive/conv/mxn/Misa/gfx1100/fp16/shadersBinReloc.hpp"
+#include "../../archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp"
+#include "../../archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp"
+#include "../../archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBinReloc.hpp"
 #include "../../archive/gemm/1xn/hlsl/fp16/shadersIL.hpp"
-#include "../../archive/gemm/mxn/ck/gfx1201/fp32/shadersBin.hpp"
-#include "../../archive/gemm/mxn/hip/gfx1201/fp16/shadersBin.hpp"
-#include "../../archive/gqa/wmma/gfx1201/fp16/shadersBin.hpp"
-#include "../../archive/mha/wmma/gfx1201/fp16/shadersBin.hpp"
+#include "../../archive/gemm/mxn/ck/gfx1201/fp32/shadersBinReloc.hpp"
+#include "../../archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp"
+#include "../../archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp"
+#include "../../archive/mha/wmma/gfx1201/fp16/shadersBinReloc.hpp"
 #include "../../archive/qgemm/mxn/hlsl/wmma/WZQ/128/64x64/gfx1201/fp16_u4/shadersIL.hpp"
 
 #include <cstddef>

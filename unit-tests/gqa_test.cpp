@@ -17,10 +17,6 @@
 
 #include <mlss_tester.hpp>
 
-static_assert(mlss::tester::hasHip(),     "GQA unit tests require the HIP backend");
-static_assert(mlss::tester::hasD3D12(),   "GQA unit tests require the D3D12 backend");
-static_assert(mlss::tester::hasOpenCL(),  "GQA unit tests require the OpenCL backend");
-
 namespace
 {
 
@@ -276,28 +272,42 @@ GqaTestData& getTestData()
 
 TEST_CASE("GQA: HIP non-relocatable", "[gqa][hip]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.nonReloc != nullptr);
+    if constexpr (mlss::tester::hasHip())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.nonReloc != nullptr);
 
-    auto result = runGqaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
-                      *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "HIP vs Host"));
+        auto result = runGqaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
+                          *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "HIP vs Host"));
+    }
+    else
+    {
+        SKIP("HIP backend not compiled into mlss-tester");
+    }
 }
 
 TEST_CASE("GQA: D3D12 relocatable", "[gqa][d3d]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.reloc != nullptr);
+    if constexpr (mlss::tester::hasD3D12())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.reloc != nullptr);
 
-    auto result = runGqaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
-                      *td.reloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "D3D vs Host"));
+        auto result = runGqaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
+                          *td.reloc, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "D3D vs Host"));
+    }
+    else
+    {
+        SKIP("D3D12 backend not compiled into mlss-tester");
+    }
 }
 
 // Temporarily disabled: the OpenCL backend currently produces all-zero output
@@ -308,15 +318,22 @@ TEST_CASE("GQA: D3D12 relocatable", "[gqa][d3d]")
 #if 0
 TEST_CASE("GQA: OpenCL non-relocatable", "[gqa][cl]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.nonReloc != nullptr);
+    if constexpr (mlss::tester::hasOpenCL())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.nonReloc != nullptr);
 
-    auto result = runGqaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
-                      *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "CL vs Host"));
+        auto result = runGqaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
+                          *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "CL vs Host"));
+    }
+    else
+    {
+        SKIP("OpenCL backend not compiled into mlss-tester");
+    }
 }
 #endif
 

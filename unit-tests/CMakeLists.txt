@@ -122,3 +122,6 @@ add_gpu_kernel_test(mlss-mha-test "${CMAKE_CURRENT_LIST_DIR}/mha_test.cpp")
 
 # GQA kernel test
 add_gpu_kernel_test(mlss-gqa-test "${CMAKE_CURRENT_LIST_DIR}/gqa_test.cpp")
+
+# Conv 1x1 kernel test
+add_gpu_kernel_test(mlss-conv1x1-test "${CMAKE_CURRENT_LIST_DIR}/conv1x1_test.cpp")

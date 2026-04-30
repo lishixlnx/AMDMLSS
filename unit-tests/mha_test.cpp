@@ -17,10 +17,6 @@
 
 #include <mlss_tester.hpp>
 
-static_assert(mlss::tester::hasHip(),     "MHA unit tests require the HIP backend");
-static_assert(mlss::tester::hasD3D12(),   "MHA unit tests require the D3D12 backend");
-static_assert(mlss::tester::hasOpenCL(),  "MHA unit tests require the OpenCL backend");
-
 namespace
 {
 
@@ -221,6 +217,7 @@ struct MhaTestData
     MlssBinaries          bins{};
     const MLSSbinary*      nonReloc = nullptr;
     const MLSSbinary*      reloc    = nullptr;
+    const MLSSbinary*      relocSmall = nullptr;
     TensorHost<float>      hostRef;
     std::vector<float16_t> hostQ16;
     std::vector<float16_t> hostK16;
@@ -244,9 +241,10 @@ MhaTestData& getTestData()
         MLSSstring asic = const_cast<MLSSstring>(MLSS_GFXAUTOFIND);
         mlssSetVerboseLevel(0);
 
-        d.bins     = getMhaBinaries(asic);
-        d.nonReloc = findBinary(d.bins.data, d.bins.count, false);
-        d.reloc    = findBinary(d.bins.data, d.bins.count, true);
+        d.bins       = getMhaBinaries(asic);
+        d.nonReloc   = findBinary(d.bins.data, d.bins.count, false);
+        d.reloc      = findBinary(d.bins.data, d.bins.count, true);
+        d.relocSmall = findBinary(d.bins.data, d.bins.count, true,  /*preferSmallArgList*/ true);
 
         auto hostQ = generateRandomTensor({kBatchSize, kHeadNum, kQSeq, kHeadDim},  -0.5f, 0.5f, 1);
         auto hostK = generateRandomTensor({kBatchSize, kHeadNum, kKVSeq, kHeadDim}, -0.5f, 0.5f, 2);
@@ -271,28 +269,42 @@ MhaTestData& getTestData()
 
 TEST_CASE("MHA: HIP non-relocatable", "[mha][hip]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.nonReloc != nullptr);
+    if constexpr (mlss::tester::hasHip())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.nonReloc != nullptr);
 
-    auto result = runMhaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
-                      *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "HIP vs Host"));
+        auto result = runMhaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
+                          *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "HIP vs Host"));
+    }
+    else
+    {
+        SKIP("HIP backend not compiled into mlss-tester");
+    }
 }
 
 TEST_CASE("MHA: D3D12 relocatable", "[mha][d3d]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.reloc != nullptr);
+    if constexpr (mlss::tester::hasD3D12())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.relocSmall != nullptr);
 
-    auto result = runMhaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
-                      *td.reloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "D3D vs Host"));
+        auto result = runMhaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
+                          *td.relocSmall, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "D3D vs Host"));
+    }
+    else
+    {
+        SKIP("D3D12 backend not compiled into mlss-tester");
+    }
 }
 
 // Temporarily disabled: the OpenCL backend currently produces all-zero output
@@ -303,15 +315,22 @@ TEST_CASE("MHA: D3D12 relocatable", "[mha][d3d]")
 #if 0
 TEST_CASE("MHA: OpenCL non-relocatable", "[mha][cl]")
 {
-    auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
-    REQUIRE(td.nonReloc != nullptr);
+    if constexpr (mlss::tester::hasOpenCL())
+    {
+        auto& td = getTestData();
+        REQUIRE(td.gpuAvailable);
+        REQUIRE(td.nonReloc != nullptr);
 
-    auto result = runMhaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
-                      *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
-    REQUIRE_FALSE(result.empty());
-    CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                         td.hostRef, kTolerance, "CL vs Host"));
+        auto result = runMhaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
+                          *td.nonReloc, td.hostQ16, td.hostK16, td.hostV16);
+        REQUIRE_FALSE(result.empty());
+        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                             td.hostRef, kTolerance, "CL vs Host"));
+    }
+    else
+    {
+        SKIP("OpenCL backend not compiled into mlss-tester");
+    }
 }
 #endif
 
