@@ -48,6 +48,7 @@ set_target_properties(c_api PROPERTIES
 install(
     DIRECTORY include/amdmlss
     DESTINATION include
+    COMPONENT amdmlss
     FILES_MATCHING PATTERN "*.h"
 )
 
@@ -55,12 +56,13 @@ install(
 install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/include/amdmlss/amdmlss_export.h"
     DESTINATION include/amdmlss
+    COMPONENT amdmlss
 )
 
 # Install the library
 install(TARGETS c_api
     EXPORT ${PROJECT_NAME}-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT amdmlss
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
 )

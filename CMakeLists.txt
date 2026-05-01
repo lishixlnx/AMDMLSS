@@ -141,6 +141,7 @@ install(EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}-targets.cmake
     NAMESPACE ${PROJECT_NAME}::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    COMPONENT amdmlss
 )
 
 configure_package_config_file(
@@ -150,8 +151,9 @@ configure_package_config_file(
 )
 
 install(
-    FILES 
+    FILES
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
-    DESTINATION 
+    DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    COMPONENT amdmlss
 )
