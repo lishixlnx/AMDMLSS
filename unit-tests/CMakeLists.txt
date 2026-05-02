@@ -81,7 +81,7 @@ function(add_gpu_kernel_test TARGET_NAME SOURCE_FILE)
     endif()
 
     add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME})
-    set_tests_properties(${TARGET_NAME} PROPERTIES SKIP_RETURN_CODE 77)
+    set_tests_properties(${TARGET_NAME} PROPERTIES SKIP_RETURN_CODE 4)
 
     # Copy the amdmlss DLL next to the test executable
     if(TARGET c_api)
