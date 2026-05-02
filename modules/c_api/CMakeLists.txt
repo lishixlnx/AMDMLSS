@@ -39,6 +39,7 @@ target_include_directories(c_api
 # Set library properties
 set_target_properties(c_api PROPERTIES
     OUTPUT_NAME "amdmlss"
+    EXPORT_NAME amdmlss
     C_VISIBILITY_PRESET hidden
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON

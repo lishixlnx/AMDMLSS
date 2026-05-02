@@ -123,6 +123,5 @@ endif()
 
 # Install the target to export set
 install(TARGETS core
-    EXPORT ${PROJECT_NAME}-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
 )

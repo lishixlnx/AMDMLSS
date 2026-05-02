@@ -74,9 +74,12 @@ if(NOT TARGET hip::host)
 endif()
 
 # Build mlss-tester library from the submodule (same compiler and build options as the main project)
+if(NOT BUILD_TESTS)
+    message(STATUS "BUILD_TESTS=OFF — skipping amd-mlss-tester")
+endif()
 set(_MLSS_TESTER_SUBMODULE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester")
 ensure_git_submodule("3rdparty/amd-mlss-tester" "lib/CMakeLists.txt")
-if(EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
+if(BUILD_TESTS AND EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
     list(APPEND CMAKE_MODULE_PATH "${_MLSS_TESTER_SUBMODULE}/cmake/Modules")
 
     set(MLSS_ENABLE_HIP ON CACHE BOOL "Enable HIP backend in mlss-tester" FORCE)
@@ -129,7 +132,7 @@ if(EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
 endif()
 
 # Add GPU kernel unit tests
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/unit-tests/CMakeLists.txt")
+if(BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/unit-tests/CMakeLists.txt")
     enable_testing()
     add_subdirectory(unit-tests)
 endif()
@@ -155,5 +158,11 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    COMPONENT amdmlss
+)
+
+install(
+    FILES cmake/FindHIP.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/Modules
     COMPONENT amdmlss
 )
