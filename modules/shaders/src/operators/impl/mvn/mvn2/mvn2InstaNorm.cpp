@@ -1,0 +1,48 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
+#include "mvn2InstaNorm.hpp"
+#include "hip/hipMvn2ShadersOp.hpp"
+
+template class mlss::BackendBase<mlss::mvn::mvn2::hip::HipMvn2InstaNorm, mlss::mvn::mvn2::MVN2InstaNorm>;
+
+namespace mlss::mvn::mvn2
+{
+
+    MVN2InstaNorm::MVN2InstaNorm(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip)
+        : base(attributes, gfxip)
+    {
+        this->m_implName = "MVN2-InstaNorm";
+    }
+
+    std::string MVN2InstaNorm::getCaseName()
+    {
+        return "AMDMLSS::MVN2InstaNorm";
+    }
+
+    std::expected<Binaries, std::error_code> MVN2InstaNorm::getBinaries() const
+    {
+        if (auto* hipEntry = BackendRegistry<MVN2InstaNorm>::get<hip::HipMvn2InstaNorm>(); hipEntry != nullptr)
+        {
+            auto result = hipEntry->getBinaries(m_attributes, m_gfxIpTriple);
+            if (result.has_value())
+            {
+                m_implName = hipEntry->name;
+                return result;
+            }
+        }
+
+        return std::unexpected(std::make_error_code(std::errc::not_supported));
+    }
+
+    uint32_t MVN2InstaNorm::getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip, const void* context)
+    {
+        std::ignore = context;
+
+        if (auto* hipEntry = BackendRegistry<MVN2InstaNorm>::get<hip::HipMvn2InstaNorm>(); hipEntry != nullptr)
+        {
+            return hipEntry->getCaps(attributes, gfxip, nullptr);
+        }
+
+        return 0x00000000u;
+    }
+
+} // namespace mlss::mvn::mvn2

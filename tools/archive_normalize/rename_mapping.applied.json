@@ -1,7 +1,7 @@
 [
   {
     "file": "archive/conv/1x1/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_misa_1x1_gfx1100",
+    "old": "gemm_add_fp16_misa_1x1_add_gfx1100",
     "new": "gemm_add_fp16_misa_1x1_add_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -10,7 +10,7 @@
   },
   {
     "file": "archive/conv/1x1/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_misa_1x1_gfx1201",
+    "old": "gemm_add_fp16_misa_1x1_add_gfx1201",
     "new": "gemm_add_fp16_misa_1x1_add_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -19,7 +19,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1100",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -28,7 +28,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1100",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1100",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -37,7 +37,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1100",
+    "old": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -46,7 +46,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1100",
+    "old": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -55,7 +55,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1100",
+    "old": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1100",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -64,7 +64,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1150",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -73,7 +73,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1150",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1150",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -82,7 +82,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1150",
+    "old": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -91,7 +91,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1150",
+    "old": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -100,7 +100,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1150",
+    "old": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -109,7 +109,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x256x32_2_nn_gfx1150",
+    "old": "gemm_add_fp16_wmma_64x256x32_add_2_nn_gfx1150",
     "new": "gemm_add_fp16_wmma_64x256x32_add_2_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -118,7 +118,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x256x32_2_nt_gfx1150",
+    "old": "gemm_add_fp16_wmma_64x256x32_add_2_nt_gfx1150",
     "new": "gemm_add_fp16_wmma_64x256x32_add_2_nt_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -127,7 +127,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nn_gfx1201",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -136,7 +136,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_64x128x32_nt_gfx1201",
+    "old": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1201",
     "new": "gemm_add_fp16_wmma_64x128x32_add_nt_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -145,7 +145,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x128x16_nn_gfx1201",
+    "old": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -154,7 +154,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x16x16_nn_gfx1201",
+    "old": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x16x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -163,7 +163,7 @@
   },
   {
     "file": "archive/conv/1x1/wmma/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_wmma_16x256x16_1_2_nn_gfx1201",
+    "old": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_wmma_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -172,7 +172,7 @@
   },
   {
     "file": "archive/conv/dilated/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_wmma_dilated_grouped_fwd_bias_relu_add_gfx1100",
+    "old": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1100",
     "new": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -181,7 +181,7 @@
   },
   {
     "file": "archive/conv/dilated/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_wmma_dilated_grouped_fwd_bias_relu_add_gfx1150",
+    "old": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1150",
     "new": "conv_relu_add_fp16_wmma_dilated_relu_add_grouped_fwd_bias_gfx1150",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -190,7 +190,7 @@
   },
   {
     "file": "archive/conv/dilated/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_dilated_32x32x64_nn_gfx1201",
+    "old": "conv_relu_add_fp16_dilated_32x32x64_relu_add_nn_gfx1201",
     "new": "conv_relu_add_fp16_dilated_32x32x64_relu_add_nn_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -199,7 +199,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp16/shadersIL.hpp",
-    "old": "conv_relu_add_fp16_dw_general_hlsl",
+    "old": "conv_relu_add_fp16_dw_relu_add_general_hlsl",
     "new": "conv_relu_add_fp16_dw_relu_add_general_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -208,7 +208,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp16/shadersIL.hpp",
-    "old": "conv_relu_add_fp16_dw_k3x3p11_hlsl",
+    "old": "conv_relu_add_fp16_dw_relu_add_k3x3p11_hlsl",
     "new": "conv_relu_add_fp16_dw_relu_add_k3x3p11_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -217,7 +217,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp16/shadersIL.hpp",
-    "old": "conv_relu_add_fp16_dw_k3x3p11s11_hlsl",
+    "old": "conv_relu_add_fp16_dw_relu_add_k3x3p11s11_hlsl",
     "new": "conv_relu_add_fp16_dw_relu_add_k3x3p11s11_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -226,7 +226,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp16/shadersIL.hpp",
-    "old": "conv_relu_add_fp16_dw_k3x3p11s22_hlsl",
+    "old": "conv_relu_add_fp16_dw_relu_add_k3x3p11s22_hlsl",
     "new": "conv_relu_add_fp16_dw_relu_add_k3x3p11s22_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -235,7 +235,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp32/shadersIL.hpp",
-    "old": "conv_relu_add_fp32_dw_general_hlsl",
+    "old": "conv_relu_add_fp32_dw_relu_add_general_hlsl",
     "new": "conv_relu_add_fp32_dw_relu_add_general_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -244,7 +244,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp32/shadersIL.hpp",
-    "old": "conv_relu_add_fp32_dw_k3x3p11_hlsl",
+    "old": "conv_relu_add_fp32_dw_relu_add_k3x3p11_hlsl",
     "new": "conv_relu_add_fp32_dw_relu_add_k3x3p11_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -253,7 +253,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp32/shadersIL.hpp",
-    "old": "conv_relu_add_fp32_dw_k3x3p11s11_hlsl",
+    "old": "conv_relu_add_fp32_dw_relu_add_k3x3p11s11_hlsl",
     "new": "conv_relu_add_fp32_dw_relu_add_k3x3p11s11_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -262,7 +262,7 @@
   },
   {
     "file": "archive/conv/dw/hlsl/fp32/shadersIL.hpp",
-    "old": "conv_relu_add_fp32_dw_k3x3p11s22_hlsl",
+    "old": "conv_relu_add_fp32_dw_relu_add_k3x3p11s22_hlsl",
     "new": "conv_relu_add_fp32_dw_relu_add_k3x3p11s22_hlsl",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -271,7 +271,7 @@
   },
   {
     "file": "archive/conv/mxn/Misa/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_misa_bias_relu_gfx1100",
+    "old": "conv_relu_add_fp16_misa_relu_add_bias_gfx1100",
     "new": "conv_relu_add_fp16_misa_relu_add_bias_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -280,7 +280,7 @@
   },
   {
     "file": "archive/conv/mxn/Misa/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_misa_bias_relu_gfx1201",
+    "old": "conv_relu_add_fp16_misa_relu_add_bias_gfx1201",
     "new": "conv_relu_add_fp16_misa_relu_add_bias_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -289,7 +289,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride1_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -298,7 +298,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dec_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -307,7 +307,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dil_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -316,7 +316,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride1_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -325,7 +325,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dec_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -334,7 +334,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dil_dot2_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1100",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -343,7 +343,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride1_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -352,7 +352,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dec_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -361,7 +361,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dil_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -370,7 +370,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride1_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -379,7 +379,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dec_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -388,7 +388,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1100/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dil_gfx1100",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1100",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -397,7 +397,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride1_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride1_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -406,7 +406,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dec_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dec_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -415,7 +415,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f2x3_stride2dil_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f2x3_stride2dil_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -424,7 +424,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride1_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride1_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -433,7 +433,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dec_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dec_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -442,7 +442,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_base_f3x2_stride2dil_dot2_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1201",
     "new": "conv_relu_add_fp16_winograd_base_relu_add_f3x2_stride2dil_dot2_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -451,7 +451,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride1_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -460,7 +460,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dec_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dec_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -469,7 +469,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f2x3_stride2dil_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f2x3_stride2dil_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -478,7 +478,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride1_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -487,7 +487,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dec_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dec_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -496,7 +496,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Base/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp32_winograd_base_f3x2_stride2dil_gfx1201",
+    "old": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1201",
     "new": "conv_relu_add_fp32_winograd_base_relu_add_f3x2_stride2dil_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp32",
@@ -505,7 +505,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_f2x3_c16_stride1_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -514,7 +514,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_f2x3_c32_stride1_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -523,7 +523,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_navi33_f2x3_c16_stride1_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_fury_navi33_relu_add_f2x3_c16_stride1_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_navi33_relu_add_f2x3_c16_stride1_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -532,7 +532,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_sync_init_gfx1100",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1100",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1100",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -541,7 +541,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_f2x3_c16_stride1_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c16_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -550,7 +550,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_f2x3_c32_stride1_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_f2x3_c32_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -559,7 +559,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Fury/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_fury_sync_init_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1201",
     "new": "conv_relu_add_fp16_winograd_fury_relu_add_sync_init_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -568,7 +568,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_rage_460_f2x3_stride1_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_rage_relu_add_460_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_rage_relu_add_460_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -577,7 +577,7 @@
   },
   {
     "file": "archive/conv/mxn/Winograd/Rage/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "conv_relu_add_fp16_winograd_rage_490_f2x3_stride1_gfx1201",
+    "old": "conv_relu_add_fp16_winograd_rage_relu_add_490_f2x3_stride1_gfx1201",
     "new": "conv_relu_add_fp16_winograd_rage_relu_add_490_f2x3_stride1_gfx1201",
     "op": "conv_relu_add",
     "dtype": "fp16",
@@ -586,7 +586,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_c_tiled_hlsl",
+    "old": "gemm_add_fp16_add_1xn_c_tiled_hlsl",
     "new": "gemm_add_fp16_add_1xn_c_tiled_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -595,7 +595,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_c_many_cols_hlsl",
+    "old": "gemm_add_fp16_add_1xn_c_many_cols_hlsl",
     "new": "gemm_add_fp16_add_1xn_c_many_cols_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -604,7 +604,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_c_one_col_hlsl",
+    "old": "gemm_add_fp16_add_1xn_c_one_col_hlsl",
     "new": "gemm_add_fp16_add_1xn_c_one_col_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -613,7 +613,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_c_grouped_hlsl",
+    "old": "gemm_add_fp16_add_1xn_c_grouped_hlsl",
     "new": "gemm_add_fp16_add_1xn_c_grouped_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -622,7 +622,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_r_tiled_hlsl",
+    "old": "gemm_add_fp16_add_1xn_r_tiled_hlsl",
     "new": "gemm_add_fp16_add_1xn_r_tiled_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -631,7 +631,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_r_many_rows_hlsl",
+    "old": "gemm_add_fp16_add_1xn_r_many_rows_hlsl",
     "new": "gemm_add_fp16_add_1xn_r_many_rows_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -640,7 +640,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp16/shadersIL.hpp",
-    "old": "gemm_add_fp16_1xn_r_one_row_hlsl",
+    "old": "gemm_add_fp16_add_1xn_r_one_row_hlsl",
     "new": "gemm_add_fp16_add_1xn_r_one_row_hlsl",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -649,7 +649,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_c_tiled_hlsl",
+    "old": "gemm_add_fp32_add_1xn_c_tiled_hlsl",
     "new": "gemm_add_fp32_add_1xn_c_tiled_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -658,7 +658,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_c_many_cols_hlsl",
+    "old": "gemm_add_fp32_add_1xn_c_many_cols_hlsl",
     "new": "gemm_add_fp32_add_1xn_c_many_cols_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -667,7 +667,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_c_one_col_hlsl",
+    "old": "gemm_add_fp32_add_1xn_c_one_col_hlsl",
     "new": "gemm_add_fp32_add_1xn_c_one_col_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -676,7 +676,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_c_grouped_hlsl",
+    "old": "gemm_add_fp32_add_1xn_c_grouped_hlsl",
     "new": "gemm_add_fp32_add_1xn_c_grouped_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -685,7 +685,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_r_tiled_hlsl",
+    "old": "gemm_add_fp32_add_1xn_r_tiled_hlsl",
     "new": "gemm_add_fp32_add_1xn_r_tiled_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -694,7 +694,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_r_many_rows_hlsl",
+    "old": "gemm_add_fp32_add_1xn_r_many_rows_hlsl",
     "new": "gemm_add_fp32_add_1xn_r_many_rows_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -703,7 +703,7 @@
   },
   {
     "file": "archive/gemm/1xn/hlsl/fp32/shadersIL.hpp",
-    "old": "gemm_add_fp32_1xn_r_one_row_hlsl",
+    "old": "gemm_add_fp32_add_1xn_r_one_row_hlsl",
     "new": "gemm_add_fp32_add_1xn_r_one_row_hlsl",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -712,7 +712,7 @@
   },
   {
     "file": "archive/gemm/mxn/ck/gfx1201/fp32/shadersBinReloc.hpp",
-    "old": "gemm_add_fp32_dl_nn_gfx1201",
+    "old": "gemm_add_fp32_add_dl_nn_gfx1201",
     "new": "gemm_add_fp32_add_dl_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp32",
@@ -721,7 +721,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nn_gfx1100",
+    "old": "gemm_add_fp16_64x128x32_add_nn_gfx1100",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -730,7 +730,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nt_gfx1100",
+    "old": "gemm_add_fp16_64x128x32_add_nt_gfx1100",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -739,7 +739,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x128x16_nn_gfx1100",
+    "old": "gemm_add_fp16_16x128x16_add_nn_gfx1100",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -748,7 +748,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x16x16_nn_gfx1100",
+    "old": "gemm_add_fp16_16x16x16_add_nn_gfx1100",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -757,7 +757,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1100",
+    "old": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1100",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1100",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -766,7 +766,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nn_gfx1150",
+    "old": "gemm_add_fp16_64x128x32_add_nn_gfx1150",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -775,7 +775,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nt_gfx1150",
+    "old": "gemm_add_fp16_64x128x32_add_nt_gfx1150",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -784,7 +784,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x128x16_nn_gfx1150",
+    "old": "gemm_add_fp16_16x128x16_add_nn_gfx1150",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -793,7 +793,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x16x16_nn_gfx1150",
+    "old": "gemm_add_fp16_16x16x16_add_nn_gfx1150",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -802,7 +802,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1150",
+    "old": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1150",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1150",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -811,7 +811,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_128x128x16_nn_gfx1201",
+    "old": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -820,7 +820,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_128x64x32_tr_nn_gfx1201",
+    "old": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -829,7 +829,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_tr_nn_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -838,7 +838,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x128x16_nn_gfx1201",
+    "old": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -847,7 +847,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x16x16_native_nn_gfx1201",
+    "old": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -856,7 +856,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1201",
+    "old": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -865,7 +865,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_256x16x16_2_1_nn_gfx1201",
+    "old": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -874,7 +874,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_2_4_nt_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -883,7 +883,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x16x16_nn_gfx1201",
+    "old": "gemm_add_fp16_16x16x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -892,7 +892,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x256x16_nn_gfx1201",
+    "old": "gemm_add_fp16_16x256x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -901,7 +901,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nn_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -910,7 +910,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_128x64x32_nn_gfx1201",
+    "old": "gemm_add_fp16_128x64x32_add_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -919,7 +919,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_256x16x16_nn_gfx1201",
+    "old": "gemm_add_fp16_256x16x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -928,7 +928,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_nt_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_nt_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -937,7 +937,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_128x128x16_nn_gfx1201",
+    "old": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_128x128x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -946,7 +946,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_128x64x32_tr_nn_gfx1201",
+    "old": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "new": "gemm_add_fp16_128x64x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -955,7 +955,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_tr_nn_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_tr_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -964,7 +964,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x128x16_nn_gfx1201",
+    "old": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "new": "gemm_add_fp16_16x128x16_add_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -973,7 +973,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x16x16_native_nn_gfx1201",
+    "old": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "new": "gemm_add_fp16_16x16x16_add_native_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -982,7 +982,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_16x256x16_1_2_nn_gfx1201",
+    "old": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "new": "gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -991,7 +991,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_256x16x16_2_1_nn_gfx1201",
+    "old": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "new": "gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -1000,7 +1000,7 @@
   },
   {
     "file": "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp",
-    "old": "gemm_add_fp16_64x128x32_2_4_nt_gfx1201",
+    "old": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "new": "gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201",
     "op": "gemm_add",
     "dtype": "fp16",
@@ -1630,7 +1630,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1639,7 +1639,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1648,7 +1648,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1657,7 +1657,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1666,7 +1666,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1675,7 +1675,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1684,7 +1684,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1693,7 +1693,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1702,7 +1702,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_bs2_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_bs2_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1711,7 +1711,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_bs4_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_bs4_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q32_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1720,7 +1720,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_bs2_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_bs2_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1729,7 +1729,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b32_bs4_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_bs4_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q32_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1738,7 +1738,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs2_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs2_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1747,7 +1747,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs4_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs4_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1756,7 +1756,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs8_WZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs8_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_wzq_q128_bs8_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1765,7 +1765,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs2_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs2_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1774,7 +1774,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs4_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs4_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1783,7 +1783,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_INT4_IlBinary_b128_bs8_NZ",
+    "old": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs8_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_no_wmma_nzq_q128_bs8_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1792,7 +1792,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_bs2_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_bs2_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1801,7 +1801,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_bs4_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_bs4_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q32_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1810,7 +1810,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_bs2_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_bs2_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1819,7 +1819,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b32_bs4_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_bs4_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q32_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1828,7 +1828,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs2_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs2_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1837,7 +1837,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs4_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs4_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1846,7 +1846,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs8_WZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs8_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_wzq_q128_bs8_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1855,7 +1855,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs2_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs2_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs2_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1864,7 +1864,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs4_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs4_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs4_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1873,7 +1873,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/no_wmma/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_FP16_W_UINT4_IlBinary_b128_bs8_NZ",
+    "old": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs8_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_no_wmma_nzq_q128_bs8_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1882,7 +1882,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/16x16/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_INT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_16x16_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1891,7 +1891,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/16x16/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_UINT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_16x16_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1900,7 +1900,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/16x16/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_INT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_16x16_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1909,7 +1909,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/16x16/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_UINT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_16x16_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1918,7 +1918,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/64x64/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_INT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_64x64_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1927,7 +1927,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/64x64/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_UINT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_64x64_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1936,7 +1936,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/64x64/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_INT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_64x64_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q128_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1945,7 +1945,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/128/64x64/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_UINT4_IlBinary_b128_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_64x64_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q128_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1954,7 +1954,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/32/16x16/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_INT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q32_16x16_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q32_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1963,7 +1963,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/32/16x16/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_UINT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q32_16x16_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q32_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1972,7 +1972,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/32/16x16/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_INT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_nzq_q32_16x16_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_nzq_q32_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1981,7 +1981,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/NZQ/32/16x16/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_UINT4_IlBinary_b32_NZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_nzq_q32_16x16_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_nzq_q32_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -1990,7 +1990,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/16x16/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_INT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_16x16_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -1999,7 +1999,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/16x16/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_UINT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_16x16_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2008,7 +2008,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/16x16/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_INT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_16x16_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2017,7 +2017,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/16x16/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_UINT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_16x16_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2026,7 +2026,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/64x64/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_INT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_64x64_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2035,7 +2035,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/64x64/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_UINT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_64x64_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2044,7 +2044,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/64x64/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_INT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_64x64_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q128_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2053,7 +2053,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/128/64x64/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_UINT4_IlBinary_b128_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_64x64_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q128_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2062,7 +2062,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/16x16/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_INT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_16x16_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2071,7 +2071,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/16x16/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx11_FP16_W_UINT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_16x16_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_16x16_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2080,7 +2080,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/16x16/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_INT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_16x16_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2089,7 +2089,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/16x16/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_16x16_Gfx12_FP16_W_UINT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_16x16_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_16x16_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2098,7 +2098,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/64x64/gfx1100/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_INT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_64x64_gfx1100",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2107,7 +2107,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/64x64/gfx1100/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx11_FP16_W_UINT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_64x64_gfx1100",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_64x64_gfx1100",
     "op": "qgemm",
     "dtype": "fp16_u4",
@@ -2116,7 +2116,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/64x64/gfx1201/fp16_s4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_INT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_64x64_gfx1201",
     "new": "qgemm_fp16_s4_hlsl_wmma_wzq_q32_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_s4",
@@ -2125,7 +2125,7 @@
   },
   {
     "file": "archive/qgemm/mxn/hlsl/wmma/WZQ/32/64x64/gfx1201/fp16_u4/shadersIL.hpp",
-    "old": "QGemm_WMMA_64x64_Gfx12_FP16_W_UINT4_IlBinary_b32_WZ",
+    "old": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_64x64_gfx1201",
     "new": "qgemm_fp16_u4_hlsl_wmma_wzq_q32_64x64_gfx1201",
     "op": "qgemm",
     "dtype": "fp16_u4",

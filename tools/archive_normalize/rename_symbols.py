@@ -233,6 +233,11 @@ def fold_known_phrases(tokens: list[str]) -> list[str]:
             out.append("rocwmma")
             i += 2
             continue
+        # no + wmma -> compound token
+        if tok == "no" and i + 1 < n and tokens[i + 1] == "wmma":
+            out.append("no_wmma")
+            i += 2
+            continue
         # packed + kv|qkv
         if tok == "packed" and i + 1 < n and tokens[i + 1] in ("kv", "qkv"):
             out.append(f"packed_{tokens[i + 1]}")
@@ -346,6 +351,8 @@ def filter_tokens(
         if t in OP_REDUNDANT.get(op, set()):
             continue
         if t in DTYPE_TOKENS_SHORT or (dtype and t == dtype):
+            continue
+        if dtype and "_" in dtype and t in dtype.split("_"):
             continue
         if arch and t == arch:
             continue

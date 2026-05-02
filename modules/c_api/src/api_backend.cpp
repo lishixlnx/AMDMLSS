@@ -1316,7 +1316,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GEMM")
                 {
-                    supported = op::OperatorGEMM::getCaps(op.m_params);
+                    supported = op::OperatorGEMM::getCaps(op.m_params, gfxArch);
 
                     if (supported)
                     {
@@ -1344,7 +1344,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_MVN")
                 {
-                    supported = op::OperatorMVN::getCaps(op.m_params);
+                    supported = op::OperatorMVN::getCaps(op.m_params, gfxArch);
 
                     if (supported)
                     {

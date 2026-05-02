@@ -20,23 +20,12 @@ namespace mlss::conv::mxn::winograd::fury
 
     std::expected<Binaries, std::error_code> WinogradFuryConvMxN::getBinaries() const
     {
-        return getShadersBlob(m_gfxIpTriple, mlss::conv::utils::buildConvParams(m_attributes));
+        return getShadersBlob(m_gfxIpTriple, m_attributes, nullptr);
     }
 
     uint32_t WinogradFuryConvMxN::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch, const void* context)
     {
-        mlss::conv::utils::GenericConvParams params{};
-
-        if (context != nullptr)
-        {
-            params = *static_cast<const mlss::conv::utils::GenericConvParams*>(context);
-        }
-        else if (!attributes.empty())
-        {
-            params = mlss::conv::utils::buildConvParams(attributes);
-        }
-
-        return isShadersAvailable(gfxArch, params).values;
+        return isShadersAvailable(gfxArch, attributes, context).values;
     }
 
 } // namespace mlss::conv::mxn::winograd::fury

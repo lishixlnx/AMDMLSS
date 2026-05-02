@@ -20,23 +20,12 @@ namespace mlss::conv::one_by_one::hip::wmma
 
     std::expected<Binaries, std::error_code> HipConv1x1::getBinaries() const
     {
-        return getShadersBlob(m_gfxIpTriple, mlss::conv::utils::buildConvParams(m_attributes));
+        return getShadersBlob(m_gfxIpTriple, m_attributes, nullptr);
     }
 
     uint32_t HipConv1x1::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch, const void* context)
     {
-        mlss::conv::utils::GenericConvParams params{};
-
-        if (context != nullptr)
-        {
-            params = *static_cast<const mlss::conv::utils::GenericConvParams*>(context);
-        }
-        else if (!attributes.empty())
-        {
-            params = mlss::conv::utils::buildConvParams(attributes);
-        }
-
-        return isShadersAvailable(gfxArch, params).values;
+        return isShadersAvailable(gfxArch, attributes, context).values;
     }
 
 } // namespace mlss::conv::one_by_one::hip::wmma

@@ -99,9 +99,13 @@ namespace mlss::conv::mxn::misa
 
     } // namespace
 
-    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
         using mlss::op::utils::MetaCmdCaps;
+
+        const auto params = cstmStruct
+            ? *static_cast<const GenericConvParams*>(cstmStruct)
+            : mlss::conv::utils::buildConvParams(attr);
 
         bool isArchSupported = isGfx110x(gfxip);
 
@@ -184,9 +188,13 @@ namespace mlss::conv::mxn::misa
         return caps;
     }
 
-    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
-        auto capsResult = isShadersAvailable(gfxip, params);
+        const auto params = cstmStruct
+            ? *static_cast<const GenericConvParams*>(cstmStruct)
+            : mlss::conv::utils::buildConvParams(attr);
+
+        auto capsResult = isShadersAvailable(gfxip, attr, cstmStruct);
         if (!capsResult.support)
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedOperator));

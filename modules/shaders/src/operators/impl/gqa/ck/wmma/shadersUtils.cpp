@@ -169,15 +169,31 @@ namespace mlss::gqa::ck::wmma
 
     } // anonymous namespace
 
-    bool isShadersAvailable(
-        GfxIpTriple gfxArch,
-        const std::uint32_t& sizeHeads,
-        const std::uint32_t& kvSequenceLength,
-        const std::uint32_t& qSequenceLength,
-        const std::uint32_t& packing,
-        const std::uint32_t& dataType)
+    bool isShadersAvailable(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
-        if (!isGfx110x(gfxArch) && !isGfx115x(gfxArch) && !isGfx120x(gfxArch))
+        std::ignore = cstmStruct;
+
+        std::uint32_t sizeHeads{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t packing{MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED};
+        std::uint32_t dataType{0};
+
+        for (const auto& attribute : attr)
+        {
+            if (attribute.is(MLSS_ATTR_GQA_SIZEHEADS))
+                sizeHeads = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_KVSEQ))
+                kvSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_QSEQ))
+                qSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_PACKING))
+                packing = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_DATATYPE))
+                dataType = attribute.value<std::uint32_t>();
+        }
+
+        if (!isGfx110x(ip) && !isGfx115x(ip) && !isGfx120x(ip))
         {
             return false;
         }
@@ -189,14 +205,6 @@ namespace mlss::gqa::ck::wmma
 
         const bool isSelfAttention = qSequenceLength == kvSequenceLength;
 
-        // Reject packings that have no compiled CK kernel matching the advertised args layout:
-        //   - PACKED_QK: no `packed_qk_gqa_*` kernel exists in any per-arch shadersBin.hpp; the
-        //     `packed_kv_gqa_*` kernels we previously fell back to expose (Q, KV, ...) buffers,
-        //     not the (QK, V, ...) layout advertised by the args metadata.
-        //   - PACKED_QKV cross-attention: no `packed_qkv_gqa_cross_attn_*` /
-        //     `packed_qkv_gqa_fallback_cross_attn_*` kernel exists, and falling back to a
-        //     `packed_kv_gqa_cross_attn_*` kernel introduces a hard arg-count mismatch
-        //     (10 vs 8, 22 vs 16).
         if (packing == MLSS_ATTR_CONFIG_GQA_PACKING_PACKED_QK)
         {
             return false;
@@ -209,19 +217,44 @@ namespace mlss::gqa::ck::wmma
         return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || (isSelfAttention && (sizeHeads <= 80));
     }
 
-    std::expected<Binaries, std::error_code> getShadersBlob(
-        GfxIpTriple gfxArch,
-        const std::uint32_t& batchSize,
-        const std::uint32_t& qHeadCount,
-        const std::uint32_t& kvHeadCount,
-        const std::uint32_t& headDim,
-        const std::uint32_t& kvSequenceLength,
-        const std::uint32_t& qSequenceLength,
-        const std::uint32_t& packing,
-        bool useStrides,
-        const std::uint32_t& dataType)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxArch, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
-        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, packing, dataType))
+        std::uint32_t batchSize{1};
+        std::uint32_t qHeadCount{1};
+        std::uint32_t kvHeadCount{1};
+        std::uint32_t headDim{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t packing{MLSS_ATTR_CONFIG_GQA_PACKING_UNPACKED};
+        bool useStrides = false;
+        std::uint32_t dataType{0};
+
+        for (const auto& attribute : attr)
+        {
+            if (attribute.is(MLSS_ATTR_GQA_BATCH))
+                batchSize = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_QHEADCOUNT))
+                qHeadCount = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_KVHEADCOUNT))
+                kvHeadCount = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_SIZEHEADS))
+                headDim = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_KVSEQ))
+                kvSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_QSEQ))
+                qSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_DATATYPE))
+                dataType = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_PACKING))
+                packing = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_GQA_QSTRIDES) ||
+                     attribute.is(MLSS_ATTR_GQA_KSTRIDES) ||
+                     attribute.is(MLSS_ATTR_GQA_VSTRIDES) ||
+                     attribute.is(MLSS_ATTR_GQA_OUTPUTSTRIDES))
+                useStrides = true;
+        }
+
+        if (!isShadersAvailable(gfxArch, attr, cstmStruct))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }

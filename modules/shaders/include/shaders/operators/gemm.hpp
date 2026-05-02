@@ -1,4 +1,4 @@
-/* Copyright (c) 2021-2025 Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2021-2026 Advanced Micro Devices, Inc. All rights reserved. */
 
 #pragma once
 
@@ -13,30 +13,21 @@ namespace mlss::op
 
         using base = OperatorBase<OperatorGEMM>;
 
-        // Friend declaration to allow base class access to private members
         friend class OperatorBase<OperatorGEMM>;
 
     public:
 
-        // Default constructor
         OperatorGEMM() = default;
 
-        // Constructor
         OperatorGEMM(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
 
-        // Destructor
         virtual ~OperatorGEMM() = default;
 
-        // Static method to get the type name for registration
         static std::string getOperatorName();
 
-        // Override the pure virtual method to get the binary blobs
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-    private:
-
-        // Static method to check capabilities
-        static bool getCapsImpl(const std::vector<Attribute>& attributes);
+        static bool getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip);
     };
 
 } // namespace mlss::op

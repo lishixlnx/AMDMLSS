@@ -171,17 +171,28 @@ namespace mlss::mha::ck::wmma
 
     } // anonymous namespace
 
-    bool isShadersAvailable(
-        GfxIpTriple gfxArch,
-        const std::uint32_t& sizeHeads,
-        const std::uint32_t& kvSequenceLength,
-        const std::uint32_t& qSequenceLength,
-        const std::uint32_t& packing,
-        const std::uint32_t& dataType)
+    bool isShadersAvailable(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
-        std::ignore = packing;
+        std::ignore = cstmStruct;
 
-        if (!isGfx110x(gfxArch) && !isGfx115x(gfxArch) && !isGfx120x(gfxArch))
+        std::uint32_t sizeHeads{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t dataType{0};
+
+        for (const auto& attribute : attr)
+        {
+            if (attribute.is(MLSS_ATTR_MHA_SIZEHEADS))
+                sizeHeads = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_KVSEQ))
+                kvSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_QSEQ))
+                qSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_DATATYPE))
+                dataType = attribute.value<std::uint32_t>();
+        }
+
+        if (!isGfx110x(ip) && !isGfx115x(ip) && !isGfx120x(ip))
         {
             return false;
         }
@@ -194,17 +205,35 @@ namespace mlss::mha::ck::wmma
         return (sizeHeads <= 48) || ((sizeHeads % 2) == 0) || ((qSequenceLength == kvSequenceLength) && (sizeHeads <= 80));
     }
 
-    std::expected<Binaries, std::error_code> getShadersBlob(
-        GfxIpTriple gfxArch,
-        const std::uint32_t& batchSize,
-        const std::uint32_t& headCount,
-        const std::uint32_t& headDim,
-        const std::uint32_t& kvSequenceLength,
-        const std::uint32_t& qSequenceLength,
-        const std::uint32_t& packing,
-        const std::uint32_t& dataType)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxArch, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
-        if (!isShadersAvailable(gfxArch, headDim, kvSequenceLength, qSequenceLength, packing, dataType))
+        std::uint32_t batchSize{0};
+        std::uint32_t headCount{0};
+        std::uint32_t headDim{0};
+        std::uint32_t kvSequenceLength{0};
+        std::uint32_t qSequenceLength{0};
+        std::uint32_t packing{0};
+        std::uint32_t dataType{0};
+
+        for (const auto& attribute : attr)
+        {
+            if (attribute.is(MLSS_ATTR_MHA_BATCH))
+                batchSize = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_HEADCOUNT))
+                headCount = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_SIZEHEADS))
+                headDim = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_KVSEQ))
+                kvSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_QSEQ))
+                qSequenceLength = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_PACKING))
+                packing = attribute.value<std::uint32_t>();
+            else if (attribute.is(MLSS_ATTR_MHA_DATATYPE))
+                dataType = attribute.value<std::uint32_t>();
+        }
+
+        if (!isShadersAvailable(gfxArch, attr, cstmStruct))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }
