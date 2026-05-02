@@ -56,17 +56,18 @@ set_target_properties(amdmlss PROPERTIES
 
 # Install ONLY the main target (single DLL/SO)
 install(TARGETS amdmlss
-    EXPORT amdmlssTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    EXPORT ${PROJECT_NAME}-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT amdmlss
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # Install main headers
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING 
+    COMPONENT amdmlss
+    FILES_MATCHING
         PATTERN "*.h"
         PATTERN "*.hpp"
 )
@@ -74,31 +75,22 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
 # Install module headers with module prefixes
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/modules/core/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/core
-    FILES_MATCHING 
+    COMPONENT amdmlss
+    FILES_MATCHING
         PATTERN "*.hpp"
         PATTERN "*.h"
 )
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/modules/shaders/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/shaders
-    FILES_MATCHING 
+    COMPONENT amdmlss
+    FILES_MATCHING
         PATTERN "*.hpp"
         PATTERN "*.h"
 )
 
 install(FILES ${CMAKE_BINARY_DIR}/include/amdmlss_export.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT amdmlss
 )
 
-# Export targets for the build tree
-export(EXPORT amdmlssTargets
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/amdmlssTargets.cmake
-    NAMESPACE amdmlss::
-)
-
-# Install the export file
-install(EXPORT amdmlssTargets
-    FILE amdmlssTargets.cmake
-    NAMESPACE amdmlss::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/amdmlss
-)

@@ -236,7 +236,11 @@ function(add_project_module NAME)
 
     # Add dependencies if any
     if(ARG_DEPENDENCIES)
-        target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
+        if(ARG_TYPE STREQUAL "SHARED")
+            target_link_libraries(${NAME} PRIVATE ${ARG_DEPENDENCIES})
+        else()
+            target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
+        endif()
     endif()
 
     # Add include directories

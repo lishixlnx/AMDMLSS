@@ -15,10 +15,12 @@ target_include_directories(common
 install(
     DIRECTORY include/amdmlss
     DESTINATION include
+    COMPONENT amdmlss
     FILES_MATCHING PATTERN "*.h"
 )
 
 # Install the target to export set
 install(TARGETS common
     EXPORT ${PROJECT_NAME}-targets
+    COMPONENT amdmlss
 )

@@ -37,14 +37,12 @@ endif()
 
 # Install the target to export set
 install(TARGETS shaders
-    EXPORT ${PROJECT_NAME}-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
 )
 
 if(TARGET shader_modules)
     install(TARGETS shader_modules
-        EXPORT ${PROJECT_NAME}-targets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT amdmlss
         FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx_modules
     )
 endif()
