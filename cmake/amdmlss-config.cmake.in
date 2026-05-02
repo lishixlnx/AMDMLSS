@@ -1,8 +1,4 @@
 @PACKAGE_INIT@
 
-include(CMakeFindDependencyMacro)
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules")
-find_dependency(HIP REQUIRED)
-
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake")
 check_required_components(@PROJECT_NAME@)
