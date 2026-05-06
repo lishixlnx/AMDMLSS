@@ -114,6 +114,86 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "linux-base",
+            "hidden": true,
+            "description": "Base settings for Linux builds (WSL or native)",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/install/${presetName}",
+            "generator": "Ninja",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "environment": {
+                "HIP_PATH": "/opt/rocm",
+                "ROCM_PATH": "/opt/rocm",
+                "HIP_PLATFORM": "amd"
+            },
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{HIP_PATH};$env{HIP_PATH}/lib/cmake;$env{CMAKE_PREFIX_PATH}",
+                "CMAKE_MODULE_PATH": "$env{HIP_PATH}/cmake;$env{CMAKE_MODULE_PATH}"
+            }
+        },
+        {
+            "name": "linux-clang-base",
+            "hidden": true,
+            "description": "Base settings for Clang builds on Linux",
+            "inherits": "linux-base",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_CXX_FLAGS": "-Wno-unused-command-line-argument",
+                "CMAKE_C_FLAGS": "-Wno-unused-command-line-argument"
+            }
+        },
+        {
+            "name": "linux-gcc-base",
+            "hidden": true,
+            "description": "Base settings for GCC builds on Linux",
+            "inherits": "linux-base",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux Clang Debug",
+            "description": "Configure with system Clang on Linux (Debug)",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-clang-release",
+            "displayName": "Linux Clang Release",
+            "description": "Configure with system Clang on Linux (Release)",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug",
+            "description": "Configure with system GCC on Linux (Debug)",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-gcc-release",
+            "displayName": "Linux GCC Release",
+            "description": "Configure with system GCC on Linux (Release)",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
         }
     ],
     "buildPresets": [
@@ -138,6 +218,26 @@
             "name": "clang-release",
             "displayName": "Clang Release",
             "configurePreset": "clang-release"
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux Clang Debug",
+            "configurePreset": "linux-clang-debug"
+        },
+        {
+            "name": "linux-clang-release",
+            "displayName": "Linux Clang Release",
+            "configurePreset": "linux-clang-release"
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug",
+            "configurePreset": "linux-gcc-debug"
+        },
+        {
+            "name": "linux-gcc-release",
+            "displayName": "Linux GCC Release",
+            "configurePreset": "linux-gcc-release"
         }
     ],
     "testPresets": [
@@ -177,6 +277,30 @@
             "displayName": "Clang Release Tests",
             "inherits": "test-base",
             "configurePreset": "clang-release"
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux Clang Debug Tests",
+            "inherits": "test-base",
+            "configurePreset": "linux-clang-debug"
+        },
+        {
+            "name": "linux-clang-release",
+            "displayName": "Linux Clang Release Tests",
+            "inherits": "test-base",
+            "configurePreset": "linux-clang-release"
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug Tests",
+            "inherits": "test-base",
+            "configurePreset": "linux-gcc-debug"
+        },
+        {
+            "name": "linux-gcc-release",
+            "displayName": "Linux GCC Release Tests",
+            "inherits": "test-base",
+            "configurePreset": "linux-gcc-release"
         }
     ]
 }

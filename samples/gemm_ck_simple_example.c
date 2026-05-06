@@ -14,7 +14,6 @@ void checkStatus(MLSSstatus status, int line)
         MLSSstring err = mlssGetErrorString(status);
 
         printf("Failed at line: %d, :%s\n", line, err);
-        free(err);
         exit(EXIT_FAILURE);
     }
 }
