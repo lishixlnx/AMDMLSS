@@ -17,7 +17,9 @@ namespace mlss
         ArchitectureNotFound,
         CodenameNotFound,
         // Comgr errors
-        ComgrError
+        ComgrError,
+        // ELF parsing errors
+        InvalidElfBinary
     };
 
     // Error category for MLSS errors
@@ -54,6 +56,8 @@ namespace mlss
                     return "GPU codename not found";
                 case MLSSErrorCode::ComgrError:
                     return "AMD Comgr operation failed";
+                case MLSSErrorCode::InvalidElfBinary:
+                    return "Invalid ELF binary";
                 default:
                     return "Unknown MLSS error";
             }

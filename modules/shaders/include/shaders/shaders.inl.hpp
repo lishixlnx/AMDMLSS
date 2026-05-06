@@ -36,7 +36,8 @@ namespace mlss
                     ? mlss::getKernelName(std::span<const std::uint8_t>(
                           reinterpret_cast<const std::uint8_t*>(binary.data()),
                           binary.size()))
-                    : kernelName);
+                          .value_or(std::string{})
+                    : std::string(kernelName));
             result.m_compilerVersion = compilerVersion;
             result.m_codeObjectVersion = codeObjectVersion;
             result.m_isRelocatable = isRelocatable;
@@ -146,13 +147,10 @@ namespace mlss
             {
                 if (name.empty())
                 {
-                    try
-                    {
-                        name = getKernelName(std::span<const std::uint8_t>(
-                            reinterpret_cast<const std::uint8_t*>(shader.m_binary.data()),
-                            shader.m_binary.size()));
-                    }
-                    catch (const std::runtime_error&) {}
+                    name = getKernelName(std::span<const std::uint8_t>(
+                               reinterpret_cast<const std::uint8_t*>(shader.m_binary.data()),
+                               shader.m_binary.size()))
+                               .value_or(std::string{});
                 }
             }
             return std::make_unique<Binaries::Blob>(Binaries::Blob{
@@ -175,13 +173,10 @@ namespace mlss
             std::string name(shader.m_kernelName);
             if (name.empty())
             {
-                try
-                {
-                    name = getKernelName(std::span<const std::uint8_t>(
-                        reinterpret_cast<const std::uint8_t*>(shader.m_binary.data()),
-                        shader.m_binary.size()));
-                }
-                catch (const std::runtime_error&) {}
+                name = getKernelName(std::span<const std::uint8_t>(
+                           reinterpret_cast<const std::uint8_t*>(shader.m_binary.data()),
+                           shader.m_binary.size()))
+                           .value_or(std::string{});
             }
             return std::make_unique<Binaries::Blob>(Binaries::Blob{
                 shader.m_binary.data(),

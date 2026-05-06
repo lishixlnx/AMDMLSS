@@ -9,9 +9,11 @@ namespace mlss
 
     /// @brief Extract kernel name from ELF binary
     /// @param arr ELF binary bytes
-    /// @return Name of the kernel found in the ELF binary
-    /// @throws std::runtime_error if no kernel or multiple kernels are found
-    [[nodiscard]] std::string getKernelName(const std::span<const std::uint8_t>& arr);
+    /// @return Name of the kernel found in the ELF binary, or
+    ///         MLSSErrorCode::InvalidElfBinary if the buffer is not a
+    ///         valid AMDGPU ELF or does not contain exactly one kernel.
+    [[nodiscard]] std::expected<std::string, std::error_code> getKernelName(
+        const std::span<const std::uint8_t>& arr);
 
     [[nodiscard]] std::expected<std::vector<std::uint8_t>, std::error_code> getNonRelocatable(const std::span<const std::uint8_t>& arr,
          const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget);

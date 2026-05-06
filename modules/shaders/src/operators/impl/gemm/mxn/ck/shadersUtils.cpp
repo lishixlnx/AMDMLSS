@@ -166,12 +166,8 @@ namespace mlss::gemm::mxn::ck
             auto nonRelocBytes = std::move(nonRelocResult).value();
             const std::span<const std::uint8_t> nonRelocSpan(nonRelocBytes.data(), nonRelocBytes.size());
 
-            std::string nonRelocName;
-            try
-            {
-                nonRelocName = getKernelName(nonRelocSpan);
-            }
-            catch (const std::runtime_error&) {}
+            const std::string nonRelocName =
+                getKernelName(nonRelocSpan).value_or(std::string{});
 
             Binaries::Blob nonRelocBlob{
                 nonRelocBytes.data(),
