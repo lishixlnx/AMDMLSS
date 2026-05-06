@@ -275,7 +275,7 @@ TEST_CASE("GQA: HIP non-relocatable", "[gqa][hip]")
     if constexpr (mlss::tester::hasHip())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.nonReloc != nullptr);
 
         auto result = runGqaGpu<HipManagedModule, HipDeviceMemory, HipShader>(
@@ -295,7 +295,7 @@ TEST_CASE("GQA: D3D12 relocatable", "[gqa][d3d]")
     if constexpr (mlss::tester::hasD3D12())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.reloc != nullptr);
 
         auto result = runGqaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
@@ -321,7 +321,7 @@ TEST_CASE("GQA: OpenCL non-relocatable", "[gqa][cl]")
     if constexpr (mlss::tester::hasOpenCL())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.nonReloc != nullptr);
 
         auto result = runGqaGpu<ClManagedModule, ClDeviceMemory, ClShader>(
@@ -340,7 +340,7 @@ TEST_CASE("GQA: OpenCL non-relocatable", "[gqa][cl]")
 TEST_CASE("GQA: Host reference (always-on tensor library)", "[gqa][host]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(td.hostRef.numel() == kOutSize);
 
     // Sanity-check the host reference: all values must be finite.

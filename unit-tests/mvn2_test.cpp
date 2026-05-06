@@ -466,7 +466,7 @@ bool resultsMatch(const std::vector<float>& a, const std::vector<float>& b,
 TEST_CASE("MVN2: getCaps and getBinaries succeed", "[mvn2][api]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(td.bins.context != 0);
     REQUIRE(td.bins.data != nullptr);
     REQUIRE(td.bins.count > 0);
@@ -476,7 +476,7 @@ TEST_CASE("MVN2: produces three kernels in both reloc and non-reloc flavors",
           "[mvn2][api][binaries]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(static_cast<std::size_t>(td.bins.count) == kExpectedBinaries);
 
     std::size_t relocCount    = 0;
@@ -514,7 +514,7 @@ TEST_CASE("MVN2: each binary advertises the correct operator and ASIC",
           "[mvn2][api]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     for (MLSSsize i = 0; i < td.bins.count; ++i)
     {
@@ -532,7 +532,7 @@ TEST_CASE("MVN2: each binary advertises the correct operator and ASIC",
 TEST_CASE("MVN2: Host reference is well-formed", "[mvn2][host]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(td.hostRef.size() == kElementCount);
 
     for (float v : td.hostRef)
@@ -578,7 +578,7 @@ TEST_CASE("MVN2: HIP non-relocatable", "[mvn2][hip][gpu]")
     if constexpr (mlss::tester::hasHip())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
         auto result = runMvn2Pipeline<HipManagedModule, HipDeviceMemory, HipShader>(
             td.bins.data, td.bins.count, /*relocatable=*/false,
@@ -598,7 +598,7 @@ TEST_CASE("MVN2: D3D12 relocatable", "[mvn2][d3d][gpu]")
     if constexpr (mlss::tester::hasD3D12())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
         auto result = runMvn2Pipeline<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
             td.bins.data, td.bins.count, /*relocatable=*/true,
@@ -625,7 +625,7 @@ TEST_CASE("MVN2: OpenCL non-relocatable", "[mvn2][cl][gpu]")
     if constexpr (mlss::tester::hasOpenCL())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
         auto result = runMvn2Pipeline<ClManagedModule, ClDeviceMemory, ClShader>(
             td.bins.data, td.bins.count, /*relocatable=*/false,

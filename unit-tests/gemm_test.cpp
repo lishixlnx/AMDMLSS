@@ -223,7 +223,7 @@ GemmTestData& getTestData()
 TEST_CASE("GEMM HIP MxN: getCaps + getBinaries succeed", "[gemm][hip][api]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(td.hipBins.context != 0);
     REQUIRE(td.hipBins.data    != nullptr);
     REQUIRE(td.hipBins.count    > 0);
@@ -232,7 +232,7 @@ TEST_CASE("GEMM HIP MxN: getCaps + getBinaries succeed", "[gemm][hip][api]")
 TEST_CASE("GEMM CK MxN: getCaps + getBinaries succeed", "[gemm][ck][api]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(td.ckBins.context != 0);
     REQUIRE(td.ckBins.data    != nullptr);
     REQUIRE(td.ckBins.count    > 0);
@@ -242,7 +242,7 @@ TEST_CASE("GEMM HIP MxN: produces reloc + non-reloc binaries with grid metadata"
           "[gemm][hip][api][binaries]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(static_cast<std::size_t>(td.hipBins.count) == kExpectedBinaries);
 
     std::size_t relocCount    = 0;
@@ -273,7 +273,7 @@ TEST_CASE("GEMM CK MxN: produces reloc + non-reloc binaries with grid metadata",
           "[gemm][ck][api][binaries]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
     REQUIRE(static_cast<std::size_t>(td.ckBins.count) == kExpectedBinaries);
 
     std::size_t relocCount    = 0;
@@ -303,7 +303,7 @@ TEST_CASE("GEMM CK MxN: produces reloc + non-reloc binaries with grid metadata",
 TEST_CASE("GEMM: each binary advertises MLSS_GEMM as its operator", "[gemm][api]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     auto checkOpName = [](const MlssBinaries& bins)
     {
@@ -323,7 +323,7 @@ TEST_CASE("GEMM HIP MxN: relocatable and non-relocatable variants share kernel s
           "[gemm][hip][api][binaries]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     const auto* reloc    = findBinaryByKernelPrefix(td.hipBins.data, td.hipBins.count,
                                                     kHipGemmKernelPrefix, /*relocatable=*/true);
@@ -347,7 +347,7 @@ TEST_CASE("GEMM CK MxN: relocatable and non-relocatable variants share kernel sy
           "[gemm][ck][api][binaries]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     const auto* reloc    = findBinaryByKernelPrefix(td.ckBins.data, td.ckBins.count,
                                                     kCkGemmKernelPrefix, /*relocatable=*/true);
@@ -374,7 +374,7 @@ TEST_CASE("GEMM CK MxN: relocatable and non-relocatable variants share kernel sy
 TEST_CASE("GEMM HIP MxN: host reference is well-formed", "[gemm][hip][host]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     REQUIRE(td.hostRefHip.size() == static_cast<std::size_t>(kHipM) * kHipN);
     for (float v : td.hostRefHip) REQUIRE(std::isfinite(v));
@@ -383,7 +383,7 @@ TEST_CASE("GEMM HIP MxN: host reference is well-formed", "[gemm][hip][host]")
 TEST_CASE("GEMM CK MxN: host reference is well-formed", "[gemm][ck][host]")
 {
     auto& td = getTestData();
-    REQUIRE(td.gpuAvailable);
+    if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
     REQUIRE(td.hostRefCk.size() == static_cast<std::size_t>(kCkM) * kCkN);
     for (float v : td.hostRefCk) REQUIRE(std::isfinite(v));

@@ -451,7 +451,7 @@ TEST_CASE("Conv1x1: HIP non-relocatable", "[conv1x1][hip]")
     if constexpr (mlss::tester::hasHip())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.nonReloc != nullptr);
 
         auto result = runConvGpu<HipManagedModule, HipDeviceMemory, HipShader>(
@@ -470,7 +470,7 @@ TEST_CASE("Conv1x1: D3D12 relocatable", "[conv1x1][d3d]")
     if constexpr (mlss::tester::hasD3D12())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.reloc != nullptr);
 
         auto result = runConvGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
@@ -489,7 +489,7 @@ TEST_CASE("Conv1x1: OpenCL non-relocatable", "[conv1x1][cl]")
     if constexpr (mlss::tester::hasOpenCL())
     {
         auto& td = getTestData();
-        REQUIRE(td.gpuAvailable);
+        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
         REQUIRE(td.nonReloc != nullptr);
 
         auto result = runConvGpu<ClManagedModule, ClDeviceMemory, ClShader>(
