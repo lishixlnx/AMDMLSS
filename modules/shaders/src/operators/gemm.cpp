@@ -1,6 +1,7 @@
 /* Copyright (c) 2021-2026 Advanced Micro Devices, Inc. All rights reserved. */
 
 #include "shaders/operators/gemm.hpp"
+#include "impl/gemm/utils.hpp"
 #include "impl/gemm/mxn/gemmMxN.hpp"
 
 template class mlss::CaseBase<mlss::gemm::mxn::GemmMxN, mlss::op::OperatorGEMM>;
@@ -36,8 +37,10 @@ namespace mlss::op
 
     bool OperatorGEMM::getCapsImpl(const std::vector<mlss::Attribute>& attributes, GfxIpTriple gfxip)
     {
+        const auto params = mlss::gemm::utils::buildGemmParams(attributes);
+
         auto* gemmMxN = CaseRegistry<OperatorGEMM>::get<mlss::gemm::mxn::GemmMxN>();
-        if (gemmMxN != nullptr && gemmMxN->getCaps(attributes, gfxip, nullptr) != 0x00000000u)
+        if (gemmMxN != nullptr && gemmMxN->getCaps(attributes, gfxip, &params) != 0x00000000u)
         {
             return true;
         }

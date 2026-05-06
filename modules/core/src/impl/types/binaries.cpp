@@ -80,4 +80,12 @@ namespace mlss
         m_blocks = blocks;
     }
 
+    //---------------------------------------------------------------------
+    void Binaries::Blob::setOwnedBinary(std::vector<std::uint8_t>&& data)
+    {
+        m_ownedBinary = std::make_shared<std::vector<std::uint8_t>>(std::move(data));
+        m_pBinary = m_ownedBinary->data();
+        m_size    = m_ownedBinary->size();
+    }
+
 } // namespace mlss

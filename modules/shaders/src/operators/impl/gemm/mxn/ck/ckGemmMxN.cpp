@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "ckGemmMxN.hpp"
 #include "shadersUtils.hpp"
+#include "../../utils.hpp"
 
 namespace mlss::gemm::mxn::ck
 {
@@ -18,12 +19,15 @@ namespace mlss::gemm::mxn::ck
 
     std::expected<Binaries, std::error_code> CKGemmMxN::getBinaries() const
     {
-        return getShadersBlob(m_gfxIpTriple, m_attributes, nullptr);
+        const auto params = mlss::gemm::utils::buildGemmParams(m_attributes);
+        return getShadersBlob(m_gfxIpTriple, m_attributes, &params);
     }
 
-    bool CKGemmMxN::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
+    uint32_t CKGemmMxN::getCapsImpl(const std::vector<Attribute>& attributes,
+                                    const GfxIpTriple& gfxArch,
+                                    const void* context)
     {
-        return isShadersAvailable(gfxArch, attributes, nullptr);
+        return isShadersAvailable(gfxArch, attributes, context).values;
     }
 
 } // namespace mlss::gemm::mxn::ck

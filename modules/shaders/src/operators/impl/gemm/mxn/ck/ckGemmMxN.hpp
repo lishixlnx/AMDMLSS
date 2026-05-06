@@ -27,7 +27,9 @@ namespace mlss::gemm::mxn::ck
 
         virtual std::expected<Binaries, std::error_code> getBinaries() const override;
 
-        static bool getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch);
+        static uint32_t getCapsImpl(const std::vector<Attribute>& attributes,
+                                    const GfxIpTriple& gfxArch,
+                                    const void* context);
     };
 
 } // namespace mlss::gemm::mxn::ck

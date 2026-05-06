@@ -3,12 +3,17 @@
 
 #include "core/core.hpp"
 #include "shaders/shaders.hpp"
+#include "../../../opUtils.hpp"
 
 namespace mlss::gemm::mxn::ck
 {
 
-    bool isShadersAvailable(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct);
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& ip,
+                                                    const std::vector<Attribute>& attr,
+                                                    const void* cstmStruct);
 
-    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct);
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& ip,
+                                                            const std::vector<Attribute>& attr,
+                                                            const void* cstmStruct);
 
 } // namespace mlss::gemm::mxn::ck

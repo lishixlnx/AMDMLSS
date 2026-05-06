@@ -229,7 +229,7 @@ namespace mlss::conv::mxn::winograd::rage
             ? *static_cast<const GenericConvParams*>(cstmStruct)
             : mlss::conv::utils::buildConvParams(attr);
 
-        auto capsResult = isShadersAvailable(gfxip, attr, cstmStruct);
+        auto capsResult = isShadersAvailable(gfxip, attr, &params);
         if (capsResult.support == 0x00000000u)
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedOperator));

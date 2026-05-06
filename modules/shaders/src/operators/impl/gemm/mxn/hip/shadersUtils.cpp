@@ -1,236 +1,415 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
+#include "shadersConstants.hpp"
+#include "../../utils.hpp"
+#include "../../../conv/1x1/hip/wmma/shadersConstants.hpp"
 
 #include "gfx1100/fp16/shadersBin.hpp"
 #include "gfx1150/fp16/shadersBin.hpp"
 #include "gfx1201/fp16/shadersBin.hpp"
 
-namespace gfx1100 = mlss::gemm::mxn::hip::fp16::gfx1100;
-namespace gfx1150 = mlss::gemm::mxn::hip::fp16::gfx1150;
-namespace gfx1201 = mlss::gemm::mxn::hip::fp16::gfx1201;
-namespace gfx1201_noact = mlss::gemm::mxn::hip::fp16::gfx1201::noActivations;
+namespace gfx1100        = mlss::gemm::mxn::hip::fp16::gfx1100;
+namespace gfx1150        = mlss::gemm::mxn::hip::fp16::gfx1150;
+namespace gfx1201        = mlss::gemm::mxn::hip::fp16::gfx1201;
+namespace gfx1201_noact  = mlss::gemm::mxn::hip::fp16::gfx1201::noActivations;
+namespace conv_trees     = mlss::conv::one_by_one::hip::wmma::fp16;
+
+using mlss::gemm::utils::GenericGemmParams;
+using mlss::gemm::utils::buildGemmParams;
+using mlss::gemm::utils::chooseTuning;
 
 namespace mlss::gemm::mxn::hip
 {
 
-    using mlss::isGfx110x;
-    using mlss::isGfx115x;
-    using mlss::isGfx120x;
-
     namespace
     {
 
-        struct GemmParams
-        {
-            std::uint32_t m{0};
-            std::uint32_t n{0};
-            std::uint32_t k{0};
-            std::uint32_t batch{1};
-            bool transA{false};
-            bool transB{false};
-            std::uint32_t dataType{0};
-            std::uint32_t activation{0};
-        };
+        constexpr std::uint32_t kMinDim         = 16u;
+        constexpr std::uint32_t kEvenMask       = 1u;
+        constexpr std::uint32_t kBlockSizeMain  = 256u;
+        constexpr std::uint32_t kGfx12MaxBlocks = 0xFFFFu;
 
-        GemmParams extractParams(const std::vector<Attribute>& attr)
+        const std::array<std::uint32_t, 7u>& getShaderConstants(HipGemmShader shader)
         {
-            GemmParams params;
-
-            for (const auto& attribute : attr)
+            switch (shader)
             {
-                if (attribute.is(MLSS_ATTR_GEMM_M))
-                    params.m = attribute.value<std::uint32_t>();
-                else if (attribute.is(MLSS_ATTR_GEMM_N))
-                    params.n = attribute.value<std::uint32_t>();
-                else if (attribute.is(MLSS_ATTR_GEMM_K))
-                    params.k = attribute.value<std::uint32_t>();
-                else if (attribute.is(MLSS_ATTR_GEMM_BATCH))
-                    params.batch = attribute.value<std::uint32_t>();
-                else if (attribute.is(MLSS_ATTR_GEMM_TRANSA))
-                    params.transA = attribute.value<bool>();
-                else if (attribute.is(MLSS_ATTR_GEMM_TRANSB))
-                    params.transB = attribute.value<bool>();
-                else if (attribute.is(MLSS_ATTR_GEMM_DATATYPE))
-                    params.dataType = attribute.value<std::uint32_t>();
-                else if (attribute.is(MLSS_ATTR_GEMM_ACTIVATION))
-                    params.activation = attribute.value<std::uint32_t>();
+                case HipGemmShader::Shader16x16x16WMMA_NN:    return Gemm2d_16x16x16NN;
+                case HipGemmShader::Shader16x128x16WMMA_NN:   return Gemm2d_16x128x16NN;
+                case HipGemmShader::Shader16x256x16WMMA_NN:   return Gemm2d_16x256x16NN;
+                case HipGemmShader::Shader64x128x32WMMA_NN:   return Gemm2d_64x128x32NN;
+                case HipGemmShader::Shader128x128x16WMMA_NN:  return Gemm2d_128x128x16NN;
+                case HipGemmShader::Shader128x64x32WMMA_NN:   return Gemm2d_128x64x32NN;
+                case HipGemmShader::Shader256x16x16WMMA_NN:   return Gemm2d_256x16x16NN;
+                case HipGemmShader::Shader64x128x32WMMA_NT:   return Gemm2d_64x128x32NT;
+                default:                                      return Gemm2d_16x16x16NN;
             }
-
-            return params;
         }
 
-        bool isHipGemmSupported(const GemmParams& params, const GfxIpTriple& ip)
+        bool isAdapterSupported(const GfxIpTriple& ip, const GenericGemmParams& params)
         {
             if (!isGfx110x(ip) && !isGfx115x(ip) && !isGfx120x(ip))
+            {
                 return false;
+            }
 
-            if (params.dataType != MLSS_FLOAT16)
+            // Only fp16 input with fp16 output is supported (matches dxcp).
+            if (params.dataType != DataTypeFlags::FLOAT16)
+            {
                 return false;
+            }
 
-            if (params.m == 0 || params.n == 0 || params.k == 0)
+            if ((params.precision != PrecisionFlags::COUNT) &&
+                (params.precision == PrecisionFlags::FLOAT32))
+            {
                 return false;
+            }
 
+            // Tensor A column-major (transA) is not supported.
             if (params.transA)
+            {
                 return false;
+            }
+
+            // Minimum dimensions and N/K must be even (kernel layout requirement).
+            if ((params.m < kMinDim) || (params.n < kMinDim) || (params.k < kMinDim))
+            {
+                return false;
+            }
+            if (((params.n & kEvenMask) != 0u) || ((params.k & kEvenMask) != 0u))
+            {
+                return false;
+            }
+
+            // The transposed-B path only has the 64x128x32 NT shader.
+            if (params.transB && ((params.m < 64u) || (params.n < 128u) || (params.k < 32u)))
+            {
+                return false;
+            }
+
+            // We support every element-wise activation (the "MAX" family is excluded).
+            if ((params.activation != ActivationFunctionFlags::COUNT) &&
+                ((params.activation == ActivationFunctionFlags::HARDMAX)     ||
+                 (params.activation == ActivationFunctionFlags::LOG_SOFTMAX) ||
+                 (params.activation == ActivationFunctionFlags::SOFTMAX)))
+            {
+                return false;
+            }
 
             return true;
         }
 
-        constexpr std::uint32_t divCeil(std::uint32_t a, std::uint32_t b)
+        // Decision-tree based shader selection. The Gemm trees are shared with
+        // the conv 1x1 backend so we reuse them directly to avoid duplication.
+        HipGemmShader chooseNNShader(const GfxIpTriple& gfxip, const GenericGemmParams& params)
         {
-            return (a + b - 1) / b;
-        }
+            const std::array<float, 3u> features = {
+                static_cast<float>(params.m),
+                static_cast<float>(params.n),
+                static_cast<float>(params.k)
+            };
 
-        template <std::size_t N>
-        void addKernelBlob(Binaries& binaries, const std::array<std::uint8_t, N>& data,
-                           const MLSSdim3& grid, const MLSSdim3& blocks)
-        {
-            auto desc = make_shader_descriptor(
-                std::span<const std::uint8_t>(data), "", "", 0, true, ShaderTypesFlags::UNKNOWN);
-            auto blob = make_binary_blob(desc);
-            if (blob)
+            auto shader = HipGemmShader::Shader16x16x16WMMA_NN;
+
+            if (gfxip == IP_GFX1100)
             {
-                blob->setGridBlocks(grid, blocks);
-                binaries.addBlob(std::move(*blob));
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::Navi31HipGemmFp16Tree, std::span{features}));
             }
+            else if (gfxip == IP_GFX1101)
+            {
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::Navi32HipGemmFp16Tree, std::span{features}));
+            }
+            else if (gfxip == IP_GFX1102 || gfxip == IP_GFX1103)
+            {
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::Navi33HipGemmFp16Tree, std::span{features}));
+            }
+            else if (isGfx115x(gfxip))
+            {
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::StrixHipGemmFp16Tree, std::span{features}));
+            }
+            else if (gfxip == IP_GFX1200 || gfxip == IP_GFX1201)
+            {
+                constexpr std::array<std::int32_t, 7u> Navi48Labels = {
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x16x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x128x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x256x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader64x128x32WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader128x128x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader128x64x32WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader256x16x16WMMA_NN)
+                };
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::Navi48HipGemmFp16Tree, std::span{features},
+                                  std::span{Navi48Labels}));
+            }
+            else if (gfxip == IP_GFX1210 || gfxip == IP_GFX1211)
+            {
+                constexpr std::array<std::int32_t, 7u> Navi44Labels = {
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x16x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x128x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader16x256x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader64x128x32WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader128x128x16WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader128x64x32WMMA_NN),
+                    static_cast<std::int32_t>(HipGemmShader::Shader256x16x16WMMA_NN)
+                };
+                shader = static_cast<HipGemmShader>(
+                    predictHelper(conv_trees::Navi44HipGemmFp16Tree, std::span{features},
+                                  std::span{Navi44Labels}));
+            }
+
+            // Fall back to the 16x16 catch-all if the predicted tile does not
+            // fit the problem size. Mirrors dxcp::ChooseNNShader.
+            const auto& constants = getShaderConstants(shader);
+            if ((params.m < constants[0x01u]) ||
+                (params.n < constants[0x02u]) ||
+                (params.k < constants[0x03u]))
+            {
+                shader = HipGemmShader::Shader16x16x16WMMA_NN;
+            }
+
+            return shader;
+        }
+
+        // Map runtime target IP to the GFX target the archived ELF was
+        // compiled for. Mirrors conv1x1/hip/wmma::sourceArchForTarget.
+        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
+        {
+            if (gfxip.major == 0x0Bu && gfxip.minor == 0x00u) return {0x0Bu, 0x00u, 0x00u};
+            if (gfxip.major == 0x0Bu && gfxip.minor == 0x05u) return {0x0Bu, 0x05u, 0x00u};
+            if (gfxip.major == 0x0Cu)                         return {0x0Cu, 0x00u, 0x01u};
+            return IP_GFX_UNKNOWN;
         }
 
         template <std::size_t N>
-        Binaries buildSingleKernelBinaries(const GemmParams& params,
-                                           const std::array<std::uint8_t, N>& kernel,
-                                           std::uint32_t tileM, std::uint32_t tileN,
-                                           std::uint32_t blockSize)
+        Binaries makeKernelBinaries(const std::array<std::uint8_t, N>& data,
+                                    const std::array<std::uint32_t, 7u>& constants,
+                                    const GenericGemmParams& params,
+                                    const GfxIpTriple& gfxip)
         {
-            MLSSdim3 grid(divCeil(params.m, tileM), divCeil(params.n, tileN), params.batch);
-            MLSSdim3 blocks(blockSize, 1, 1);
+            std::uint32_t blockCountX = integer_divide_ceil(params.m, constants[0x01u]);
+            std::uint32_t blockCountY = integer_divide_ceil(params.n, constants[0x02u]);
+
+            if (isGfx12(gfxip))
+            {
+                blockCountY = std::min(blockCountY, kGfx12MaxBlocks);
+            }
+
+            MLSSdim3 grid{blockCountX, blockCountY, params.batch};
+            MLSSdim3 blocks{constants[0x04u] * constants[0x05u] * constants[0x06u],
+                            1u, 1u};
 
             Binaries binaries;
-            addKernelBlob(binaries, kernel, grid, blocks);
+
+            // 1) Relocatable variant: the original ELF blob from the archive.
+            auto relocDescriptor = make_shader_descriptor(
+                std::span<const std::uint8_t>(data), "", "", 0, true, ShaderTypesFlags::UNKNOWN);
+            auto relocBlob = make_binary_blob(relocDescriptor);
+            if (relocBlob)
+            {
+                *relocBlob = hip_gemm_mxn_ARGS_CONSTANTS;
+                relocBlob->m_constants.assign(constants.begin(), constants.end());
+                relocBlob->setGridBlocks(grid, blocks);
+                binaries.addBlob(std::move(*relocBlob));
+            }
+
+            // 2) Non-relocatable variant: link the relocatable ELF against
+            //    the runtime target.
+            const auto sourceArch = sourceArchForTarget(gfxip);
+            auto nonRelocResult = getNonRelocatable(relocDescriptor.m_binary, sourceArch, gfxip);
+            if (!nonRelocResult.has_value())
+            {
+                return binaries;
+            }
+
+            // Take ownership of the linked bytes inside the Blob so the
+            // pointer remains valid past this function (default
+            // make_binary_blob would store a raw pointer into the source
+            // span, which would dangle once the local goes out of scope).
+            auto nonRelocBytes = std::move(nonRelocResult).value();
+            const std::span<const std::uint8_t> nonRelocSpan(nonRelocBytes.data(), nonRelocBytes.size());
+
+            std::string nonRelocName;
+            try
+            {
+                nonRelocName = getKernelName(nonRelocSpan);
+            }
+            catch (const std::runtime_error&) {}
+
+            Binaries::Blob nonRelocBlob{
+                nonRelocBytes.data(),
+                nonRelocBytes.size(),
+                static_cast<std::uint32_t>(BinaryTypeFlags::ELF),
+                0u,
+                nonRelocName};
+            nonRelocBlob.setOwnedBinary(std::move(nonRelocBytes));
+            nonRelocBlob = hip_gemm_mxn_ARGS_CONSTANTS;
+            nonRelocBlob.m_constants.assign(constants.begin(), constants.end());
+            nonRelocBlob.setGridBlocks(grid, blocks);
+            binaries.addBlob(std::move(nonRelocBlob));
+
             return binaries;
         }
 
-        template <typename GetNN, typename GetNT>
-        std::expected<Binaries, std::error_code> selectAndBuild(
-            const GemmParams& params, GetNN getNNKernel, GetNT getNTKernel)
+        std::expected<Binaries, std::error_code> buildBinariesGfx1100(
+            const GenericGemmParams& params,
+            const GfxIpTriple& gfxip,
+            HipGemmShader shader)
         {
-            if (params.transB)
+            const auto& constants = getShaderConstants(shader);
+            switch (shader)
             {
-                return getNTKernel(params);
+                case HipGemmShader::Shader64x128x32WMMA_NT:
+                    return makeKernelBinaries(gfx1100::gemm_add_fp16_64x128x32_add_nt_gfx1100, constants, params, gfxip);
+                case HipGemmShader::Shader64x128x32WMMA_NN:
+                    return makeKernelBinaries(gfx1100::gemm_add_fp16_64x128x32_add_nn_gfx1100, constants, params, gfxip);
+                case HipGemmShader::Shader16x256x16WMMA_NN:
+                    return makeKernelBinaries(gfx1100::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1100, constants, params, gfxip);
+                case HipGemmShader::Shader16x128x16WMMA_NN:
+                    return makeKernelBinaries(gfx1100::gemm_add_fp16_16x128x16_add_nn_gfx1100, constants, params, gfxip);
+                case HipGemmShader::Shader16x16x16WMMA_NN:
+                    return makeKernelBinaries(gfx1100::gemm_add_fp16_16x16x16_add_nn_gfx1100, constants, params, gfxip);
+                default:
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedConfiguration));
             }
-            return getNNKernel(params);
         }
 
-        std::expected<Binaries, std::error_code> buildGfx1100(const GemmParams& params)
+        std::expected<Binaries, std::error_code> buildBinariesGfx1150(
+            const GenericGemmParams& params,
+            const GfxIpTriple& gfxip,
+            HipGemmShader shader)
         {
-            return selectAndBuild(params,
-                [](const GemmParams& p) -> std::expected<Binaries, std::error_code>
-                {
-                    if (p.m >= 64 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1100::gemm_add_fp16_64x128x32_add_nn_gfx1100, 64, 128, 256);
-                    if (p.m >= 16 && p.n >= 256)
-                        return buildSingleKernelBinaries(p, gfx1100::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1100, 16, 256, 256);
-                    if (p.m >= 16 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1100::gemm_add_fp16_16x128x16_add_nn_gfx1100, 16, 128, 256);
-                    return buildSingleKernelBinaries(p, gfx1100::gemm_add_fp16_16x16x16_add_nn_gfx1100, 16, 16, 256);
-                },
-                [](const GemmParams& p) -> std::expected<Binaries, std::error_code>
-                {
-                    return buildSingleKernelBinaries(p, gfx1100::gemm_add_fp16_64x128x32_add_nt_gfx1100, 64, 128, 256);
-                });
+            const auto& constants = getShaderConstants(shader);
+            switch (shader)
+            {
+                case HipGemmShader::Shader64x128x32WMMA_NT:
+                    return makeKernelBinaries(gfx1150::gemm_add_fp16_64x128x32_add_nt_gfx1150, constants, params, gfxip);
+                case HipGemmShader::Shader64x128x32WMMA_NN:
+                    return makeKernelBinaries(gfx1150::gemm_add_fp16_64x128x32_add_nn_gfx1150, constants, params, gfxip);
+                case HipGemmShader::Shader16x256x16WMMA_NN:
+                    return makeKernelBinaries(gfx1150::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1150, constants, params, gfxip);
+                case HipGemmShader::Shader16x128x16WMMA_NN:
+                    return makeKernelBinaries(gfx1150::gemm_add_fp16_16x128x16_add_nn_gfx1150, constants, params, gfxip);
+                case HipGemmShader::Shader16x16x16WMMA_NN:
+                    return makeKernelBinaries(gfx1150::gemm_add_fp16_16x16x16_add_nn_gfx1150, constants, params, gfxip);
+                default:
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedConfiguration));
+            }
         }
 
-        std::expected<Binaries, std::error_code> buildGfx1150(const GemmParams& params)
+        std::expected<Binaries, std::error_code> buildBinariesGfx1201(
+            const GenericGemmParams& params,
+            const GfxIpTriple& gfxip,
+            HipGemmShader shader)
         {
-            return selectAndBuild(params,
-                [](const GemmParams& p) -> std::expected<Binaries, std::error_code>
-                {
-                    if (p.m >= 64 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1150::gemm_add_fp16_64x128x32_add_nn_gfx1150, 64, 128, 256);
-                    if (p.m >= 16 && p.n >= 256)
-                        return buildSingleKernelBinaries(p, gfx1150::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1150, 16, 256, 256);
-                    if (p.m >= 16 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1150::gemm_add_fp16_16x128x16_add_nn_gfx1150, 16, 128, 256);
-                    return buildSingleKernelBinaries(p, gfx1150::gemm_add_fp16_16x16x16_add_nn_gfx1150, 16, 16, 256);
-                },
-                [](const GemmParams& p) -> std::expected<Binaries, std::error_code>
-                {
-                    return buildSingleKernelBinaries(p, gfx1150::gemm_add_fp16_64x128x32_add_nt_gfx1150, 64, 128, 256);
-                });
-        }
+            const bool useNoActivation = (params.activation == ActivationFunctionFlags::IDENTITY);
+            const auto& constants = getShaderConstants(shader);
 
-        std::expected<Binaries, std::error_code> buildGfx1201(const GemmParams& params)
-        {
-            const bool useNoActivation = (params.activation == MLSS_ACTIVATION_IDENTITY);
+            if (shader == HipGemmShader::Shader64x128x32WMMA_NT)
+            {
+                return useNoActivation
+                    ? makeKernelBinaries(gfx1201_noact::gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201, constants, params, gfxip)
+                    : makeKernelBinaries(gfx1201::gemm_add_fp16_64x128x32_add_nt_gfx1201, constants, params, gfxip);
+            }
 
-            return selectAndBuild(params,
-                [useNoActivation](const GemmParams& p) -> std::expected<Binaries, std::error_code>
+            if (useNoActivation)
+            {
+                switch (shader)
                 {
-                    if (useNoActivation)
-                    {
-                        if (p.m >= 128 && p.n >= 128)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_128x128x16_add_nn_gfx1201, 128, 128, 256);
-                        if (p.m >= 128 && p.n >= 64)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_128x64x32_add_tr_nn_gfx1201, 128, 64, 256);
-                        if (p.m >= 64 && p.n >= 128)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_64x128x32_add_tr_nn_gfx1201, 64, 128, 256);
-                        if (p.m >= 256 && p.n >= 16)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201, 256, 16, 256);
-                        if (p.m >= 16 && p.n >= 256)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201, 16, 256, 256);
-                        if (p.m >= 16 && p.n >= 128)
-                            return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_16x128x16_add_nn_gfx1201, 16, 128, 256);
-                        return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_16x16x16_add_native_nn_gfx1201, 16, 16, 256);
-                    }
+                    case HipGemmShader::Shader128x128x16WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_128x128x16_add_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader128x64x32WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_128x64x32_add_tr_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader64x128x32WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_64x128x32_add_tr_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader256x16x16WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_256x16x16_add_2_1_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader16x256x16WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_16x256x16_add_1_2_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader16x128x16WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_16x128x16_add_nn_gfx1201, constants, params, gfxip);
+                    case HipGemmShader::Shader16x16x16WMMA_NN:
+                        return makeKernelBinaries(gfx1201_noact::gemm_add_fp16_16x16x16_add_native_nn_gfx1201, constants, params, gfxip);
+                    default:
+                        return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedConfiguration));
+                }
+            }
 
-                    if (p.m >= 128 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_128x128x16_add_nn_gfx1201, 128, 128, 256);
-                    if (p.m >= 128 && p.n >= 64)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_128x64x32_add_nn_gfx1201, 128, 64, 256);
-                    if (p.m >= 64 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_64x128x32_add_nn_gfx1201, 64, 128, 256);
-                    if (p.m >= 256 && p.n >= 16)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_256x16x16_add_nn_gfx1201, 256, 16, 256);
-                    if (p.m >= 16 && p.n >= 256)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_16x256x16_add_nn_gfx1201, 16, 256, 256);
-                    if (p.m >= 16 && p.n >= 128)
-                        return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_16x128x16_add_nn_gfx1201, 16, 128, 256);
-                    return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_16x16x16_add_nn_gfx1201, 16, 16, 256);
-                },
-                [useNoActivation](const GemmParams& p) -> std::expected<Binaries, std::error_code>
-                {
-                    if (useNoActivation)
-                        return buildSingleKernelBinaries(p, gfx1201_noact::gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201, 64, 128, 256);
-                    return buildSingleKernelBinaries(p, gfx1201::gemm_add_fp16_64x128x32_add_nt_gfx1201, 64, 128, 256);
-                });
+            switch (shader)
+            {
+                case HipGemmShader::Shader128x128x16WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_128x128x16_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader128x64x32WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_128x64x32_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader64x128x32WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_64x128x32_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader256x16x16WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_256x16x16_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader16x256x16WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_16x256x16_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader16x128x16WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_16x128x16_add_nn_gfx1201, constants, params, gfxip);
+                case HipGemmShader::Shader16x16x16WMMA_NN:
+                    return makeKernelBinaries(gfx1201::gemm_add_fp16_16x16x16_add_nn_gfx1201, constants, params, gfxip);
+                default:
+                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedConfiguration));
+            }
         }
 
     } // anonymous namespace
 
-    bool isShadersAvailable(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct)
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& ip,
+                                                    const std::vector<Attribute>& attr,
+                                                    const void* cstmStruct)
     {
-        std::ignore = cstmStruct;
+        using mlss::op::utils::MetaCmdCaps;
 
-        const auto params = extractParams(attr);
-        return isHipGemmSupported(params, ip);
+        const auto params = cstmStruct
+            ? *static_cast<const GenericGemmParams*>(cstmStruct)
+            : buildGemmParams(attr);
+
+        const bool isSupported     = isAdapterSupported(ip, params);
+        const bool isFullySupported = isSupported && chooseTuning(ip, params);
+
+        MetaCmdCaps caps{.values = 0x00000000u};
+        caps.support     = isSupported       ? 0x00000001u : 0x00000000u;
+        caps.fullSupport = isFullySupported  ? 0x00000001u : 0x00000000u;
+        return caps;
     }
 
-    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& ip,
+                                                            const std::vector<Attribute>& attr,
+                                                            const void* cstmStruct)
     {
-        if (!isShadersAvailable(ip, attr, cstmStruct))
+        const auto params = cstmStruct
+            ? *static_cast<const GenericGemmParams*>(cstmStruct)
+            : buildGemmParams(attr);
+
+        const auto caps = isShadersAvailable(ip, attr, &params);
+        if (caps.support == 0u)
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedConfiguration));
         }
 
-        const auto params = extractParams(attr);
+        const HipGemmShader shader = params.transB
+            ? HipGemmShader::Shader64x128x32WMMA_NT
+            : chooseNNShader(ip, params);
 
         if (isGfx110x(ip))
-            return buildGfx1100(params);
-
+        {
+            return buildBinariesGfx1100(params, ip, shader);
+        }
         if (isGfx115x(ip))
-            return buildGfx1150(params);
-
+        {
+            return buildBinariesGfx1150(params, ip, shader);
+        }
         if (isGfx120x(ip))
-            return buildGfx1201(params);
+        {
+            return buildBinariesGfx1201(params, ip, shader);
+        }
 
         return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedArchitecture));
     }

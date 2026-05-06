@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "hipGemmMxN.hpp"
 #include "shadersUtils.hpp"
+#include "../../utils.hpp"
 
 namespace mlss::gemm::mxn::hip
 {
@@ -18,12 +19,15 @@ namespace mlss::gemm::mxn::hip
 
     std::expected<Binaries, std::error_code> HipGemmMxN::getBinaries() const
     {
-        return getShadersBlob(m_gfxIpTriple, m_attributes, nullptr);
+        const auto params = mlss::gemm::utils::buildGemmParams(m_attributes);
+        return getShadersBlob(m_gfxIpTriple, m_attributes, &params);
     }
 
-    bool HipGemmMxN::getCapsImpl(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxArch)
+    uint32_t HipGemmMxN::getCapsImpl(const std::vector<Attribute>& attributes,
+                                     const GfxIpTriple& gfxArch,
+                                     const void* context)
     {
-        return isShadersAvailable(gfxArch, attributes, nullptr);
+        return isShadersAvailable(gfxArch, attributes, context).values;
     }
 
 } // namespace mlss::gemm::mxn::hip

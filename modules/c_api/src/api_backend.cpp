@@ -2,6 +2,7 @@
 
 // Standard library includes
 #include <cstdarg>
+#include <deque>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -582,9 +583,21 @@ namespace mlss
     //=====================================================================================================================
     struct BinaryInfoCollection_t
     {
-        std::vector<MLSSbinary> binary_infos;
-        std::vector<std::string> string_storage;                // Keep strings alive
-        std::vector<std::vector<MLSSuint32>> constants_storage; // Keep constants alive
+        // Use std::deque for storage that is read back through raw pointers:
+        // unlike std::vector, std::deque does not invalidate references or
+        // pointers to existing elements when push_back / emplace_back grows
+        // the container. This is required because addString() returns the
+        // c_str() of the back element and that pointer must remain valid
+        // for every subsequent insertion.
+        std::vector<MLSSbinary>             binary_infos;
+        std::deque<std::string>             string_storage;
+        std::deque<std::vector<MLSSuint32>> constants_storage;
+
+        // Keeps shader Binaries alive for as long as the C-API hands out
+        // pointers into Blob::m_pBinary. Without this, dynamically generated
+        // binaries (e.g. linked non-relocatable variants) would be freed
+        // before the user could read them.
+        std::deque<Binaries>                binaries_storage;
 
         // Helper to add a string and return a MLSSstring (i.e. a char*)
         MLSSstring addString(const std::string& str);
@@ -651,12 +664,13 @@ namespace mlss
             }
         }
 
-        // Create comprehensive collection
-        // Each operation produces 4 binaries (rel, nonrel, rel_with_strides, nonrel_with_strides)
-        // Each binary needs 3 strings (operator name, ASIC, kernel name)
+        // Create comprehensive collection. binary_infos is the only storage
+        // that must be contiguous (for the C-API surface); string_storage
+        // and constants_storage are std::deque so growth never invalidates
+        // already-handed-out pointers, regardless of how many blobs an op
+        // produces.
         BinaryInfoCollection_t collection;
         collection.binary_infos.reserve(ctx->m_ops.size() * 4);
-        collection.string_storage.reserve(ctx->m_ops.size() * 4 * 3);
 
         for (const auto& op : ctx->m_ops)
         {
@@ -818,7 +832,12 @@ namespace mlss
                 return binary_info;
             };
 
-            for (const auto& blob : binaries)
+            // Keep the Binaries (and the Blobs they own) alive past this
+            // loop iteration; the createBinaryInfo lambda above hands out
+            // raw pointers into each Blob's underlying buffer.
+            collection.binaries_storage.emplace_back(std::move(binaries));
+            const auto& storedBinaries = collection.binaries_storage.back();
+            for (const auto& blob : storedBinaries)
             {
                 collection.binary_infos.emplace_back(createBinaryInfo(blob));
             }
@@ -1034,6 +1053,7 @@ namespace mlss
             info_log << "Operator Name: " << (binary.m_pOperatorName ? binary.m_pOperatorName : "N/A") << std::endl;
             info_log << "ASIC: " << (binary.m_ASIC ? binary.m_ASIC : "N/A") << std::endl;
             info_log << "Kernel Name: " << (binary.m_pKernelName ? binary.m_pKernelName : "N/A") << std::endl;
+            info_log << "Relocatable: " << (binary.m_isRelocatable ? "yes" : "no") << std::endl;
 
             // Grid and block dimensions
             info_log << "Grid: (" << binary.m_grid.m_x << ", " << binary.m_grid.m_y << ", " << binary.m_grid.m_z << ")" << std::endl;

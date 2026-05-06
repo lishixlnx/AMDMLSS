@@ -1,10 +1,14 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "gemmMxN.hpp"
+#include "../utils.hpp"
 #include "hip/hipGemmMxN.hpp"
 #include "ck/ckGemmMxN.hpp"
 
 template class mlss::BackendBase<mlss::gemm::mxn::hip::HipGemmMxN, mlss::gemm::mxn::GemmMxN>;
 template class mlss::BackendBase<mlss::gemm::mxn::ck::CKGemmMxN, mlss::gemm::mxn::GemmMxN>;
+
+using namespace mlss::gemm::utils;
+using mlss::op::utils::MetaCmdCaps;
 
 namespace mlss::gemm::mxn
 {
@@ -45,25 +49,36 @@ namespace mlss::gemm::mxn
         return std::unexpected(std::make_error_code(std::errc::not_supported));
     }
 
-    uint32_t GemmMxN::getCapsImpl(const std::vector<Attribute>& attributes, GfxIpTriple gfxip, const void* context)
+    uint32_t GemmMxN::getCapsImpl(const std::vector<Attribute>& attributes,
+                                  GfxIpTriple gfxip,
+                                  const void* context)
     {
-        std::ignore = context;
+        GenericGemmParams params{};
+        MetaCmdCaps caps{.values = 0x00000000u};
+
+        if (context != nullptr)
+        {
+            params = *static_cast<const GenericGemmParams*>(context);
+        }
+        else if (!attributes.empty())
+        {
+            params = buildGemmParams(attributes);
+        }
 
         if (auto* hipEntry = BackendRegistry<GemmMxN>::get<hip::HipGemmMxN>(); hipEntry != nullptr)
         {
-            auto score = hipEntry->getCaps(attributes, gfxip, nullptr);
-            if (score != 0x00000000u)
-                return score;
+            caps.values = hipEntry->getCaps(attributes, gfxip, &params);
         }
 
-        if (auto* ckEntry = BackendRegistry<GemmMxN>::get<ck::CKGemmMxN>(); ckEntry != nullptr)
+        if (caps.values == 0x00000000u)
         {
-            auto score = ckEntry->getCaps(attributes, gfxip, nullptr);
-            if (score != 0x00000000u)
-                return score;
+            if (auto* ckEntry = BackendRegistry<GemmMxN>::get<ck::CKGemmMxN>(); ckEntry != nullptr)
+            {
+                caps.values = ckEntry->getCaps(attributes, gfxip, &params);
+            }
         }
 
-        return 0x00000000u;
+        return caps.values;
     }
 
 } // namespace mlss::gemm::mxn

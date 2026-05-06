@@ -82,7 +82,7 @@ namespace mlss
         }
         else if constexpr (flag == OperatorFlag::GEMM)
         {
-            return "[MLSS_FLOAT16]";
+            return "[MLSS_FLOAT16, MLSS_FLOAT32]";
         }
         else if constexpr (flag == OperatorFlag::QUANTIZED_GEMM)
         {

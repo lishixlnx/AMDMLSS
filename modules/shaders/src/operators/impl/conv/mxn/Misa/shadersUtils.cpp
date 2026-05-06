@@ -194,7 +194,7 @@ namespace mlss::conv::mxn::misa
             ? *static_cast<const GenericConvParams*>(cstmStruct)
             : mlss::conv::utils::buildConvParams(attr);
 
-        auto capsResult = isShadersAvailable(gfxip, attr, cstmStruct);
+        auto capsResult = isShadersAvailable(gfxip, attr, &params);
         if (!capsResult.support)
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderUnsupportedOperator));
