@@ -312,11 +312,15 @@ namespace mlss
     } // anonymous namespace
 
     //=====================================================================================================================
-    std::string getKernelName(const std::span<const std::uint8_t>& arr)
+    std::expected<std::string, std::error_code> getKernelName(const std::span<const std::uint8_t>& arr)
     {
+        const auto invalidElf = [] {
+            return std::unexpected(make_error_code(MLSSErrorCode::InvalidElfBinary));
+        };
+
         if (arr.size() < sizeof(Elf64_Ehdr))
         {
-            throw std::runtime_error("Invalid ELF binary: null pointer or insufficient size");
+            return invalidElf();
         }
 
         const std::uint8_t* const ptr = arr.data();
@@ -326,13 +330,13 @@ namespace mlss
         if (ptr[0] != 0x7f || ptr[1] != std::uint8_t{'E'} ||
             ptr[2] != std::uint8_t{'L'} || ptr[3] != std::uint8_t{'F'})
         {
-            throw std::runtime_error("Invalid ELF binary: bad magic number");
+            return invalidElf();
         }
 
         // Verify 64-bit ELF (EI_CLASS == ELFCLASS64)
         if (ptr[4] != 2)
         {
-            throw std::runtime_error("Invalid ELF binary: not a 64-bit ELF");
+            return invalidElf();
         }
 
         const auto* ehdr = reinterpret_cast<const Elf64_Ehdr*>(ptr);
@@ -340,7 +344,7 @@ namespace mlss
         // Validate section header table offset
         if (ehdr->e_shoff == 0 || ehdr->e_shoff + ehdr->e_shnum * sizeof(Elf64_Shdr) > size)
         {
-            throw std::runtime_error("Invalid ELF binary: invalid section header table");
+            return invalidElf();
         }
 
         const auto* shdrs = reinterpret_cast<const Elf64_Shdr*>(ptr + ehdr->e_shoff);
@@ -365,14 +369,14 @@ namespace mlss
 
         if (symtab == nullptr || strtab == nullptr)
         {
-            throw std::runtime_error("Invalid ELF binary: no symbol table found");
+            return invalidElf();
         }
 
         // Validate symbol table and string table offsets
         if (symtab->sh_offset + symtab->sh_size > size ||
             strtab->sh_offset + strtab->sh_size > size)
         {
-            throw std::runtime_error("Invalid ELF binary: symbol/string table out of bounds");
+            return invalidElf();
         }
 
         const auto* symbols = reinterpret_cast<const Elf64_Sym*>(ptr + symtab->sh_offset);
@@ -420,14 +424,9 @@ namespace mlss
             }
         }
 
-        if (kernelNames.empty())
+        if (kernelNames.size() != 1u)
         {
-            throw std::runtime_error("No kernel found in ELF binary");
-        }
-
-        if (kernelNames.size() > 1)
-        {
-            throw std::runtime_error("Multiple kernels found in ELF binary (expected single kernel)");
+            return invalidElf();
         }
 
         return kernelNames[0];

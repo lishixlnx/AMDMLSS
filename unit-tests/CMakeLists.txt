@@ -81,7 +81,7 @@ function(add_gpu_kernel_test TARGET_NAME SOURCE_FILE)
     endif()
 
     add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME})
-    set_tests_properties(${TARGET_NAME} PROPERTIES SKIP_RETURN_CODE 77)
+    set_tests_properties(${TARGET_NAME} PROPERTIES SKIP_RETURN_CODE 4)
 
     # Copy the amdmlss DLL next to the test executable
     if(TARGET c_api)
@@ -125,3 +125,9 @@ add_gpu_kernel_test(mlss-gqa-test "${CMAKE_CURRENT_LIST_DIR}/gqa_test.cpp")
 
 # Conv 1x1 kernel test
 add_gpu_kernel_test(mlss-conv1x1-test "${CMAKE_CURRENT_LIST_DIR}/conv1x1_test.cpp")
+
+# MVN2 (InstaNorm) kernel test
+add_gpu_kernel_test(mlss-mvn2-test "${CMAKE_CURRENT_LIST_DIR}/mvn2_test.cpp")
+
+# GEMM MxN (HIP + CK) kernel test
+add_gpu_kernel_test(mlss-gemm-test "${CMAKE_CURRENT_LIST_DIR}/gemm_test.cpp")

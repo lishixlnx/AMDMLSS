@@ -86,6 +86,10 @@ namespace mlss::conv::mxn
         {
             params = buildConvParams(attributes);
         }
+        if (params.dilationX > 1 || params.dilationY > 1)
+        {
+            return caps.values;
+        }
 
         if (auto* misaEntry = BackendRegistry<ConvMxN>::get<misa::MisaConvMxN>(); misaEntry != nullptr)
         {

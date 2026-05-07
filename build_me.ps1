@@ -2,33 +2,41 @@
 param(
     [Parameter()]
     [Alias('c')]
-    [ValidateSet('vs2022', 'clang', 'all')]
+    [ValidateSet('vs2022', 'vs2026', 'clang', 'all')]
     [string]$Compiler = 'clang',
-    
+
     [Parameter()]
     [Alias('b')]
     [ValidateSet('debug', 'release', 'all')]
     [string]$Build = 'release',
-    
+
     [Parameter()]
     [switch]$Help,
-    
+
     [Parameter()]
     [switch]$CleanUp,
-    
+
     [Parameter()]
     [switch]$BuildSampleTests,
-    
+
     [Parameter()]
     [switch]$RunSampleTests,
-    
+
     [Parameter()]
     [switch]$BuildAllTests,
-    
+
+    # PowerShell cannot bind a string parameter that was passed without a value
+    # (e.g. '-d'), so deployment is split into a switch (enable) and a separate
+    # path argument. Backwards-compat helper for the legacy '-d <path>' form is
+    # provided below by detecting a string positional after -d/--Deploy.
     [Parameter()]
     [Alias('d')]
-    [string]$Deploy = '',
-    
+    [switch]$Deploy,
+
+    [Parameter()]
+    [Alias('Path')]
+    [string]$DeployPath = './amdmlss_redist',
+
     [Parameter()]
     [switch]$h
 )
@@ -41,24 +49,20 @@ if ($h) {
 # Display help if requested
 if ($Help) {
     Write-Host "Usage: .\build_me.ps1 [-c|-Compiler <compiler>] [-b|-Build <build_type>] [options]"
-    Write-Host "  -c, -Compiler           Compiler: vs2022, clang, all (default: clang)"
+    Write-Host "  -c, -Compiler           Compiler: vs2022, vs2026, clang, all (default: clang)"
     Write-Host "  -b, -Build              Build type: debug, release, all (default: release)"
     Write-Host "  -CleanUp                Remove all build directories before building"
     Write-Host "  -BuildSampleTests       Build sample tests but don't run them"
     Write-Host "  -RunSampleTests         Build and run sample tests (or just run if already built)"
     Write-Host "  -BuildAllTests          Build sample tests, mlss-tester and unit tests"
-    Write-Host "  -d, -Deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)"
+    Write-Host "  -d, -Deploy             Deploy amdmlss and cmake files after building"
+    Write-Host "  -DeployPath <path>      Override the deployment directory (default: ./amdmlss_redist)"
     Write-Host "  -Help, -h               Show this help message"
     Write-Host ""
     Write-Host "  When using -c all, builds with all supported compilers."
     Write-Host "  When using -b all, builds both debug and release configurations."
     Write-Host "  Each build will be placed in build/<compiler>-<build_type> directory."
     exit 0
-}
-
-# Set default deploy path if deploy is requested without path
-if ($Deploy -eq 'true' -or $Deploy -eq '1') {
-    $Deploy = './amdmlss_redist'
 }
 
 # Handle clean-up if requested
@@ -292,52 +296,45 @@ if ($Build -eq 'all') {
     $buildTypes = @($Build)
 }
 
+# Compilers to iterate over for "-c all" — must mirror the '.bat' / '.sh' lists.
+$supportedCompilers = @('vs2026', 'vs2022', 'clang')
+
 # Handle "all" compiler option
 if ($Compiler -eq 'all') {
     Write-Host "Building with all supported compilers..."
     Write-Host ""
-    
-    # Build all combinations
+
     foreach ($buildType in $buildTypes) {
-        # Build with vs2022
-        Write-Host "========================================"
-        Write-Host "Building with vs2022-$buildType"
-        Write-Host "========================================"
-        $result = Build-Single -Preset "vs2022-$buildType"
-        if (-not $result) {
-            Write-Host "vs2022-$buildType build failed!"
-            exit 1
+        foreach ($compiler in $supportedCompilers) {
+            $preset = "$compiler-$buildType"
+            Write-Host "========================================"
+            Write-Host "Building with $preset"
+            Write-Host "========================================"
+            $result = Build-Single -Preset $preset
+            if (-not $result) {
+                Write-Host "$preset build failed!"
+                exit 1
+            }
+            Write-Host ""
         }
-        Write-Host ""
-        
-        # Build with clang
-        Write-Host "========================================"
-        Write-Host "Building with clang-$buildType"
-        Write-Host "========================================"
-        $result = Build-Single -Preset "clang-$buildType"
-        if (-not $result) {
-            Write-Host "clang-$buildType build failed!"
-            exit 1
-        }
-        Write-Host ""
     }
-    
+
     Write-Host "All builds completed successfully!"
-    
+
     # Deploy if requested (use the last built configuration)
     if ($Deploy) {
         Write-Host ""
         Write-Host "========================================"
         Write-Host "Deploying amdmlss"
         Write-Host "========================================"
-        $lastPreset = "clang-$($buildTypes[-1])"
-        $result = Deploy-Amdmlss -Preset $lastPreset -DeployPath $Deploy
+        $lastPreset = "$($supportedCompilers[-1])-$($buildTypes[-1])"
+        $result = Deploy-Amdmlss -Preset $lastPreset -DeployPath $DeployPath
         if (-not $result) {
             Write-Host "Deployment failed!"
             exit 1
         }
     }
-    
+
     exit 0
 }
 
@@ -380,7 +377,7 @@ if ($Deploy) {
     Write-Host "========================================"
     Write-Host "Deploying amdmlss"
     Write-Host "========================================"
-    $result = Deploy-Amdmlss -Preset $lastPreset -DeployPath $Deploy
+    $result = Deploy-Amdmlss -Preset $lastPreset -DeployPath $DeployPath
     if (-not $result) {
         Write-Host "Deployment failed!"
         exit 1

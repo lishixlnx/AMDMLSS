@@ -11,10 +11,13 @@ set BUILD_ALL_TESTS=0
 set DEPLOY=
 set DEPLOY_PATH=./amdmlss_redist
 
+:: Skip past the :usage helper into the argument parser.
+goto :parse_args
+
 :: Function to display usage
 :usage
 echo Usage: %0 [-c^|--compiler ^<compiler^>] [-b^|--build ^<build_type^>] [options]
-echo   -c, --compiler           Compiler: vs2022, clang, all (default: clang)
+echo   -c, --compiler           Compiler: vs2022, vs2026, clang, all (default: clang)
 echo   -b, --build              Build type: debug, release, all (default: release)
 echo   --clean-up               Remove all build directories before building
 echo   --build-sample-tests     Build sample tests but don't run them

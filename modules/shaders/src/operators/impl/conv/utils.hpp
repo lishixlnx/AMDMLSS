@@ -17,6 +17,8 @@ struct GenericConvParams
     std::uint32_t r;
     std::uint32_t outW;
     std::uint32_t outH;
+    std::uint32_t dilationX;
+    std::uint32_t dilationY;
     std::uint32_t startPadX;
     std::uint32_t startPadY;
     std::uint32_t endPadX;

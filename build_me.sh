@@ -1,13 +1,30 @@
 #!/bin/bash
 
-# Default values
-COMPILER="clang"
+# Detect host OS so the same script works on Windows (Git Bash / MSYS) and on
+# Linux (native or WSL). On Linux we use a different set of CMake presets and
+# different compiler defaults; on Windows the original behaviour is preserved.
+case "$(uname -s)" in
+    Linux*)                             HOST_OS="linux"   ;;
+    MINGW*|MSYS*|CYGWIN*|Windows_NT*)   HOST_OS="windows" ;;
+    *)                                  HOST_OS="unknown" ;;
+esac
+
+# Default values (compiler default depends on host OS)
+if [[ "$HOST_OS" == "linux" ]]; then
+    COMPILER="clang"
+else
+    COMPILER="clang"
+fi
 BUILD_TYPE="release"
 
 # Function to display usage
 usage() {
     echo "Usage: $0 [-c|--compiler <compiler>] [-b|--build <build_type>] [options]"
-    echo "  -c, --compiler           Compiler: vs2022, clang, all (default: clang)"
+    if [[ "$HOST_OS" == "linux" ]]; then
+        echo "  -c, --compiler           Compiler: clang, gcc, all (default: clang)"
+    else
+        echo "  -c, --compiler           Compiler: vs2022, vs2026, clang, all (default: clang)"
+    fi
     echo "  -b, --build              Build type: debug, release, all (default: release)"
     echo "  --clean-up               Remove all build directories before building"
     echo "  --build-sample-tests     Build sample tests but don't run them"
@@ -15,10 +32,23 @@ usage() {
     echo "  --build-all-tests        Build sample tests, mlss-tester and unit tests"
     echo "  -d, --deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)"
     echo ""
-    echo "  When using -c all, builds with all supported compilers."
+    echo "  When using -c all, builds with all supported compilers for the host OS."
     echo "  When using -b all, builds both debug and release configurations."
-    echo "  Each build will be placed in build/<compiler>-<build_type> directory."
+    echo "  Each build will be placed in build/<preset> directory."
     exit 1
+}
+
+# Map a user-friendly compiler+config tuple to the actual CMake preset name
+# (Linux presets are prefixed with 'linux-' so they coexist with the Windows
+# presets in CMakePresets.json).
+resolve_preset() {
+    local compiler=$1
+    local build_type=$2
+    if [[ "$HOST_OS" == "linux" ]]; then
+        echo "linux-${compiler}-${build_type}"
+    else
+        echo "${compiler}-${build_type}"
+    fi
 }
 
 # Function to deploy amdmlss
@@ -59,17 +89,26 @@ build_single() {
         # Map main-project preset to the matching mlss-tester preset
         local tester_preset=""
         case "$preset" in
-            clang-debug)    tester_preset="clang-lib-static-debug"   ;;
-            clang-release)  tester_preset="clang-lib-static-release" ;;
-            vs2022-*)       tester_preset="vs2022-lib-static"        ;;
-            vs2026-*)       tester_preset="vs2026-lib-static"        ;;
+            clang-debug)            tester_preset="clang-lib-static-debug"   ;;
+            clang-release)          tester_preset="clang-lib-static-release" ;;
+            vs2022-*)               tester_preset="vs2022-lib-static"        ;;
+            vs2026-*)               tester_preset="vs2026-lib-static"        ;;
+            linux-clang-debug)      tester_preset="clang-lib-static-debug"   ;;
+            linux-clang-release)    tester_preset="clang-lib-static-release" ;;
+            linux-gcc-debug)        tester_preset="gcc-lib-static-debug"     ;;
+            linux-gcc-release)      tester_preset="gcc-lib-static-release"   ;;
             *)
                 echo "No matching mlss-tester preset for '$preset'!"
                 return 1
                 ;;
         esac
 
-        export HIP_PATH="${HIP_PATH:-C:/opt/rocm}"
+        if [[ "$HOST_OS" == "linux" ]]; then
+            export HIP_PATH="${HIP_PATH:-/opt/rocm}"
+            export ROCM_PATH="${ROCM_PATH:-/opt/rocm}"
+        else
+            export HIP_PATH="${HIP_PATH:-C:/opt/rocm}"
+        fi
 
         local tester_config_args=(--preset "$tester_preset"
                                   -DCMAKE_INSTALL_PREFIX="$tester_install"
@@ -77,7 +116,10 @@ build_single() {
                                   -DBUILD_APP=OFF
                                   -DBUILD_TESTING=OFF)
 
-        if [[ "$preset" == clang-* ]]; then
+        # On Windows the project must use the ROCm clang++ for HIP source.
+        # On Linux the tester's clang-base preset already uses system clang/clang++,
+        # which is what we want, so we skip the explicit override there.
+        if [[ "$HOST_OS" != "linux" && "$preset" == clang-* ]]; then
             tester_config_args+=("-DCMAKE_CXX_COMPILER=${HIP_PATH}/bin/clang++.exe"
                                  "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
         fi
@@ -156,22 +198,39 @@ build_single() {
     if [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
         echo ""
         echo "Running sample tests for $preset..."
+
+        # On Linux, sample binaries have no extension. On Windows (Ninja) they
+        # are .exe. With MSBuild they live under a Debug/Release subfolder.
+        local exe_pattern
+        if [[ "$HOST_OS" == "linux" ]]; then
+            exe_pattern="*"
+        else
+            exe_pattern="*.exe"
+        fi
+
         # First try the base samples directory (for Ninja builds)
         local test_dir="build/${preset}/samples"
-        
-        # Check if exe files exist in base directory
-        local has_exe_files=false
+
+        # Check whether usable sample files exist in the base directory
+        local has_test_files=false
         if [ -d "$test_dir" ]; then
-            for f in "$test_dir"/*.exe; do
-                if [ -f "$f" ]; then
-                    has_exe_files=true
-                    break
+            for f in "$test_dir"/$exe_pattern; do
+                if [[ "$HOST_OS" == "linux" ]]; then
+                    if [ -f "$f" ] && [ -x "$f" ]; then
+                        has_test_files=true
+                        break
+                    fi
+                else
+                    if [ -f "$f" ]; then
+                        has_test_files=true
+                        break
+                    fi
                 fi
             done
         fi
-        
+
         # If not found, try with build configuration subdirectory (for MSBuild)
-        if [ "$has_exe_files" = false ]; then
+        if [ "$has_test_files" = false ]; then
             test_dir="build/${preset}/samples/${build_config^}"
             if [ ! -d "$test_dir" ]; then
                 test_dir="build/${preset}/samples/Debug"
@@ -180,24 +239,28 @@ build_single() {
                 test_dir="build/${preset}/samples/Release"
             fi
         fi
-        
+
         if [ -d "$test_dir" ]; then
             local test_failed=0
-            for test_exe in "$test_dir"/*.exe; do
-                if [ -f "$test_exe" ]; then
+            for test_exe in "$test_dir"/$exe_pattern; do
+                if [[ "$HOST_OS" == "linux" ]]; then
+                    [ -f "$test_exe" ] && [ -x "$test_exe" ] || continue
+                    local test_name=$(basename "$test_exe")
+                else
+                    [ -f "$test_exe" ] || continue
                     local test_name=$(basename "$test_exe" .exe)
-                    echo "Running test: $test_name"
-                    "$test_exe"
-                    if [ $? -ne 0 ]; then
-                        echo "Test $test_name failed!"
-                        test_failed=1
-                    else
-                        echo "Test $test_name passed!"
-                    fi
-                    echo ""
                 fi
+                echo "Running test: $test_name"
+                "$test_exe"
+                if [ $? -ne 0 ]; then
+                    echo "Test $test_name failed!"
+                    test_failed=1
+                else
+                    echo "Test $test_name passed!"
+                fi
+                echo ""
             done
-            
+
             if [ $test_failed -ne 0 ]; then
                 echo "Some tests failed for $preset!"
                 return 1
@@ -208,7 +271,7 @@ build_single() {
             echo "Skipping sample tests for $preset"
         fi
     fi
-    
+
     return 0
 }
 
@@ -314,70 +377,64 @@ else
     BUILD_TYPES=("$BUILD_TYPE")
 fi
 
+# Compilers supported by the host OS, in build order for "-c all"
+if [[ "$HOST_OS" == "linux" ]]; then
+    SUPPORTED_COMPILERS=("clang" "gcc")
+else
+    SUPPORTED_COMPILERS=("vs2026" "vs2022" "clang")
+fi
+
 # Handle "all" compiler option
 if [[ "$COMPILER" == "all" ]]; then
-    echo "Building with all supported compilers..."
+    echo "Building with all supported compilers for ${HOST_OS}..."
     echo ""
-    
-    # Build all combinations
+
     for build_type in "${BUILD_TYPES[@]}"; do
-        # Build with vs2026
-        echo "========================================"
-        echo "Building with vs2026-${build_type}"
-        echo "========================================"
-        build_single "vs2026-${build_type}"
-        if [ $? -ne 0 ]; then
-            echo "vs2026-${build_type} build failed!"
-            exit 1
-        fi
-        echo ""
-        
-        # Build with vs2022
-        echo "========================================"
-        echo "Building with vs2022-${build_type}"
-        echo "========================================"
-        build_single "vs2022-${build_type}"
-        if [ $? -ne 0 ]; then
-            echo "vs2022-${build_type} build failed!"
-            exit 1
-        fi
-        echo ""
-        
-        # Build with clang
-        echo "========================================"
-        echo "Building with clang-${build_type}"
-        echo "========================================"
-        build_single "clang-${build_type}"
-        if [ $? -ne 0 ]; then
-            echo "clang-${build_type} build failed!"
-            exit 1
-        fi
-        echo ""
+        for compiler in "${SUPPORTED_COMPILERS[@]}"; do
+            preset=$(resolve_preset "$compiler" "$build_type")
+            echo "========================================"
+            echo "Building with $preset"
+            echo "========================================"
+            build_single "$preset"
+            if [ $? -ne 0 ]; then
+                echo "$preset build failed!"
+                exit 1
+            fi
+            echo ""
+        done
     done
-    
+
     echo "All builds completed successfully!"
-    
+
     # Deploy if requested (use the last built configuration)
     if [[ "$DEPLOY" == "true" ]]; then
         echo ""
         echo "========================================"
         echo "Deploying amdmlss"
         echo "========================================"
-        # Deploy from the last built configuration (clang-release or vs2022-release)
-        local last_preset="clang-${BUILD_TYPES[-1]}"
+        last_compiler="${SUPPORTED_COMPILERS[-1]}"
+        last_preset=$(resolve_preset "$last_compiler" "${BUILD_TYPES[-1]}")
         deploy_amdmlss "$last_preset" "$DEPLOY_PATH"
         if [ $? -ne 0 ]; then
             echo "Deployment failed!"
             exit 1
         fi
     fi
-    
+
     exit 0
 fi
 
-# Validate single compiler
-if [[ "$COMPILER" != "vs2022" && "$COMPILER" != "vs2026" && "$COMPILER" != "clang" ]]; then
-    echo "Invalid compiler: $COMPILER"
+# Validate single compiler against the host's supported set
+COMPILER_OK=false
+for c in "${SUPPORTED_COMPILERS[@]}"; do
+    if [[ "$COMPILER" == "$c" ]]; then
+        COMPILER_OK=true
+        break
+    fi
+done
+if [[ "$COMPILER_OK" != "true" ]]; then
+    echo "Invalid compiler '$COMPILER' for host OS '$HOST_OS'."
+    echo "Supported on this host: ${SUPPORTED_COMPILERS[*]}, all"
     usage
 fi
 
@@ -389,8 +446,8 @@ fi
 
 LAST_PRESET=""
 for build_type in "${BUILD_TYPES[@]}"; do
-    PRESET="${COMPILER}-${build_type}"
-    
+    PRESET=$(resolve_preset "$COMPILER" "$build_type")
+
     if [[ ${#BUILD_TYPES[@]} -gt 1 ]]; then
         echo "========================================"
         echo "Building with preset: $PRESET"
@@ -398,15 +455,15 @@ for build_type in "${BUILD_TYPES[@]}"; do
     else
         echo "Building with preset: $PRESET"
     fi
-    
+
     build_single "$PRESET"
     if [ $? -ne 0 ]; then
         echo "Build failed!"
         exit 1
     fi
-    
+
     LAST_PRESET="$PRESET"
-    
+
     if [[ ${#BUILD_TYPES[@]} -gt 1 ]]; then
         echo ""
     fi

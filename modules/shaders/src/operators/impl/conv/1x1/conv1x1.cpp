@@ -66,6 +66,10 @@ namespace mlss::conv::one_by_one
 
         if(params.r == 1 && params.s == 1)
         {
+            if (params.dilationX > 1 || params.dilationY > 1)
+            {
+                return caps.values;
+            }
             if(auto* misaEntry = BackendRegistry<Conv1x1>::get<misa::MisaConv1x1>(); misaEntry != nullptr)
             {
                 caps.values = misaEntry->getCaps(attributes, gfxip, &params);

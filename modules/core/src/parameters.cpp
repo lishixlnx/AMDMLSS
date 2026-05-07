@@ -82,7 +82,7 @@ namespace mlss
         }
         else if constexpr (flag == OperatorFlag::GEMM)
         {
-            return "[MLSS_FLOAT16]";
+            return "[MLSS_FLOAT16, MLSS_FLOAT32]";
         }
         else if constexpr (flag == OperatorFlag::QUANTIZED_GEMM)
         {
@@ -475,6 +475,14 @@ namespace mlss
 
             case MLSS_ATTR_CONV_OUTH:
                 ret = "outH";
+                break;
+
+            case MLSS_ATTR_CONV_DILATIONX:
+                ret = "dilationX";
+                break;
+
+            case MLSS_ATTR_CONV_DILATIONY:
+                ret = "dilationY";
                 break;
 
             case MLSS_ATTR_CONV_STARTPADX:
@@ -966,6 +974,8 @@ namespace mlss
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_R, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_OUTW, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_OUTH, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_DILATIONX, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_DILATIONY, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_STARTPADX, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_STARTPADY, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_ENDPADX, static_cast<std::uint32_t>(MLSS_UINT32)));

@@ -8,8 +8,8 @@
 namespace mlss::conv::dilated::hip::wmma
 {
 
-    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params);
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct);
 
-    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params);
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& ip, const std::vector<Attribute>& attr, const void* cstmStruct);
 
 } // namespace mlss::conv::dilated::hip::wmma

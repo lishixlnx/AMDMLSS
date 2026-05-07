@@ -36,6 +36,13 @@ target_include_directories(c_api
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 )
 
+# The public C-API headers (modules/c_api/include/amdmlss/amdmlss_api.h)
+# include "amdmlss/amdmlss_api_cdefs.h" which lives in the header-only
+# `common` module. Re-expose it as a PUBLIC dependency so consumers
+# (samples, downstream apps) inherit its INTERFACE include path. `common`
+# carries no symbols, so this does not leak implementation details.
+target_link_libraries(c_api PUBLIC common)
+
 # Set library properties
 set_target_properties(c_api PROPERTIES
     OUTPUT_NAME "amdmlss"

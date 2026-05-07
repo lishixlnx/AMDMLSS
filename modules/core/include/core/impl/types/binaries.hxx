@@ -103,6 +103,14 @@ namespace mlss
         void setGridBlocks(const Func& func, const Args&... args);
 
         //---------------------------------------------------------------------
+        // Take ownership of a binary buffer; m_pBinary / m_size become valid
+        // for the entire lifetime of this Blob (and any copy of it).
+        // Use this when the source bytes are dynamically generated (e.g. the
+        // output of getNonRelocatable) and would otherwise be freed before
+        // the Blob is consumed by the C-API or runtime loader.
+        void setOwnedBinary(std::vector<std::uint8_t>&& data);
+
+        //---------------------------------------------------------------------
         const void* m_pBinary;
         std::size_t m_size;
         std::uint32_t m_type;
@@ -112,6 +120,11 @@ namespace mlss
         std::vector<MLSSarg> m_argList;
         MLSSdim3 m_grid;
         MLSSdim3 m_blocks;
+
+        // Optional owned storage for dynamically-generated binaries. When
+        // non-null, m_pBinary always points into this buffer; copies of the
+        // Blob share the same buffer via the shared_ptr.
+        std::shared_ptr<std::vector<std::uint8_t>> m_ownedBinary;
     };
 
     using Blob = Binaries::Blob;

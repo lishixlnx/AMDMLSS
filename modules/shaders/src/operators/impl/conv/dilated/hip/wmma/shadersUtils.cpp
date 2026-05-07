@@ -203,9 +203,14 @@ namespace mlss::conv::dilated::hip::wmma
 
     } // namespace
 
-    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    mlss::op::utils::MetaCmdCaps isShadersAvailable(const GfxIpTriple& gfxip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
         using mlss::op::utils::MetaCmdCaps;
+        using mlss::conv::utils::GenericConvParams;
+
+        const auto params = cstmStruct
+            ? *static_cast<const GenericConvParams*>(cstmStruct)
+            : mlss::conv::utils::buildConvParams(attr);
 
         bool isArchSupported = isGfx110x(gfxip) || isGfx115x(gfxip) || isGfx120x(gfxip);
 
@@ -232,8 +237,14 @@ namespace mlss::conv::dilated::hip::wmma
         return caps;
     }
 
-    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const mlss::conv::utils::GenericConvParams& params)
+    std::expected<Binaries, std::error_code> getShadersBlob(const GfxIpTriple& gfxip, const std::vector<Attribute>& attr, const void* cstmStruct)
     {
+        using mlss::conv::utils::GenericConvParams;
+
+        const auto params = cstmStruct
+            ? *static_cast<const GenericConvParams*>(cstmStruct)
+            : mlss::conv::utils::buildConvParams(attr);
+
         auto shader = retrieveNNShader(gfxip, params);
 
         if ((gfxip.major == 0x0Bu) && (shader != HipConvDilatedShader::Shader64x64x64WMMA_NN))
