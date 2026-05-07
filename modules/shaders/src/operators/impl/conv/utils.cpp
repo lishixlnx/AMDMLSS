@@ -47,6 +47,14 @@ GenericConvParams buildConvParams(const std::vector<Attribute>& attributes)
         {
             params.outH = attribute.value<std::uint32_t>();
         }
+        else if (attribute.is(MLSS_ATTR_CONV_DILATIONX))
+        {
+            params.dilationX = attribute.value<std::uint32_t>();
+        }
+        else if (attribute.is(MLSS_ATTR_CONV_DILATIONY))
+        {
+            params.dilationY = attribute.value<std::uint32_t>();
+        }
         else if (attribute.is(MLSS_ATTR_CONV_STARTPADX))
         {
             params.startPadX = attribute.value<std::uint32_t>();
