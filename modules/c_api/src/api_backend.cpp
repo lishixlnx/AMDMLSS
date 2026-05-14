@@ -900,37 +900,28 @@ namespace mlss
 
         const MLSSsize total = *n;
 
-        // Find first matching index.
-        MLSSsize first = total; // sentinel
-        MLSSsize matched = 0;
+        // Compact matching binaries into the front of the array so the
+        // returned [binaries, binaries + *n) range contains only matches
+        // even when matching entries are not contiguous in the original data.
+        MLSSsize writeIndex = 0;
         for (MLSSsize i = 0; i < total; ++i)
         {
             if (!binaries[i].m_binaries || binaries[i].m_binarySize == 0)
                 continue;
+
             bool match = (kind == MLSS_BINARY_KIND_NON_RELOCATABLE) ? !binaries[i].m_isRelocatable
                                                                      :  binaries[i].m_isRelocatable;
-            if (match)
-            {
-                if (first == total)
-                    first = i;
-                ++matched;
-            }
+            if (!match)
+                continue;
+
+            if (writeIndex != i)
+                binaries[writeIndex] = binaries[i];
+            ++writeIndex;
         }
 
-        if (matched == 0)
-        {
-            // No binaries matched the requested kind. Return an empty result
-            // set rather than silently exposing the unfiltered binaries.
-            *n = 0;
-            return MLSS_SUCCESS;
-        }
-
-        // Advance the pointer so binaries[0] is the first matching blob,
-        // and set *n to the matched count.
-        // This is safe: the array lives inside BinaryInfoCollection_t which
-        // MemoryManager holds alive for the context's lifetime.
-        binaries += first;
-        *n = matched;
+        // If no binaries matched the requested kind, return an empty result
+        // set rather than silently exposing the unfiltered binaries.
+        *n = writeIndex;
         return MLSS_SUCCESS;
     }
 
