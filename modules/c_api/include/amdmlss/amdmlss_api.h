@@ -192,7 +192,7 @@ extern "C"
      *     hipModuleLoadData / DX12 CreateComputePipelineCrossCompile (default).
      *   - MLSS_BINARY_KIND_RELOCATABLE     — raw relocatable ELF for callers
      *     that perform their own amd_comgr / lld linking step.
-     *   - MLSS_BINARY_KIND_ANY             — first valid blob regardless of type.
+     *   - MLSS_BINARY_KIND_ANY             — all blobs returned unfiltered regardless of type.
      *
      * @param context     The context to get binaries from
      * @param binaries    Pointer to store the filtered binary array
