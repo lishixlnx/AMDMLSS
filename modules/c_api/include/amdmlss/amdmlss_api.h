@@ -198,7 +198,7 @@ extern "C"
      * @param binaries    Pointer to store the filtered binary array
      * @param numBinaries Pointer to store the number of returned binaries
      * @param kind        Which ELF variant to return (see MLSSbinaryKind)
-     * @return MLSSstatus MLSS_STATUS_SUCCESS on success, error code otherwise
+     * @return MLSSstatus MLSS_SUCCESS on success, error code otherwise
      */
     MLSS_API MLSSstatus mlssGetBinariesEx(const MLSScontext context, MLSSbinary** const binaries,
                                           MLSSsize* const numBinaries, MLSSbinaryKind kind);
