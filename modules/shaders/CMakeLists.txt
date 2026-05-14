@@ -1,15 +1,17 @@
 add_project_module(shaders
     TYPE STATIC
-    SOURCES 
+    SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
 
-    HEADERS 
+    HEADERS
         "${CMAKE_CURRENT_SOURCE_DIR}/include/shaders/*.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     DEPENDENCIES
         common
         core
+    INCLUDE_DIRS
+        "${CMAKE_SOURCE_DIR}"
 )
 
 # Add C++20 module interface units (.cppm) for shader binaries
