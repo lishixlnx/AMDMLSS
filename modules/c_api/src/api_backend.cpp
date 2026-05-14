@@ -879,22 +879,19 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    MLSSbool createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n)
+    MLSSenum createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n)
     {
         return createObj<createBinaries_t>(binaries, context, n);
-
-        return true;
     }
 
     //=====================================================================================================================
     // Filtered variant: collects all blobs via createBinaries, then compacts the array
-    // in-place to keep only entries matching `kind`.  Falls back to all valid blobs
-    // when the requested kind yields no results.
+    // in-place to keep only entries matching `kind`.
     MLSSenum createBinariesEx(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n, MLSSbinaryKind kind)
     {
-        const MLSSbool created = createBinaries(binaries, context, n);
-        if (!created)
-            return MLSS_ERROR_FAILURE;
+        MLSSenum status = createBinaries(binaries, context, n);
+        if (status != MLSS_SUCCESS)
+            return status;
         if (!n || *n == 0 || !binaries)
             return MLSS_SUCCESS;
 

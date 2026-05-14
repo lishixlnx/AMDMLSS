@@ -29,7 +29,7 @@ namespace mlss
     MLSSstatus createContext(MLSScontext& context, std::string_view asic, std::string_view opName, va_list* lst);
 
     //=====================================================================================================================
-    MLSSbool createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n);
+    MLSSenum createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n);
 
     //=====================================================================================================================
     // Filtered variant: returns only blobs matching `kind` (NON_RELOCATABLE, RELOCATABLE, or ANY).
