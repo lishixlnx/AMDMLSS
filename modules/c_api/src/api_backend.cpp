@@ -892,9 +892,11 @@ namespace mlss
     // when the requested kind yields no results.
     MLSSenum createBinariesEx(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n, MLSSbinaryKind kind)
     {
-        MLSSenum status = createBinaries(binaries, context, n);
-        if (status != MLSS_SUCCESS || !n || *n == 0 || !binaries)
-            return status;
+        const MLSSbool created = createBinaries(binaries, context, n);
+        if (!created)
+            return MLSS_ERROR_FAILURE;
+        if (!n || *n == 0 || !binaries)
+            return MLSS_SUCCESS;
 
         if (kind == MLSS_BINARY_KIND_ANY)
             return MLSS_SUCCESS;
