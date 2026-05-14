@@ -57,8 +57,12 @@ if(BUILD_TESTS)
     endif()
 endif()
 
-# Provide hip::host so mlss-tester (and unit-tests) can link HIP headers + runtime
-if(NOT TARGET hip::host)
+# Provide hip::host so mlss-tester (and unit-tests) can link HIP headers + runtime.
+# Only create this stub when tests are enabled AND the caller has not already imported
+# the full ROCm HIP package (which creates hip::host, hip::amdhip64, hip::device).
+# When consumed as a subdirectory by a project that already has ROCm HIP configured,
+# skip this block entirely to avoid partial-target conflicts with hip-targets.cmake.
+if(BUILD_TESTS AND NOT TARGET hip::host)
     find_path(_MLSS_HIP_INC NAMES hip/hip_runtime.h
         PATH_SUFFIXES include PATHS "$ENV{HIP_PATH}" "$ENV{ROCM_PATH}" NO_DEFAULT_PATH)
     find_library(_MLSS_HIP_LIB NAMES amdhip64

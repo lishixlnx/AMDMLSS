@@ -161,13 +161,23 @@ extern "C"
 
     MLSSstatus mlssGetBinaries(const MLSScontext context, MLSSbinary** const binaries, MLSSsize* const numBinaries)
     {
-
         if (context == 0)
         {
             return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
 
         return mlss::setLastError(mlss::createBinaries(*binaries, context, numBinaries));
+    }
+
+    MLSSstatus mlssGetBinariesEx(const MLSScontext context, MLSSbinary** const binaries,
+                                  MLSSsize* const numBinaries, MLSSbinaryKind kind)
+    {
+        if (context == 0)
+        {
+            return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
+        }
+
+        return mlss::setLastError(mlss::createBinariesEx(*binaries, context, numBinaries, kind));
     }
 
     // Operator management

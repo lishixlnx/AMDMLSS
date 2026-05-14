@@ -873,7 +873,7 @@ namespace mlss
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_GQA_KVHEADCOUNT, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_GQA_PASTSEQLENGTHSSIZE, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<float>(FLOAT32_RANGE, MLSS_ATTR_GQA_SCALE, static_cast<std::uint32_t>(MLSS_FLOAT32)));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::GQA>(), MLSS_ATTR_GQA_DATATYPE, static_cast<std::uint32_t>(MLSS_ENUM)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::GQA>(), MLSS_ATTR_GQA_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_GQA_QSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_GQA_KSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_GQA_VSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
@@ -892,7 +892,7 @@ namespace mlss
             attributes.emplace_back(makeAttribute<uint32_t>("[0, 2, 3]", MLSS_ATTR_MHA_PACKING, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_MHA_HEADCOUNT, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<float>(FLOAT32_RANGE, MLSS_ATTR_MHA_SCALE, static_cast<std::uint32_t>(MLSS_FLOAT32)));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::MHA>(), MLSS_ATTR_MHA_DATATYPE, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::MHA>(), MLSS_ATTR_MHA_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_MHA_QSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_MHA_KSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_MHA_VSTRIDES, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
@@ -911,8 +911,8 @@ namespace mlss
             attributes.emplace_back(makeAttribute<std::array<uint32_t, 4>>(uint32_t_RANGE_x4, MLSS_ATTR_MVN_SBDIMS, makeArrayEnum(MLSS_ARRAY | MLSS_UINT32, 4)));
             attributes.emplace_back(makeAttribute<bool>(BOOL_RANGE, MLSS_ATTR_MVN_HASSCALE, MLSS_BOOL));
             attributes.emplace_back(makeAttribute<bool>(BOOL_RANGE, MLSS_ATTR_MVN_HASBIAS, MLSS_BOOL));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::MVN>(), MLSS_ATTR_MVN_DATATYPE, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_MVN_ACTIVATION, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::MVN>(), MLSS_ATTR_MVN_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_MVN_ACTIVATION, static_cast<std::uint32_t>(MLSS_UINT32)));
         }
         else if (opName == MLSS_CONV_DILATED)
         {
@@ -957,9 +957,9 @@ namespace mlss
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_DILATED_OOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_DILATED_FOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_DILATED_BOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::CONV_DILATED>(), MLSS_ATTR_CONV_DILATED_DATATYPE, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_CONV_DILATED_PRECISION, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_CONV_DILATED_ACTIVATION, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::CONV_DILATED>(), MLSS_ATTR_CONV_DILATED_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_CONV_DILATED_PRECISION, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_CONV_DILATED_ACTIVATION, static_cast<std::uint32_t>(MLSS_UINT32)));
         }
         else if (opName == MLSS_CONV)
         {
@@ -1006,9 +1006,9 @@ namespace mlss
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_OOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_FOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
             attributes.emplace_back(makeAttribute<uint32_t>(uint32_t_RANGE, MLSS_ATTR_CONV_BOFFSET, static_cast<std::uint32_t>(MLSS_UINT32)));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::CONV>(), MLSS_ATTR_CONV_DATATYPE, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_CONV_PRECISION, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_CONV_ACTIVATION, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::CONV>(), MLSS_ATTR_CONV_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_CONV_PRECISION, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_CONV_ACTIVATION, static_cast<std::uint32_t>(MLSS_UINT32)));
         }
         else if (opName == MLSS_QGEMM)
         {
@@ -1053,12 +1053,12 @@ namespace mlss
                 MLSS_ATTR_QGEMM_DATATYPEOUTPUT,
                 makeArrayEnum(MLSS_ARRAY | MLSS_ENUM, 4)));
 
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSA, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSB, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSC, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSOUTPUT, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_QGEMM_PRECISION, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_QGEMM_ACTIVATION, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSA, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSB, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSC, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::QUANTIZED_GEMM>(), MLSS_ATTR_QGEMM_DATATYPEQPARAMSOUTPUT, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_QGEMM_PRECISION, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_QGEMM_ACTIVATION, static_cast<std::uint32_t>(MLSS_UINT32)));
         }
         else if (opName == MLSS_GEMM)
         {
@@ -1073,9 +1073,9 @@ namespace mlss
             attributes.emplace_back(makeAttribute<bool>(BOOL_RANGE, MLSS_ATTR_GEMM_HASC, MLSS_BOOL));
             attributes.emplace_back(makeAttribute<bool>(BOOL_RANGE, MLSS_ATTR_GEMM_TRANSA, MLSS_BOOL));
             attributes.emplace_back(makeAttribute<bool>(BOOL_RANGE, MLSS_ATTR_GEMM_TRANSB, MLSS_BOOL));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::GEMM>(), MLSS_ATTR_GEMM_DATATYPE, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_GEMM_PRECISION, MLSS_ENUM));
-            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_GEMM_ACTIVATION, MLSS_ENUM));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSOpSupportedTypeList<OperatorFlag::GEMM>(), MLSS_ATTR_GEMM_DATATYPE, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSPrecisionList(), MLSS_ATTR_GEMM_PRECISION, static_cast<std::uint32_t>(MLSS_UINT32)));
+            attributes.emplace_back(makeAttribute<uint32_t>(getMLSSActivationFunctionList(), MLSS_ATTR_GEMM_ACTIVATION, static_cast<std::uint32_t>(MLSS_UINT32)));
         }
     }
 

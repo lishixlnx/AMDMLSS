@@ -8,10 +8,16 @@
 #include "gfx1150/fp16/shadersBin.hpp"
 #include "gfx1201/fp16/shadersBin.hpp"
 
-namespace gfx1100        = mlss::gemm::mxn::hip::fp16::gfx1100;
-namespace gfx1150        = mlss::gemm::mxn::hip::fp16::gfx1150;
-namespace gfx1201        = mlss::gemm::mxn::hip::fp16::gfx1201;
-namespace gfx1201_noact  = mlss::gemm::mxn::hip::fp16::gfx1201::noActivations;
+// Archive (DX12-ready ET_REL) binaries — supersede the modules binaries for
+// the relocatable blob in makeKernelBinaries().
+#include "../../../../../../../../archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp"
+#include "../../../../../../../../archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp"
+#include "../../../../../../../../archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp"
+
+namespace gfx1100        = archive::gemm::mxn::hip::gfx1100::fp16;
+namespace gfx1150        = archive::gemm::mxn::hip::gfx1150::fp16;
+namespace gfx1201        = archive::gemm::mxn::hip::gfx1201::fp16;
+namespace gfx1201_noact  = noActivations; // archive gfx1201 noActivations (top-level ns in shadersBinReloc.hpp)
 namespace conv_trees     = mlss::conv::one_by_one::hip::wmma::fp16;
 
 using mlss::gemm::utils::GenericGemmParams;

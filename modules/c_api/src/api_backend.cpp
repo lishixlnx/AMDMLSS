@@ -863,18 +863,6 @@ namespace mlss
         {
             auto& stored_collection = anyCast<BinaryInfoCollection_t&>(*new_any);
             bin = stored_collection.binary_infos.data();
-
-            // Debug: Print addresses to verify they're valid
-            debug_log << "Collection stored at: " << &stored_collection << std::endl;
-            debug_log << "String storage size: " << stored_collection.string_storage.size() << std::endl;
-            debug_log << "Binary infos size: " << stored_collection.binary_infos.size() << std::endl;
-
-            if (!stored_collection.binary_infos.empty())
-            {
-                debug_log << "First binary operator name: " << (stored_collection.binary_infos[0].m_pOperatorName ? stored_collection.binary_infos[0].m_pOperatorName : "NULL") << std::endl;
-                debug_log << "First binary ASIC: " << (stored_collection.binary_infos[0].m_ASIC ? stored_collection.binary_infos[0].m_ASIC : "NULL") << std::endl;
-                debug_log << "First binary args count: " << stored_collection.binary_infos[0].m_argList.m_size << std::endl;
-            }
         }
         else
         {
@@ -896,6 +884,53 @@ namespace mlss
         return createObj<createBinaries_t>(binaries, context, n);
 
         return true;
+    }
+
+    //=====================================================================================================================
+    // Filtered variant: collects all blobs via createBinaries, then compacts the array
+    // in-place to keep only entries matching `kind`.  Falls back to all valid blobs
+    // when the requested kind yields no results.
+    MLSSenum createBinariesEx(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n, MLSSbinaryKind kind)
+    {
+        MLSSenum status = createBinaries(binaries, context, n);
+        if (status != MLSS_SUCCESS || !n || *n == 0 || !binaries)
+            return status;
+
+        if (kind == MLSS_BINARY_KIND_ANY)
+            return MLSS_SUCCESS;
+
+        const MLSSsize total = *n;
+
+        // Find first matching index.
+        MLSSsize first = total; // sentinel
+        MLSSsize matched = 0;
+        for (MLSSsize i = 0; i < total; ++i)
+        {
+            if (!binaries[i].m_binaries || binaries[i].m_binarySize == 0)
+                continue;
+            bool match = (kind == MLSS_BINARY_KIND_NON_RELOCATABLE) ? !binaries[i].m_isRelocatable
+                                                                     :  binaries[i].m_isRelocatable;
+            if (match)
+            {
+                if (first == total)
+                    first = i;
+                ++matched;
+            }
+        }
+
+        if (matched == 0)
+        {
+            // Fallback: nothing matched, return everything as-is.
+            return MLSS_SUCCESS;
+        }
+
+        // Advance the pointer so binaries[0] is the first matching blob,
+        // and set *n to the matched count.
+        // This is safe: the array lives inside BinaryInfoCollection_t which
+        // MemoryManager holds alive for the context's lifetime.
+        binaries += first;
+        *n = matched;
+        return MLSS_SUCCESS;
     }
 
     //=====================================================================================================================
@@ -1440,14 +1475,6 @@ namespace mlss
         {
             auto& stored_collection = anyCast<CapabilityCollection_t&>(*new_any);
             *pStatuses = stored_collection.statuses.data();
-
-            // Debug output (can be removed in production)
-            debug_log << "Capability check completed for " << stored_collection.statuses.size() << " operations:" << std::endl;
-            for (size_t i = 0; i < stored_collection.statuses.size(); ++i)
-            {
-                debug_log << "  [" << i << "] " << stored_collection.error_messages[i]
-                          << " (Status: " << stored_collection.statuses[i] << ")" << std::endl;
-            }
         }
         else
         {

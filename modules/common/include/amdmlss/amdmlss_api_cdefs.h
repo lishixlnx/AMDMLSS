@@ -660,6 +660,16 @@ typedef struct
 
 } MLSSbinary;
 
+// Filter passed to mlssGetBinariesEx to select which ELF variant is returned.
+// MLSS emits two blobs per kernel: a relocatable object (.o) from the shader
+// archive and a linked executable produced by amd_comgr.
+typedef enum
+{
+    MLSS_BINARY_KIND_NON_RELOCATABLE = 0, // Linked executable — loadable by hipModuleLoadData (default)
+    MLSS_BINARY_KIND_RELOCATABLE     = 1, // Raw relocatable ELF — for callers that link themselves
+    MLSS_BINARY_KIND_ANY             = 2, // First valid blob regardless of ELF type
+} MLSSbinaryKind;
+
 typedef struct
 {
     MLSSuint32 m_numCUs;
