@@ -7,9 +7,9 @@
 #include "gfx1201/fp16/shadersBin.hpp"
 
 // Archive (DX12-ready ET_REL) binaries used as the relocatable blob source.
-#include "../../../../../../../../archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp"
-#include "../../../../../../../../archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp"
-#include "../../../../../../../../archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp"
+#include "archive/gqa/wmma/gfx1100/fp16/shadersBinReloc.hpp"
+#include "archive/gqa/wmma/gfx1150/fp16/shadersBinReloc.hpp"
+#include "archive/gqa/wmma/gfx1201/fp16/shadersBinReloc.hpp"
 
 #include <mutex>
 #include <unordered_map>
