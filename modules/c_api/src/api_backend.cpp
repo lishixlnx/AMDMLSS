@@ -922,7 +922,9 @@ namespace mlss
 
         if (matched == 0)
         {
-            // Fallback: nothing matched, return everything as-is.
+            // No binaries matched the requested kind. Return an empty result
+            // set rather than silently exposing the unfiltered binaries.
+            *n = 0;
             return MLSS_SUCCESS;
         }
 
