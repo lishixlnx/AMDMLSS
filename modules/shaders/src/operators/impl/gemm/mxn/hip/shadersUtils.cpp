@@ -17,7 +17,7 @@
 namespace gfx1100        = archive::gemm::mxn::hip::gfx1100::fp16;
 namespace gfx1150        = archive::gemm::mxn::hip::gfx1150::fp16;
 namespace gfx1201        = archive::gemm::mxn::hip::gfx1201::fp16;
-namespace gfx1201_noact  = archive::gemm::mxn::hip::gfx1201::fp16::noActivations;
+namespace gfx1201_noact  = noActivations; // archive gfx1201 noActivations (top-level ns in shadersBinReloc.hpp)
 namespace conv_trees     = mlss::conv::one_by_one::hip::wmma::fp16;
 
 using mlss::gemm::utils::GenericGemmParams;
