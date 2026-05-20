@@ -94,7 +94,7 @@ std::vector<float> runMhaGpu(const MLSSbinary& bin,
     [[maybe_unused]] ClContext backendCtx{};
     Module module = [&]() -> Module
     {
-        if constexpr (std::is_same_v<Module, ClManagedModule>)
+        if constexpr (mlss::tester::hasOpenCL() && std::is_same_v<Module, ClManagedModule>)
             return Module(backendCtx, desc);
         else
             return Module(desc);
@@ -107,7 +107,7 @@ std::vector<float> runMhaGpu(const MLSSbinary& bin,
     // D3D12 returns a `const BaseShaderTag*` that we copy from.
     Shader kernel = [&]() -> Shader
     {
-        if constexpr (std::is_same_v<Shader, D3D12Shader>)
+        if constexpr (mlss::tester::hasD3D12() && std::is_same_v<Shader, D3D12Shader>)
         {
             const BaseShaderTag* tag = module.getShader(bin.m_pKernelName);
             REQUIRE(tag != nullptr);
@@ -116,7 +116,7 @@ std::vector<float> runMhaGpu(const MLSSbinary& bin,
         else
         {
             Shader sh = module.getShader(bin.m_pKernelName);
-            if constexpr (std::is_same_v<Shader, HipShader>)
+            if constexpr (mlss::tester::hasHip() && std::is_same_v<Shader, HipShader>)
             {
                 if (!sh.isValid())
                 {
@@ -136,9 +136,9 @@ std::vector<float> runMhaGpu(const MLSSbinary& bin,
 
     auto allocMem = [&](std::size_t bytes) -> Memory
     {
-        if constexpr (std::is_same_v<Memory, D3D12DeviceMemory>)
+        if constexpr (mlss::tester::hasD3D12() && std::is_same_v<Memory, D3D12DeviceMemory>)
             return Memory(module.getDevice()->handle().Get(), bytes);
-        else if constexpr (std::is_same_v<Memory, ClDeviceMemory>)
+        else if constexpr (mlss::tester::hasOpenCL() && std::is_same_v<Memory, ClDeviceMemory>)
             return Memory(backendCtx, bytes);
         else
             return Memory(bytes);
@@ -289,22 +289,30 @@ TEST_CASE("MHA: HIP non-relocatable", "[mha][hip]")
 
 TEST_CASE("MHA: D3D12 relocatable", "[mha][d3d]")
 {
-    if constexpr (mlss::tester::hasD3D12())
+    // The body is wrapped in an explicit-template lambda so that the
+    // discarded `if constexpr` branch is never instantiated on platforms
+    // where D3D12 is not compiled in. Without the template wrapper, this
+    // would still instantiate `runMhaGpu<D3D12*>` on Linux because the
+    // enclosing TEST_CASE is a non-template function.
+    [&]<bool D3D = mlss::tester::hasD3D12()>()
     {
-        auto& td = getTestData();
-        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
-        REQUIRE(td.relocSmall != nullptr);
+        if constexpr (D3D)
+        {
+            auto& td = getTestData();
+            if (!td.gpuAvailable) SKIP("No compatible GPU detected");
+            REQUIRE(td.relocSmall != nullptr);
 
-        auto result = runMhaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
-                          *td.relocSmall, td.hostQ16, td.hostK16, td.hostV16);
-        REQUIRE_FALSE(result.empty());
-        CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
-                             td.hostRef, kTolerance, "D3D vs Host"));
-    }
-    else
-    {
-        SKIP("D3D12 backend not compiled into mlss-tester");
-    }
+            auto result = runMhaGpu<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
+                              *td.relocSmall, td.hostQ16, td.hostK16, td.hostV16);
+            REQUIRE_FALSE(result.empty());
+            CHECK(compareBuffers(transposeHeadSeq(vectorToTensor(result, td.gpuOutShape)),
+                                 td.hostRef, kTolerance, "D3D vs Host"));
+        }
+        else
+        {
+            SKIP("D3D12 backend not compiled into mlss-tester");
+        }
+    }();
 }
 
 // Temporarily disabled: the OpenCL backend currently produces all-zero output

@@ -12,7 +12,6 @@
 #include <numeric>
 #include <random>
 #include <string>
-#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -34,7 +33,6 @@ inline void checkStatus(MLSSstatus status, int line)
     {
         MLSSstring err = mlssGetErrorString(status);
         std::cerr << "MLSS FAIL at line " << line << ": " << err << '\n';
-        std::free(err);
         std::exit(EXIT_FAILURE);
     }
 }
@@ -60,27 +58,6 @@ inline ShaderDescriptor buildShaderDescriptor(const MLSSbinary& bin)
 // When preferSmallArgList is true, returns the match with the fewest
 // m_argList entries (i.e. the "no strides" variant).
 // ---------------------------------------------------------------------------
-
-// Finds the first MLSSbinary whose kernel name starts with the given prefix
-// and matches the requested relocatable flag. Returns nullptr if not found.
-inline const MLSSbinary* findBinaryByKernelPrefix(
-    const MLSSbinary* binaries, MLSSsize count,
-    std::string_view kernelPrefix, bool wantRelocatable)
-{
-    for (const auto* p = binaries; p < binaries + count; ++p)
-    {
-        if (static_cast<bool>(p->m_isRelocatable) != wantRelocatable)
-            continue;
-        if (p->m_pKernelName == nullptr)
-            continue;
-        const std::string_view name(p->m_pKernelName);
-        if (name.size() < kernelPrefix.size())
-            continue;
-        if (name.compare(0, kernelPrefix.size(), kernelPrefix) == 0)
-            return p;
-    }
-    return nullptr;
-}
 
 inline const MLSSbinary* findBinary(const MLSSbinary* binaries, MLSSsize count,
                                     bool wantRelocatable,
@@ -282,9 +259,30 @@ inline std::vector<float> halvesToFloats(const std::vector<float16_t>& src)
 }
 
 // ---------------------------------------------------------------------------
+// Convert TensorHost<float> to flat std::vector<float>
+inline std::vector<float> tensorToVector(const TensorHost<float>& tensor)
+{
+    const float* data = tensor.data();
+    return std::vector<float>(data, data + tensor.numel());
+}
+
+inline bool convCompareBuffers(const std::vector<float>& a, const TensorHost<float>& b)
+{
+/*    for (auto i : a)
+        std::cout << i << std::endl;*/
+    auto B = tensorToVector(b);
+    float diff = 0;
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        diff += B[i] - a[i];
+    }
+    std::cout << "Difference = " << diff << std::endl;
+    return false;
+}
+
+// ---------------------------------------------------------------------------
 // Element-wise comparison with tolerance
 // ---------------------------------------------------------------------------
-
 inline bool compareBuffers(const TensorHost<float>& a, const TensorHost<float>& b,
                            float tolerance, const std::string& label)
 {
@@ -398,6 +396,9 @@ inline TensorHost<float> referenceAttention(
     return output;
 }
 
+// ---------------------------------------------------------------------------
+// Host-side conv computation 
+// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // 4D tensor axis-1/axis-2 transpose: [B, X, Y, D] ↔ [B, Y, X, D]
 //

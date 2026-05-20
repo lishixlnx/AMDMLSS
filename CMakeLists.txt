@@ -19,6 +19,13 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+# Build every target as position-independent code. Required on Linux/ELF
+# because the project's intermediate libraries (core, shaders, ...) are
+# static archives that get linked into a shared library (libamdmlss.so);
+# without -fPIC the linker rejects the relocations. MSVC silently ignores
+# this flag, so Windows builds are unaffected.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Enable comprehensive Visual Studio project structure
 setup_vs_project_structure()
 
@@ -57,7 +64,18 @@ if(BUILD_TESTS)
     endif()
 endif()
 
-# Provide hip::host so mlss-tester (and unit-tests) can link HIP headers + runtime
+# Provide hip::host so mlss-tester (and unit-tests) can link HIP headers + runtime.
+#
+# Prefer ROCm's own hip-config.cmake when it is usable: on Linux it imports a
+# full export set (hip::host, hip::amdhip64, hip::device) and tripping the
+# export-set safety check by pre-creating only hip::host manually breaks the
+# downstream find_package(hip) call inside mlss-tester. We therefore try the
+# package first; only fall back to a manual imported target when ROCm's
+# CMake config is not available (typical on some Windows ROCm layouts).
+if(NOT TARGET hip::host)
+    find_package(hip QUIET)
+endif()
+
 if(NOT TARGET hip::host)
     find_path(_MLSS_HIP_INC NAMES hip/hip_runtime.h
         PATH_SUFFIXES include PATHS "$ENV{HIP_PATH}" "$ENV{ROCM_PATH}" NO_DEFAULT_PATH)
@@ -84,24 +102,30 @@ if(BUILD_TESTS AND EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
 
     set(MLSS_ENABLE_HIP ON CACHE BOOL "Enable HIP backend in mlss-tester" FORCE)
 
-    # D3D12 — requires the amd-cross-compiler-tester helper sources.
-    # The submodule path moved between mlss-tester revisions; check both.
-    set(_DX12_SRC "")
-    foreach(_candidate
-            "${_MLSS_TESTER_SUBMODULE}/3rdparty/amd-cross-compiler-tester/src"
-            "${_MLSS_TESTER_SUBMODULE}/amd-cross-compiler-tester/src")
-        if(EXISTS "${_candidate}/dx12")
-            set(_DX12_SRC "${_candidate}")
-            break()
+    # D3D12 — Windows-only API. The backend additionally requires the
+    # amd-cross-compiler-tester helper sources (whose submodule path moved
+    # between mlss-tester revisions; check both legacy and current layouts).
+    if(WIN32)
+        set(_DX12_SRC "")
+        foreach(_candidate
+                "${_MLSS_TESTER_SUBMODULE}/3rdparty/amd-cross-compiler-tester/src"
+                "${_MLSS_TESTER_SUBMODULE}/amd-cross-compiler-tester/src")
+            if(EXISTS "${_candidate}/dx12")
+                set(_DX12_SRC "${_candidate}")
+                break()
+            endif()
+        endforeach()
+        if(_DX12_SRC)
+            set(MLSS_ENABLE_D3D ON CACHE BOOL "Enable D3D backend in mlss-tester" FORCE)
+            set(MLSS_DX12_INCLUDE_DIR "${_DX12_SRC}"
+                CACHE PATH "Path to the dx12 helper headers" FORCE)
+        else()
+            set(MLSS_ENABLE_D3D OFF CACHE BOOL "D3D disabled (amd-cross-compiler-tester not available)" FORCE)
+            message(STATUS "mlss-tester: D3D disabled (amd-cross-compiler-tester submodule not initialised)")
         endif()
-    endforeach()
-    if(_DX12_SRC)
-        set(MLSS_ENABLE_D3D ON CACHE BOOL "Enable D3D backend in mlss-tester" FORCE)
-        set(MLSS_DX12_INCLUDE_DIR "${_DX12_SRC}"
-            CACHE PATH "Path to the dx12 helper headers" FORCE)
     else()
-        set(MLSS_ENABLE_D3D OFF CACHE BOOL "D3D disabled (amd-cross-compiler-tester not available)" FORCE)
-        message(STATUS "mlss-tester: D3D disabled (amd-cross-compiler-tester submodule not initialised)")
+        set(MLSS_ENABLE_D3D OFF CACHE BOOL "D3D disabled (Windows-only backend)" FORCE)
+        message(STATUS "mlss-tester: D3D disabled (Windows-only backend)")
     endif()
 
     # OpenCL — requires OpenCL SDK headers and library. If a system-wide

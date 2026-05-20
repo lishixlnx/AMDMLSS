@@ -122,10 +122,7 @@ const WinogradHyperSet HyperSetNavi33 =
 }},
 };
 
-
-
-
-    const std::array<MLSSarg, 43> winograd_conv_ARGS_CONSTANTS = {{
+    const std::array<MLSSarg, 48> winograd_conv_ARGS_CONSTANTS = {{
         { 0,  MLSS_UINT32,  false, 0, true,  true,  false, "n"},
         { 1,  MLSS_UINT32,  false, 0, true,  true,  false, "c"},
         { 2,  MLSS_UINT32,  false, 0, true,  true,  false, "h"},
@@ -166,9 +163,14 @@ const WinogradHyperSet HyperSetNavi33 =
         {37,  MLSS_UINT32,  false, 0, true,  true,  false, "dGStride"},
         {38,  MLSS_UINT32,  false, 0, true,  true,  false, "fGStride"},
         {39,  MLSS_UINT32,  false, 0, true,  true,  false, "oGStride"},
-        {40,  MLSS_UINT8,   false, 0, true,  true,  false, "activationMode"},
-        {41,  MLSS_UINT8,   false, 0, false, false, false, "reserved7"},
-        {42,  MLSS_UINT16,  false, 0, false, false, false, "reserved8"},
+        {40,  MLSS_UINT8,   false, 0, true,  true,  false, "activationMode"}, // offset 200
+        {41,  MLSS_UINT8,   false, 0, true,  true,  false, "syncLimit"},      // offset 201  (MUST be 255)
+        {42,  MLSS_UINT8,   false, 0, true,  true,  false, "syncPeriod"},     // offset 202
+        {43,  MLSS_UINT8,   false, 0, false, false, false, "reserved8"},      // offset 203
+        {44,  MLSS_UINT32,  false, 0, false, false, false, "reserved9"},      // offset 204
+        {45,  MLSS_UINT64,  true,  1, true,  true,  false, "syncAddr"},       // offset 208 (device ptr)
+        {46,  MLSS_UINT64,  true,  1, true,  true,  false, "accAddr"},        // offset 216 (device ptr)
+        {47,  MLSS_UINT64,  false, 0, true,  true,  false, "aOffset"},        // offset 224
     }};
 
 } // namespace mlss::conv::mxn::winograd::base::fp16

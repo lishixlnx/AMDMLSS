@@ -29,7 +29,7 @@ namespace mlss
 #if defined(__ANDROID__) || (defined(__APPLE__) && defined(__MACH__))
         ptr = std::aligned_alloc(CACHE_LINE_SIZE, aligned_size);
 #else
-        if (posix_memalign(&ptr, alignment, size) != 0)
+        if (posix_memalign(&ptr, CACHE_LINE_SIZE, aligned_size) != 0)
         {
             ptr = nullptr;
         }

@@ -282,6 +282,22 @@ namespace mlss::conv::mxn::winograd::base
         }
 
         //=============================================================================================================
+        // The Winograd non-reloc archives are baked offline for one
+        // representative IP per family (see tools/winograd_pal/). At runtime
+        // we patch the ELF gfx version to the actual target so a gfx1201
+        // archive can be loaded on gfx1200, gfx1102 from gfx1100, etc.
+        // We deliberately do NOT call getNonRelocatable() here: its second
+        // step (comgr LINK_RELOCATABLE_TO_EXECUTABLE) silently fails on
+        // PAL OS/ABI inputs, which every Winograd ELF is. Only the
+        // patchGfxInElf() half of getNonRelocatable() is applicable.
+        GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
+        {
+            if (gfxip.major == 0x0Bu) return {0x0Bu, 0x00u, 0x00u};
+            if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x01u};
+            return IP_GFX_UNKNOWN;
+        }
+
+        //=============================================================================================================
         std::pair<MLSSdim3, MLSSdim3> calcGridAndBlocks(
             const ShaderDescriptorType& shader,
             std::uint32_t numCu,
@@ -493,6 +509,23 @@ namespace mlss::conv::mxn::winograd::base
         binaries.addBlob(std::move(relocBlob));
 
         Blob nonRelocBlob = std::move(*make_binary_blob(shaderPair.nonReloc));
+
+        /* Patch the gfx version on the shipped non-reloc ELF so it matches
+        the runtime target (e.g. gfx1201 archive -> gfx1200 device).
+        patchGfxInElf() is a no-op copy when source == target, so this is
+        always safe. We use setOwnedBinary() so the patched buffer
+        outlives this function*/
+        const auto sourceArch = sourceArchForTarget(gfxip);
+        auto patchedNonReloc  = patchGfxInElf(shaderPair.nonReloc.m_binary, sourceArch, gfxip);
+        if (!patchedNonReloc.has_value())
+        {
+            return std::unexpected(patchedNonReloc.error());
+        }
+        auto patchedBytes = std::move(patchedNonReloc).value();
+        nonRelocBlob.m_pBinary = patchedBytes.data();
+        nonRelocBlob.m_size    = patchedBytes.size();
+        nonRelocBlob.setOwnedBinary(std::move(patchedBytes));
+
         nonRelocBlob = fp16::winograd_conv_ARGS_CONSTANTS;
         nonRelocBlob.setGridBlocks(grid, blocks);
         binaries.addBlob(std::move(nonRelocBlob));

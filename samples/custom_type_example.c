@@ -221,7 +221,8 @@ int main(int argc, char* argv[])
 {
     printf("=== Custom Type Registration Example ===\n\n");
 
-    MLSSstring asic = MLSS_GFXAUTOFIND;
+    //MLSSstring asic = MLSS_GFXAUTOFIND;
+    MLSSstring asic = MLSS_GFX1201;
     char customAsic[64] = {0};
 
     for (int i = 1; i < argc; i++)

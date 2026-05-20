@@ -24,4 +24,13 @@ namespace mlss
     [[nodiscard]] std::expected<MLSSdim3, std::error_code> getWorkgroupSize(
         const std::span<const std::uint8_t>& arr);
 
+    /// @brief Patch the gfx version in the ELF binary
+    /// @param input ELF binary bytes
+    /// @param gfxIpHighEnd The high end gfx ip
+    /// @param gfxIpTarget The target gfx ip
+    /// @return The patched ELF binary bytes, or an error code
+    [[nodiscard]] std::expected<std::vector<std::uint8_t>, std::error_code> patchGfxInElf(
+        std::span<const std::uint8_t> input,
+        const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget);
+
 } // namespace mlss

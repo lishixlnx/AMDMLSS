@@ -65,6 +65,22 @@ if ($Help) {
     exit 0
 }
 
+# HIP_PATH / ROCM_PATH must be supplied by the environment so the build
+# adapts to whatever ROCm install the user has. At least one of them must
+# be set; if only one is provided we mirror it to the other so downstream
+# CMake projects can pick whichever name they prefer.
+if (-not $env:HIP_PATH -and -not $env:ROCM_PATH) {
+    Write-Host "ERROR: neither HIP_PATH nor ROCM_PATH is set in the environment." -ForegroundColor Red
+    Write-Host "       Set one of them to your ROCm install root, for example:"
+    Write-Host "           `$env:HIP_PATH  = 'C:/opt/rocm'"
+    Write-Host "           `$env:ROCM_PATH = 'C:/opt/rocm'"
+    Write-Host "       Or persist it across sessions:"
+    Write-Host "           setx HIP_PATH C:/opt/rocm"
+    exit 1
+}
+if (-not $env:HIP_PATH)  { $env:HIP_PATH  = $env:ROCM_PATH }
+if (-not $env:ROCM_PATH) { $env:ROCM_PATH = $env:HIP_PATH }
+
 # Handle clean-up if requested
 if ($CleanUp) {
     Write-Host "Cleaning up build directories..."
@@ -143,8 +159,6 @@ function Build-Single {
             Write-Host "No matching mlss-tester preset for '$Preset'!"
             return $false
         }
-
-        if (-not $env:HIP_PATH) { $env:HIP_PATH = 'C:/opt/rocm' }
 
         $testerConfigArgs = @(
             "--preset", $testerPreset,

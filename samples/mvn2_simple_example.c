@@ -108,7 +108,8 @@ void printUsage(const char* programName)
 int main(int argc, char* argv[])
 {
     MLSSenum verboseLevel = 4;
-    MLSSstring asic = MLSS_GFXAUTOFIND;
+    //MLSSstring asic = MLSS_GFXAUTOFIND;
+    MLSSstring asic = MLSS_GFX1201;
     char customAsic[64] = {0};
 
     for (int i = 1; i < argc; i++)
