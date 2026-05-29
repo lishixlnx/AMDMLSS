@@ -8,11 +8,10 @@
 #include "gfx1150/fp16/shadersBin.hpp"
 #include "gfx1201/fp16/shadersBin.hpp"
 
-// Archive (DX12-ready ET_REL) binaries — supersede the modules binaries for
-// the relocatable blob in makeKernelBinaries().
-#include "archive/gemm/mxn/hip/gfx1100/fp16/shadersBinReloc.hpp"
-#include "archive/gemm/mxn/hip/gfx1150/fp16/shadersBinReloc.hpp"
-#include "archive/gemm/mxn/hip/gfx1201/fp16/shadersBinReloc.hpp"
+// ET_REL relocatable binaries (DX12-ready) — co-located with shadersBin.hpp in impl tree.
+#include "gfx1100/fp16/shadersBinReloc.hpp"
+#include "gfx1150/fp16/shadersBinReloc.hpp"
+#include "gfx1201/fp16/shadersBinReloc.hpp"
 
 namespace gfx1100        = archive::gemm::mxn::hip::gfx1100::fp16;
 namespace gfx1150        = archive::gemm::mxn::hip::gfx1150::fp16;

@@ -14,6 +14,48 @@
 #include <mutex>
 #include <cstring>
 #include <vector>
+#ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef ERROR  // windows.h defines ERROR=0 which clashes with mlss::VerboseLevel::ERROR
+
+// SEH shim helpers — __try/__except cannot be used inside lambdas or functions
+// with C++ object unwinding on MSVC/Clang, so each dangerous call site gets
+// its own plain-C-style shim function that wraps exactly one MLSS C-API call.
+// If an access violation or similar structured exception occurs inside MLSS,
+// the shim returns MLSS_ERROR_FAILURE instead of crashing the host process.
+
+static MLSSstatus seh_createContext(MLSScontext* ctx, const MLSSstring asic, const MLSSstring op) noexcept
+{
+    __try { return mlss::setLastError(mlss::createContext(*ctx, asic, op, nullptr)); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return MLSS_ERROR_FAILURE; }
+}
+
+static MLSSstatus seh_getCaps(const MLSScontext ctx, MLSSstatus** ps, MLSSsize* ns) noexcept
+{
+    __try { return mlss::setLastError(mlss::getCaps(ctx, ps, ns)); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return MLSS_ERROR_FAILURE; }
+}
+
+struct SetParamArgs { MLSScontext* ctx; const MLSSstring op; MLSSenum flag; const MLSSvoid* val; };
+static MLSSstatus seh_setParamByEnum(SetParamArgs a) noexcept
+{
+    __try {
+        if (!mlss::setParams(a.ctx, a.op, a.flag, a.val))
+            return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
+        return mlss::setLastError(MLSS_SUCCESS);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return MLSS_ERROR_FAILURE; }
+}
+
+static MLSSstatus seh_getBinariesEx(const MLSScontext ctx, MLSSbinary** bins,
+                                     MLSSsize* n, MLSSbinaryKind kind) noexcept
+{
+    __try { return mlss::setLastError(mlss::createBinariesEx(*bins, ctx, n, kind)); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return MLSS_ERROR_FAILURE; }
+}
+#endif
 
 #ifndef MLSS_VERSION_MAJOR
 #define MLSS_VERSION_MAJOR 0
@@ -128,7 +170,11 @@ extern "C"
             return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
 
+#ifdef _WIN32
+        return seh_createContext(context, asic, opName);
+#else
         return mlss::setLastError(mlss::createContext(*context, asic, opName, nullptr));
+#endif
     }
 
     MLSSstatus mlssCreateContextList(MLSScontext* context, const MLSSstring asic, const MLSSstring opName, ...)
@@ -154,7 +200,11 @@ extern "C"
     // get caps
     MLSSstatus mlssGetCaps(const MLSScontext context, MLSSstatus** const pStatuses, MLSSsize* const nStatuses)
     {
+#ifdef _WIN32
+        return seh_getCaps(context, pStatuses, nStatuses);
+#else
         return mlss::setLastError(mlss::getCaps(context, pStatuses, nStatuses));
+#endif
     }
 
     // Binary management
@@ -177,7 +227,11 @@ extern "C"
             return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
 
+#ifdef _WIN32
+        return seh_getBinariesEx(context, binaries, numBinaries, kind);
+#else
         return mlss::setLastError(mlss::createBinariesEx(*binaries, context, numBinaries, kind));
+#endif
     }
 
     // Operator management
@@ -236,12 +290,13 @@ extern "C"
             return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
 
+#ifdef _WIN32
+        return seh_setParamByEnum({context, opName, parameterFlag, value});
+#else
         if (!mlss::setParams(context, opName, parameterFlag, value))
-        {
             return mlss::setLastError(MLSS_ERROR_PARAMETER_NOT_FOUND);
-        }
-
         return mlss::setLastError(MLSS_SUCCESS);
+#endif
     }
 
     MLSSstatus mlssPrintParameters(const MLSScontext context, const MLSSstring opName)

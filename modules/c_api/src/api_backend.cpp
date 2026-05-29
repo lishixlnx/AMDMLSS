@@ -14,6 +14,10 @@
 #include <format>
 #include <ranges>
 #include <span>
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 // Core includes (which includes amdmlss_api_cdefs.h)
 #include "core/core.hpp"
@@ -24,9 +28,12 @@
 #include "shaders/operators/mha.hpp"
 #include "shaders/operators/conv.hpp"
 #include "shaders/operators/gemm.hpp"
+#include "shaders/operators/gemm_gemm.hpp"
 #include "shaders/operators/gqa.hpp"
 #include "shaders/operators/mvn.hpp"
 #include "shaders/operators/qgemm.hpp"
+#include "shaders/operators/rmsnorm.hpp"
+#include "shaders/operators/sigmoid_mul.hpp"
 
 namespace mlss
 {
@@ -109,6 +116,34 @@ namespace mlss
 
             deleter(static_cast<T*>(obj));
         }
+
+        // Invoke fn() and return its result.  On Windows, any structured exception
+        // (access violation, illegal instruction, …) raised inside an MLSS
+        // getCapsImpl or getBinaries call is caught here and converted to the
+        // fallback value so the caller never sees a process crash.
+#ifdef _WIN32
+        template <class Fn, class Ret = std::invoke_result_t<Fn>>
+        Ret seh_call(Fn&& fn, Ret fallback) noexcept
+        {
+            __try
+            {
+                return fn();
+            }
+            __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ||
+                     GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION ||
+                     GetExceptionCode() == EXCEPTION_STACK_OVERFLOW
+                     ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+            {
+                return fallback;
+            }
+        }
+#else
+        template <class Fn, class Ret = std::invoke_result_t<Fn>>
+        Ret seh_call(Fn&& fn, Ret /*fallback*/) noexcept
+        {
+            return fn();
+        }
+#endif
 
         //=====================================================================================================================
         template <class T>
@@ -761,6 +796,45 @@ namespace mlss
                 }
                 binaries = std::move(result.value());
             }
+            else if (op.m_op == "MLSS_RMSNORM")
+            {
+                op::OperatorRmsNorm rmsnorm_operator;
+                rmsnorm_operator.setAttributes(op.m_params);
+                rmsnorm_operator.setGfxIpTriple(gfxArch);
+
+                auto result = rmsnorm_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
+            else if (op.m_op == "MLSS_SIGMOID_MUL")
+            {
+                op::OperatorSigmoidMul sigmoid_mul_operator;
+                sigmoid_mul_operator.setAttributes(op.m_params);
+                sigmoid_mul_operator.setGfxIpTriple(gfxArch);
+
+                auto result = sigmoid_mul_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
+            else if (op.m_op == "MLSS_GEMMGEMM")
+            {
+                op::OperatorGemmGemm gemm_gemm_operator;
+                gemm_gemm_operator.setAttributes(op.m_params);
+                gemm_gemm_operator.setGfxIpTriple(gfxArch);
+
+                auto result = gemm_gemm_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
             else
             {
                 // Unknown operator
@@ -1328,7 +1402,7 @@ namespace mlss
                     // Check if architecture is GFX11+ for MHA
                     if (isGfx11Plus(gfxArch))
                     {
-                        supported = op::OperatorMHA::getCaps(op.m_params, gfxArch);
+                        supported = seh_call([&]{ return op::OperatorMHA::getCaps(op.m_params, gfxArch); }, false);
 
                         if (supported)
                         {
@@ -1349,7 +1423,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_CONV")
                 {
-                    supported = op::OperatorConv::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorConv::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1363,7 +1437,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GEMM")
                 {
-                    supported = op::OperatorGEMM::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorGEMM::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1377,7 +1451,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GQA")
                 {
-                    supported = op::OperatorGQA::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorGQA::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1391,7 +1465,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_MVN")
                 {
-                    supported = op::OperatorMVN::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorMVN::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1405,7 +1479,49 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_QGEMM")
                 {
-                    supported = op::OperatorQGEMM::getCaps(op.m_params);
+                    supported = seh_call([&]{ return op::OperatorQGEMM::getCaps(op.m_params); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_RMSNORM")
+                {
+                    supported = seh_call([&]{ return op::OperatorRmsNorm::getCaps(op.m_params, gfxArch); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_SIGMOID_MUL")
+                {
+                    supported = seh_call([&]{ return op::OperatorSigmoidMul::getCaps(op.m_params, gfxArch); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_GEMMGEMM")
+                {
+                    supported = seh_call([&]{ return op::OperatorGemmGemm::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
