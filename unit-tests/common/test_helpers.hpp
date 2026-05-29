@@ -90,6 +90,26 @@ inline const MLSSbinary* findBinary(const MLSSbinary* binaries, MLSSsize count,
 }
 
 // ---------------------------------------------------------------------------
+// Binary finder by kernel name prefix: returns pointer to the first MLSSbinary
+// whose m_pKernelName starts with the given prefix and matches the requested
+// relocatable flag, or nullptr if none found.
+// ---------------------------------------------------------------------------
+
+inline const MLSSbinary* findBinaryByKernelPrefix(const MLSSbinary* binaries, MLSSsize count,
+                                                   std::string_view prefix,
+                                                   bool wantRelocatable)
+{
+    for (const auto* p = binaries; p < binaries + count; ++p)
+    {
+        if (static_cast<bool>(p->m_isRelocatable) != wantRelocatable)
+            continue;
+        if (p->m_pKernelName && std::string_view(p->m_pKernelName).substr(0, prefix.size()) == prefix)
+            return p;
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
 // Build kernel arguments from MLSSbinary.m_argList
 //
 // Reads the self-describing argument list via mlssVectorRetrieveData, then

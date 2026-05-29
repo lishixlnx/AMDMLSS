@@ -42,6 +42,10 @@ require_rocm_env() {
 
 require_rocm_env || exit 1
 
+# Update submodules to the latest tracked branch tip
+echo "Updating submodules..."
+git submodule update --remote || echo "WARNING: git submodule update --remote failed, continuing with current state."
+
 # Function to display usage
 usage() {
     echo "Usage: $0 [-c|--compiler <compiler>] [-b|--build <build_type>] [options]"

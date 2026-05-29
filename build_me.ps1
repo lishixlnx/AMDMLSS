@@ -81,6 +81,13 @@ if (-not $env:HIP_PATH -and -not $env:ROCM_PATH) {
 if (-not $env:HIP_PATH)  { $env:HIP_PATH  = $env:ROCM_PATH }
 if (-not $env:ROCM_PATH) { $env:ROCM_PATH = $env:HIP_PATH }
 
+# Update submodules to the latest tracked branch tip
+Write-Host "Updating submodules..."
+git submodule update --remote | Out-Host
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "WARNING: git submodule update --remote failed, continuing with current state." -ForegroundColor Yellow
+}
+
 # Handle clean-up if requested
 if ($CleanUp) {
     Write-Host "Cleaning up build directories..."
