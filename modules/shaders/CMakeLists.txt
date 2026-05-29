@@ -12,6 +12,8 @@ add_project_module(shaders
     DEPENDENCIES
         common
         core
+    INCLUDE_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../.."
 )
 
 # Add C++20 module interface units (.cppm) for shader binaries

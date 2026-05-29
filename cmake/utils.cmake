@@ -438,17 +438,19 @@ endfunction()
 # without a .git directory, etc.) so that the build does not silently skip
 # critical dependencies.
 function(ensure_git_submodule SUBMODULE_PATH SENTINEL_FILE)
-    set(_abs_path "${CMAKE_SOURCE_DIR}/${SUBMODULE_PATH}")
+    # Use CMAKE_CURRENT_SOURCE_DIR so the function works correctly when this
+    # project is consumed as a subdirectory (add_subdirectory).
+    set(_abs_path "${CMAKE_CURRENT_SOURCE_DIR}/${SUBMODULE_PATH}")
     set(_sentinel "${_abs_path}/${SENTINEL_FILE}")
 
     if(EXISTS "${_sentinel}")
         return()
     endif()
 
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
         message(FATAL_ERROR
             "Submodule '${SUBMODULE_PATH}' is missing and the project is not a "
-            "git working tree (no .git directory at ${CMAKE_SOURCE_DIR}). "
+            "git working tree (no .git directory at ${CMAKE_CURRENT_SOURCE_DIR}). "
             "Re-clone the project with --recurse-submodules or fetch the "
             "submodule contents manually before configuring.")
     endif()
@@ -463,7 +465,7 @@ function(ensure_git_submodule SUBMODULE_PATH SENTINEL_FILE)
     message(STATUS "Initialising git submodule '${SUBMODULE_PATH}'...")
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" submodule update --init --recursive -- "${SUBMODULE_PATH}"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         RESULT_VARIABLE _git_rc
         OUTPUT_VARIABLE _git_stdout
         ERROR_VARIABLE  _git_stderr)

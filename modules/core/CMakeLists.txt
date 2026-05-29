@@ -9,7 +9,7 @@ add_project_module(core
         common
 )
 
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 
 if(NOT DEFINED HIP_PATH OR "${HIP_PATH}" STREQUAL "")
     if(DEFINED ENV{HIP_PATH} AND NOT "$ENV{HIP_PATH}" STREQUAL "")
