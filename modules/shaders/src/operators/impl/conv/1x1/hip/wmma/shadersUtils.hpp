@@ -2,8 +2,8 @@
 #pragma once
 #include "core/core.hpp"
 #include "shaders/shaders.hpp"
-#include "../../../utils.hpp"
-#include "../../../../opUtils.hpp"
+#include "shaders/src/operators/impl/conv/utils.hpp"
+#include "shaders/src/operators/impl/opUtils.hpp"
 
 namespace mlss::conv::one_by_one::hip::wmma
 {

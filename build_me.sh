@@ -129,9 +129,15 @@ build_single() {
         esac
 
 
+        local dx12_include_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/include"
+        local dx12_source_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/src"
+
         local tester_config_args=(--preset "$tester_preset"
                                   -DCMAKE_INSTALL_PREFIX="$tester_install"
                                   -DMLSS_ENABLE_HIP=ON
+                                  -DMLSS_ENABLE_AOCL=ON
+                                  -DMLSS_DX12_INCLUDE_DIR="$dx12_include_dir"
+                                  -DMLSS_DX12_SOURCE_DIR="$dx12_source_dir"
                                   -DBUILD_APP=OFF
                                   -DBUILD_TESTING=OFF)
 
@@ -381,6 +387,22 @@ if [[ "$CLEAN_UP_REQUESTED" == "true" ]]; then
     echo "Clean-up completed!"
     echo ""
 fi
+
+# Advance top-level submodules to the tip of their tracked remote branch,
+# then sync nested submodules to the SHAs pinned by the updated parents
+# (without --recursive on the --remote pass to avoid version skew).
+echo "Updating git submodules (--remote)..."
+git submodule update --init --remote
+if [ $? -ne 0 ]; then
+    echo "git submodule update --remote failed!"
+    exit 1
+fi
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    echo "git submodule update --recursive failed!"
+    exit 1
+fi
+echo ""
 
 # Validate build type
 if [[ "$BUILD_TYPE" != "debug" && "$BUILD_TYPE" != "release" && "$BUILD_TYPE" != "all" ]]; then

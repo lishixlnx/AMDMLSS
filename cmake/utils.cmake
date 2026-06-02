@@ -243,12 +243,18 @@ function(add_project_module NAME)
         endif()
     endif()
 
-    # Add include directories
+    # Add include directories.
+    # The module's public 'include/' is exposed PUBLIC for consumers, while the
+    # parent 'modules/' directory is added PRIVATE so module-internal files can
+    # reference their own (and only their own) source tree through absolute
+    # paths rooted at the module name, e.g. #include "<module>/src/foo.hpp".
     target_include_directories(${NAME}
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
             ${ARG_INCLUDE_DIRS}
+        PRIVATE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
     )
 
     # Set output name if specified

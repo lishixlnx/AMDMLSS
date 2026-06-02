@@ -2,7 +2,7 @@
 #pragma once
 
 #include "core/core.hpp"
-#include "../opUtils.hpp"
+#include "shaders/src/operators/impl/opUtils.hpp"
 
 namespace mlss::gemm::utils
 {

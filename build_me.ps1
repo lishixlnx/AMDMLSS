@@ -98,6 +98,22 @@ if ($CleanUp) {
     Write-Host ""
 }
 
+# Advance top-level submodules to the tip of their tracked remote branch,
+# then sync nested submodules to the SHAs pinned by the updated parents
+# (without --recursive on the --remote pass to avoid version skew).
+Write-Host "Updating git submodules (--remote)..."
+git submodule update --init --remote | Out-Host
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "git submodule update --remote failed!"
+    exit 1
+}
+git submodule update --init --recursive | Out-Host
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "git submodule update --recursive failed!"
+    exit 1
+}
+Write-Host ""
+
 # Function to deploy amdmlss
 function Deploy-Amdmlss {
     param(
@@ -160,10 +176,18 @@ function Build-Single {
             return $false
         }
 
+        if (-not $env:HIP_PATH) { $env:HIP_PATH = 'C:/opt/rocm' }
+
+        $dx12IncludeDir = Join-Path $PSScriptRoot '3rdparty/amd-mlss-tester/3rdparty/amd-cross-compiler-tester/lib/include'
+        $dx12SourceDir  = Join-Path $PSScriptRoot '3rdparty/amd-mlss-tester/3rdparty/amd-cross-compiler-tester/lib/src'
+
         $testerConfigArgs = @(
             "--preset", $testerPreset,
             "-DCMAKE_INSTALL_PREFIX=$testerInstall",
             "-DMLSS_ENABLE_HIP=ON",
+            "-DMLSS_ENABLE_AOCL=ON",
+            "-DMLSS_DX12_INCLUDE_DIR=$dx12IncludeDir",
+            "-DMLSS_DX12_SOURCE_DIR=$dx12SourceDir",
             "-DBUILD_APP=OFF",
             "-DBUILD_TESTING=OFF"
         )

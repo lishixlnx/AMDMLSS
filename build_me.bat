@@ -147,6 +147,22 @@ if %CLEANUP%==1 (
     echo.
 )
 
+:: Advance top-level submodules to the tip of their tracked remote branch,
+:: then sync nested submodules to the SHAs pinned by the updated parents
+:: (without --recursive on the --remote pass to avoid version skew).
+echo Updating git submodules (--remote)...
+git submodule update --init --remote
+if %errorlevel% neq 0 (
+    echo git submodule update --remote failed!
+    exit /b 1
+)
+git submodule update --init --recursive
+if %errorlevel% neq 0 (
+    echo git submodule update --recursive failed!
+    exit /b 1
+)
+echo.
+
 :: Validate build type
 if /i not "%BUILD_TYPE%"=="debug" if /i not "%BUILD_TYPE%"=="release" if /i not "%BUILD_TYPE%"=="all" (
     echo Invalid build type: %BUILD_TYPE%
@@ -360,7 +376,12 @@ if "%TESTER_PRESET%"=="" (
     exit /b 1
 )
 
-set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DBUILD_APP=OFF -DBUILD_TESTING=OFF
+if "%HIP_PATH%"=="" set HIP_PATH=C:\opt\rocm
+
+set DX12_INCLUDE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\include
+set DX12_SOURCE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\src
+
+set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DMLSS_ENABLE_AOCL=ON -DMLSS_DX12_INCLUDE_DIR=%DX12_INCLUDE_DIR% -DMLSS_DX12_SOURCE_DIR=%DX12_SOURCE_DIR% -DBUILD_APP=OFF -DBUILD_TESTING=OFF
 
 if /i "%FIRST_TOKEN%"=="clang" (
     set TESTER_CONFIG_ARGS=%TESTER_CONFIG_ARGS% -DCMAKE_CXX_COMPILER=%HIP_PATH%/bin/clang++.exe "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"

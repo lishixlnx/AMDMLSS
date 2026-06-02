@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "gemmMxN.hpp"
-#include "../utils.hpp"
+#include "shaders/src/operators/impl/gemm/utils.hpp"
 #include "hip/hipGemmMxN.hpp"
 #include "ck/ckGemmMxN.hpp"
 
