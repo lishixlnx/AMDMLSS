@@ -108,7 +108,8 @@ int main(int argc, char* argv[])
 {
     // Default to DEBUG level verbose mode
     MLSSenum verboseLevel = 4; // DEBUG level
-    MLSSstring asic = MLSS_GFXAUTOFIND;
+    //MLSSstring asic = MLSS_GFXAUTOFIND;
+    MLSSstring asic = MLSS_GFX1201;
     char customAsic[64] = {0};
 
     // Parse command line arguments

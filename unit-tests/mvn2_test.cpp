@@ -279,7 +279,7 @@ std::vector<float> runMvn2Pipeline(MLSSbinary*      binaries,
 
     auto makeModule = [&](const ShaderDescriptor& desc) -> Module
     {
-        if constexpr (std::is_same_v<Module, ClManagedModule>)
+        if constexpr (mlss::tester::hasOpenCL() && std::is_same_v<Module, ClManagedModule>)
             return Module(backendCtx, desc);
         else
             return Module(desc);
@@ -302,7 +302,7 @@ std::vector<float> runMvn2Pipeline(MLSSbinary*      binaries,
         const std::string lookupName = !names.empty() ? names.front()
                                      : (bin.m_pKernelName ? std::string(bin.m_pKernelName) : std::string{});
 
-        if constexpr (std::is_same_v<Shader, D3D12Shader>)
+        if constexpr (mlss::tester::hasD3D12() && std::is_same_v<Shader, D3D12Shader>)
         {
             const BaseShaderTag* tag = module.getShader(lookupName);
             if (tag == nullptr && bin.m_pKernelName != nullptr)
@@ -331,9 +331,9 @@ std::vector<float> runMvn2Pipeline(MLSSbinary*      binaries,
 
     auto allocMem = [&](std::size_t bytes) -> Memory
     {
-        if constexpr (std::is_same_v<Memory, D3D12DeviceMemory>)
+        if constexpr (mlss::tester::hasD3D12() && std::is_same_v<Memory, D3D12DeviceMemory>)
             return Memory(m1.getDevice()->handle().Get(), bytes);
-        else if constexpr (std::is_same_v<Memory, ClDeviceMemory>)
+        else if constexpr (mlss::tester::hasOpenCL() && std::is_same_v<Memory, ClDeviceMemory>)
             return Memory(backendCtx, bytes);
         else
             return Memory(bytes);
@@ -595,22 +595,30 @@ TEST_CASE("MVN2: HIP non-relocatable", "[mvn2][hip][gpu]")
 
 TEST_CASE("MVN2: D3D12 relocatable", "[mvn2][d3d][gpu]")
 {
-    if constexpr (mlss::tester::hasD3D12())
+    // The body is wrapped in an explicit-template lambda so that the
+    // discarded `if constexpr` branch is never instantiated on platforms
+    // where D3D12 is not compiled in. Without the template wrapper, this
+    // would still instantiate `runMvn2Pipeline<D3D12*>` on Linux because
+    // the enclosing TEST_CASE is a non-template function.
+    [&]<bool D3D = mlss::tester::hasD3D12()>()
     {
-        auto& td = getTestData();
-        if (!td.gpuAvailable) SKIP("No compatible GPU detected");
+        if constexpr (D3D)
+        {
+            auto& td = getTestData();
+            if (!td.gpuAvailable) SKIP("No compatible GPU detected");
 
-        auto result = runMvn2Pipeline<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
-            td.bins.data, td.bins.count, /*relocatable=*/true,
-            td.hostInput16, td.hostScale16, td.hostBias16);
+            auto result = runMvn2Pipeline<D3D12ManagedModule, D3D12DeviceMemory, D3D12Shader>(
+                td.bins.data, td.bins.count, /*relocatable=*/true,
+                td.hostInput16, td.hostScale16, td.hostBias16);
 
-        REQUIRE(result.size() == td.hostRef.size());
-        CHECK(resultsMatch(result, td.hostRef, kTolerance, "D3D12 vs Host"));
-    }
-    else
-    {
-        SKIP("D3D12 backend not compiled into mlss-tester");
-    }
+            REQUIRE(result.size() == td.hostRef.size());
+            CHECK(resultsMatch(result, td.hostRef, kTolerance, "D3D12 vs Host"));
+        }
+        else
+        {
+            SKIP("D3D12 backend not compiled into mlss-tester");
+        }
+    }();
 }
 
 // Temporarily disabled: the OpenCL backend currently produces all-zero

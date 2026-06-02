@@ -102,6 +102,20 @@ goto :parse_args
 
 :done_parsing
 
+:: HIP_PATH / ROCM_PATH must be supplied by the environment so the build
+:: adapts to whatever ROCm install the user has. At least one of them must
+:: be set; if only one is provided we mirror it to the other so downstream
+:: CMake projects can pick whichever name they prefer.
+if "%HIP_PATH%"=="" if "%ROCM_PATH%"=="" (
+    echo ERROR: neither HIP_PATH nor ROCM_PATH is set in the environment.
+    echo        Set one of them to your ROCm install root, for example:
+    echo            set HIP_PATH=C:\opt\rocm
+    echo            set ROCM_PATH=C:\opt\rocm
+    exit /b 1
+)
+if "%HIP_PATH%"==""  set HIP_PATH=%ROCM_PATH%
+if "%ROCM_PATH%"=="" set ROCM_PATH=%HIP_PATH%
+
 :: Perform cleanup if requested
 if %CLEANUP%==1 (
     echo Cleaning up build directories...
@@ -345,8 +359,6 @@ if "%TESTER_PRESET%"=="" (
     echo No matching mlss-tester preset for '%PRESET%'!
     exit /b 1
 )
-
-if "%HIP_PATH%"=="" set HIP_PATH=C:\opt\rocm
 
 set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DBUILD_APP=OFF -DBUILD_TESTING=OFF
 

@@ -17,6 +17,31 @@ else
 fi
 BUILD_TYPE="release"
 
+# HIP_PATH / ROCM_PATH must be supplied by the environment so the build
+# adapts to whatever ROCm install the user has (/opt/rocm, /opt/rocm-7.x,
+# C:/opt/rocm, a custom prefix, ...). At least one of them must be set;
+# if only one is provided we mirror it to the other so downstream CMake
+# projects can pick whichever name they prefer.
+require_rocm_env() {
+    if [[ -z "${HIP_PATH:-}" && -z "${ROCM_PATH:-}" ]]; then
+        echo "ERROR: neither HIP_PATH nor ROCM_PATH is set in the environment." >&2
+        echo "       Set one of them to your ROCm install root, for example:" >&2
+        if [[ "$HOST_OS" == "linux" ]]; then
+            echo "           export HIP_PATH=/opt/rocm" >&2
+            echo "           export ROCM_PATH=/opt/rocm" >&2
+        else
+            echo "           export HIP_PATH=C:/opt/rocm   # Git Bash / MSYS" >&2
+            echo "           setx   HIP_PATH C:/opt/rocm   # cmd.exe (new shells)" >&2
+        fi
+        return 1
+    fi
+    if [[ -z "${HIP_PATH:-}"  ]]; then export HIP_PATH="$ROCM_PATH"; fi
+    if [[ -z "${ROCM_PATH:-}" ]]; then export ROCM_PATH="$HIP_PATH"; fi
+    return 0
+}
+
+require_rocm_env || exit 1
+
 # Function to display usage
 usage() {
     echo "Usage: $0 [-c|--compiler <compiler>] [-b|--build <build_type>] [options]"
@@ -103,12 +128,6 @@ build_single() {
                 ;;
         esac
 
-        if [[ "$HOST_OS" == "linux" ]]; then
-            export HIP_PATH="${HIP_PATH:-/opt/rocm}"
-            export ROCM_PATH="${ROCM_PATH:-/opt/rocm}"
-        else
-            export HIP_PATH="${HIP_PATH:-C:/opt/rocm}"
-        fi
 
         local tester_config_args=(--preset "$tester_preset"
                                   -DCMAKE_INSTALL_PREFIX="$tester_install"

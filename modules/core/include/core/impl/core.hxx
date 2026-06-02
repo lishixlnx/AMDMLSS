@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstddef>
+#include <cstring>
+#include <cmath>
 #include <type_traits>
 #include <array>
 #include <vector>
@@ -11,6 +13,7 @@
 #include <unordered_set>
 #include <mutex>
 #include <memory>
+#include <atomic>
 #include <expected>
 #include <filesystem>
 #include <stdexcept>

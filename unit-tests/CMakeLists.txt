@@ -12,19 +12,28 @@ if(NOT TARGET c_api)
 endif()
 
 # ── Required mlss-tester backends ────────────────────────────────────────────
-# The unit tests exercise every backend the tester supports. We require the
-# HIP, D3D12 and OpenCL backends to be compiled in. The Host tensor library
-# (used for reference computation) is always compiled into mlss-tester.
-set(_MLSS_REQUIRED_BACKENDS HIP D3D CL)
+# The unit tests exercise every backend the tester supports. HIP and OpenCL
+# are required on every platform; D3D12 is Windows-only and therefore only
+# required when building for Windows. The Host tensor library (used for
+# reference computation) is always compiled into mlss-tester.
+set(_MLSS_REQUIRED_BACKENDS HIP CL)
+if(WIN32)
+    list(APPEND _MLSS_REQUIRED_BACKENDS D3D)
+endif()
 foreach(_backend IN LISTS _MLSS_REQUIRED_BACKENDS)
     if(NOT MLSS_ENABLE_${_backend})
         message(FATAL_ERROR
             "unit-tests: mlss-tester backend ${_backend} is not enabled "
-            "(MLSS_ENABLE_${_backend}=OFF). The unit tests require HIP, D3D "
-            "and OpenCL backends, plus the always-compiled Host tensor library.")
+            "(MLSS_ENABLE_${_backend}=OFF). The unit tests require HIP and "
+            "OpenCL on every platform (plus D3D12 on Windows), and the "
+            "always-compiled Host tensor library.")
     endif()
 endforeach()
-message(STATUS "unit-tests: mlss-tester backends enabled — HIP, D3D, OpenCL, Host")
+if(WIN32)
+    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, D3D, OpenCL, Host")
+else()
+    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, OpenCL, Host (D3D is Windows-only)")
+endif()
 
 include(CTest)
 
@@ -124,7 +133,7 @@ add_gpu_kernel_test(mlss-mha-test "${CMAKE_CURRENT_LIST_DIR}/mha_test.cpp")
 add_gpu_kernel_test(mlss-gqa-test "${CMAKE_CURRENT_LIST_DIR}/gqa_test.cpp")
 
 # Conv 1x1 kernel test
-add_gpu_kernel_test(mlss-conv1x1-test "${CMAKE_CURRENT_LIST_DIR}/conv1x1_test.cpp")
+add_gpu_kernel_test(mlss-convmxn-test "${CMAKE_CURRENT_LIST_DIR}/convmxn_test.cpp")
 
 # MVN2 (InstaNorm) kernel test
 add_gpu_kernel_test(mlss-mvn2-test "${CMAKE_CURRENT_LIST_DIR}/mvn2_test.cpp")

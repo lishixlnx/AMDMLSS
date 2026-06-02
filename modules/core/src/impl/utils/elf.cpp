@@ -433,12 +433,56 @@ namespace mlss
     }
 
 
-    std::expected<std::vector<std::uint8_t>, std::error_code> getNonRelocatable(const std::span<const std::uint8_t>& arr,
+    std::expected<std::vector<std::uint8_t>, std::error_code> patchGfxInElf(
+        std::span<const std::uint8_t> input,
         const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget)
     {
         if (!areGfxIpsCompatible(gfxIpHighEnd, gfxIpTarget))
         {
             return std::unexpected(make_error_code(MLSSErrorCode::ArchitectureNotSupported));
+        }
+
+        if (gfxIpHighEnd == gfxIpTarget)
+        {
+            return std::vector<std::uint8_t>(input.begin(), input.end());
+        }
+
+        auto elfShaderQuery = gfxIpTripleToElfMatch(gfxIpHighEnd);
+        if (!elfShaderQuery.has_value())
+        {
+            return std::unexpected(elfShaderQuery.error());
+        }
+
+        auto elfTargetQuery = gfxIpTripleToElfMatch(gfxIpTarget);
+        if (!elfTargetQuery.has_value())
+        {
+            return std::unexpected(elfTargetQuery.error());
+        }
+
+        auto shaderIsaResult = gfxIpToIsaString(gfxIpHighEnd);
+        if (!shaderIsaResult.has_value())
+        {
+            return std::unexpected(shaderIsaResult.error());
+        }
+
+        auto targetIsaResult = gfxIpToIsaString(gfxIpTarget);
+        if (!targetIsaResult.has_value())
+        {
+            return std::unexpected(targetIsaResult.error());
+        }
+
+        return patchGfxVersion(input,
+            shaderIsaResult.value(), elfShaderQuery.value(),
+            targetIsaResult.value(), elfTargetQuery.value());
+    }
+
+    std::expected<std::vector<std::uint8_t>, std::error_code> getNonRelocatable(const std::span<const std::uint8_t>& arr,
+        const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget)
+    {
+        auto patchedQuery = patchGfxInElf(arr, gfxIpHighEnd, gfxIpTarget);
+        if (!patchedQuery.has_value())
+        {
+            return std::unexpected(patchedQuery.error());
         }
 
         auto targetIsaResult = gfxIpToIsaString(gfxIpTarget);
@@ -448,42 +492,7 @@ namespace mlss
         }
         const std::string comgrIsa = "amdgcn-amd-amdhsa--" + targetIsaResult.value();
 
-        std::span<const std::uint8_t> inputData = arr;
-        std::vector<std::uint8_t> patched;
-
-        if (gfxIpHighEnd != gfxIpTarget)
-        {
-            auto elfShaderQuery = gfxIpTripleToElfMatch(gfxIpHighEnd);
-            if (!elfShaderQuery.has_value())
-            {
-                return std::unexpected(elfShaderQuery.error());
-            }
-
-            auto elfTargetQuery = gfxIpTripleToElfMatch(gfxIpTarget);
-            if (!elfTargetQuery.has_value())
-            {
-                return std::unexpected(elfTargetQuery.error());
-            }
-
-            auto shaderIsaResult = gfxIpToIsaString(gfxIpHighEnd);
-            if (!shaderIsaResult.has_value())
-            {
-                return std::unexpected(shaderIsaResult.error());
-            }
-
-            auto patchedQuery = patchGfxVersion(arr,
-                shaderIsaResult.value(), elfShaderQuery.value(),
-                targetIsaResult.value(), elfTargetQuery.value());
-            if (!patchedQuery.has_value())
-            {
-                return std::unexpected(patchedQuery.error());
-            }
-
-            patched = std::move(patchedQuery.value());
-            inputData = patched;
-        }
-
-        auto executableQuery = linkRelocatableToExecutable(inputData, comgrIsa);
+        auto executableQuery = linkRelocatableToExecutable(patchedQuery.value(), comgrIsa);
         if (!executableQuery.has_value())
         {
             return std::unexpected(executableQuery.error());
