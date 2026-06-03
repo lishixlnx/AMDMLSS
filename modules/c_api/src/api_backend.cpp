@@ -963,6 +963,19 @@ namespace mlss
     // in-place to keep only entries matching `kind`.
     MLSSenum createBinariesEx(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n, MLSSbinaryKind kind)
     {
+        // Reject unknown / not-yet-supported kinds up-front instead of silently
+        // treating them as "relocatable". Only the ELF-type filters are
+        // implemented; SINGLE_POINTER / DOUBLE_POINTER are not handled here yet.
+        switch (kind)
+        {
+            case MLSS_BINARY_KIND_ANY:
+            case MLSS_BINARY_KIND_NON_RELOCATABLE:
+            case MLSS_BINARY_KIND_RELOCATABLE:
+                break;
+            default:
+                return MLSS_ERROR_INVALID_PARAMETER;
+        }
+
         MLSSenum status = createBinaries(binaries, context, n);
         if (status != MLSS_SUCCESS)
             return status;

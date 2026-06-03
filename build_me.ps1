@@ -109,15 +109,12 @@ if ($CleanUp) {
     Write-Host ""
 }
 
-# Advance top-level submodules to the tip of their tracked remote branch,
-# then sync nested submodules to the SHAs pinned by the updated parents
-# (without --recursive on the --remote pass to avoid version skew).
-Write-Host "Updating git submodules (--remote)..."
-git submodule update --init --remote | Out-Host
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "git submodule update --remote failed!"
-    exit 1
-}
+# Initialise submodules to the SHAs pinned by this checkout. We deliberately
+# do NOT run "git submodule update --remote": pulling the tip of each tracked
+# remote branch mutates the working tree, requires network access, and makes
+# builds non-reproducible (and fails in offline/CI environments). Builds use
+# the pinned SHAs; bump them explicitly with a separate, intentional commit.
+Write-Host "Initialising git submodules..."
 git submodule update --init --recursive | Out-Host
 if ($LASTEXITCODE -ne 0) {
     Write-Host "git submodule update --recursive failed!"

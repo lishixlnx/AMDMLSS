@@ -222,7 +222,7 @@ extern "C"
     MLSSstatus mlssGetBinariesEx(const MLSScontext context, MLSSbinary** const binaries,
                                   MLSSsize* const numBinaries, MLSSbinaryKind kind)
     {
-        if (context == 0)
+        if ((context == 0) || (binaries == nullptr) || (numBinaries == nullptr))
         {
             return mlss::setLastError(MLSS_ERROR_INVALID_PARAMETER);
         }
