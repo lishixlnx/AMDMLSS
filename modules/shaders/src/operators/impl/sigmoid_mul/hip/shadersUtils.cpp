@@ -74,7 +74,6 @@ namespace mlss::sigmoid_mul::hip
             const std::uint32_t blockSize = SigmoidMul_CONSTANTS[0u];
             const std::uint32_t totalElements = params.n * params.c * params.h * params.w;
             const std::uint32_t blockCountX = integer_divide_ceil(totalElements, blockSize);
-
             MLSSdim3 grid{blockCountX, 1u, 1u};
             MLSSdim3 blocks{blockSize, 1u, 1u};
 
