@@ -694,7 +694,7 @@ typedef enum
 {
     MLSS_BINARY_KIND_NON_RELOCATABLE = 1 << 0, // Linked executable — loadable by hipModuleLoadData (default)
     MLSS_BINARY_KIND_RELOCATABLE     = 1 << 1, // Raw relocatable ELF — for callers that link themselves
-    MLSS_BINARY_KIND_ANY             = 1 << 2, // All valid blobs regardless of ELF type
+    MLSS_BINARY_KIND_ANY             = (MLSS_BINARY_KIND_NON_RELOCATABLE | MLSS_BINARY_KIND_RELOCATABLE), // All valid blobs regardless of ELF type
     MLSS_BINARY_KIND_SINGLE_POINTER  = 1 << 3, // Single pointer to the binary
     MLSS_BINARY_KIND_DOUBLE_POINTER  = 1 << 4, // Double pointer to the binary
 } MLSSbinaryKind;
