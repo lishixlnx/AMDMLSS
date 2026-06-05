@@ -69,10 +69,10 @@ namespace mlss::sigmoid_mul::hip
                                     const SigmoidMulParams& params,
                                     const GfxIpTriple& gfxip)
         {
-            // Grid: ceil(N*C*H / blockSize) blocks in X, 1 in Y/Z.
+            // Grid: ceil(N*C*H*W / blockSize) blocks in X, 1 in Y/Z.
             // blockSize = 64 (SigmoidMul_CONSTANTS[0]).
             const std::uint32_t blockSize = SigmoidMul_CONSTANTS[0u];
-            const std::uint32_t totalElements = params.n * params.c * params.h;
+            const std::uint32_t totalElements = params.n * params.c * params.h * params.w;
             const std::uint32_t blockCountX = integer_divide_ceil(totalElements, blockSize);
 
             MLSSdim3 grid{blockCountX, 1u, 1u};
