@@ -4,9 +4,7 @@ Convert dxGml precompiled shader headers (const unsigned char Name[N] = {...})
 to MLSS shadersBin.hpp format (inline constexpr auto name = std::to_array<std::uint8_t>({...})).
 
 Usage:
-  python convert_dxgml_to_mlss.py <input.h> <output_shadersBin.hpp> <mlss_namespace> [<kernel_name_map>]
-
-kernel_name_map: optional JSON file mapping dxGml var names to kernel symbol names
+  python convert_dxgml_to_mlss.py <input.h> <output_shadersBin.hpp> <mlss_namespace>
 """
 
 import re
