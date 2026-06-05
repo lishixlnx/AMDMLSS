@@ -984,7 +984,8 @@ namespace mlss
 
         if (kind == MLSS_BINARY_KIND_ANY)
             return MLSS_SUCCESS;
-
+        if (kind != MLSS_BINARY_KIND_NON_RELOCATABLE && kind != MLSS_BINARY_KIND_RELOCATABLE)
+            return MLSS_ERROR_INVALID_PARAMETER;
         const MLSSsize total = *n;
 
         // Compact matching binaries into the front of the array so the
