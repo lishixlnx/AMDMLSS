@@ -607,12 +607,11 @@ def process_s_kernels(args, tmpdir: Path):
             # (e.g. gemm2d_NN_16x128x16_F16_gfx12 already carries "gfx12")
             gfx_already_in_variant = any(
                 tile_variant.endswith(g) or f"_{g}" in tile_variant
-                for g in (gfx, gfx[:5])  # match full "gfx1201" or prefix "gfx12"
-            )
             arch_suffix = "" if gfx_already_in_variant else f"_{gfx}"
-            symbol    = f"{op}_fp16{variant_part}{act_tag}{arch_suffix}"
+            symbol    = f"{op}_{dtype}{variant_part}{act_tag}{arch_suffix}"
             out_dir   = Path(args.out_dir) / op / backend / gfx / dtype
             out_path  = out_dir / "shadersBin.hpp"
+            namespace = f"archive::{op}::{backend}::{gfx}::{dtype}"
             namespace = f"archive::{op}::{backend}::{gfx}::{dtype}"
 
             namespaces[out_path] = namespace
