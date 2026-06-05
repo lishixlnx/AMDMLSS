@@ -319,17 +319,21 @@ def write_shaders_hpp(
     return out_path
 
 
-def run_cmd(cmd: list[str], verbose: bool, dry_run: bool, label: str = "") -> bytes | None:
+def run_cmd(
+    cmd: list[str],
+    verbose: bool,
+    dry_run: bool,
+    label: str = "",
+) -> subprocess.CompletedProcess[str] | None:
     if verbose or dry_run:
         print(f"  [{label}] {' '.join(str(c) for c in cmd)}")
     if dry_run:
-        return b"\x7fELF(dry-run)"
+        return None
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"  ERROR ({label}):\n{result.stderr}", file=sys.stderr)
         return None
-    return result  # caller reads output file, not stdout
-
+    return result
 
 # ---------------------------------------------------------------------------
 # HIP compilation
