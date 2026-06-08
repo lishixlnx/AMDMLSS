@@ -1,3 +1,8 @@
 3rdparty/
 build/
 .cline_storage/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+*.pyo
