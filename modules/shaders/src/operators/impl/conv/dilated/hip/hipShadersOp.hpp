@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-#include "../dilatedConv.hpp"
+#include "shaders/src/operators/impl/conv/dilated/dilatedConv.hpp"
 
 namespace mlss::conv::dilated::hip
 {

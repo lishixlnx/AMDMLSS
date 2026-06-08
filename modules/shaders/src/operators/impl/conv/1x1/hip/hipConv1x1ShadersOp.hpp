@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-#include "../conv1x1.hpp"
+#include "shaders/src/operators/impl/conv/1x1/conv1x1.hpp"
 
 namespace mlss::conv::one_by_one::hip::wmma
 {

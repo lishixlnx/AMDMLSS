@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "conv1x1.hpp"
-#include "../utils.hpp"
+#include "shaders/src/operators/impl/conv/utils.hpp"
 #include "misa/misaShadersOp.hpp"
 #include "hip/hipConv1x1ShadersOp.hpp"
 

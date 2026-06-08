@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-#include "../core.hxx"
+#include "core/impl/core.hxx"
 
 namespace mlss
 {

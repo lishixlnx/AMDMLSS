@@ -52,10 +52,15 @@ usage() {
     fi
     echo "  -b, --build              Build type: debug, release, all (default: release)"
     echo "  --clean-up               Remove all build directories before building"
-    echo "  --build-sample-tests     Build sample tests but don't run them"
-    echo "  --run-sample-tests       Build and run sample tests (or just run if already built)"
-    echo "  --build-all-tests        Build sample tests, mlss-tester and unit tests"
+    echo "  --run-sample-tests       Run sample tests after building them"
+    echo "  --no-tests               Library-only build: skip samples, unit tests and mlss-tester"
+    echo "  --no-sample-tests        Skip building the samples"
+    echo "  --no-unit-tests          Skip building the unit tests (and mlss-tester)"
     echo "  -d, --deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)"
+    echo ""
+    echo "  By default every build also builds the samples and unit tests"
+    echo "  (which pulls in mlss-tester). Use --no-tests for a library-only build,"
+    echo "  or --no-sample-tests / --no-unit-tests to skip just one."
     echo ""
     echo "  When using -c all, builds with all supported compilers for the host OS."
     echo "  When using -b all, builds both debug and release configurations."
@@ -104,8 +109,21 @@ build_single() {
     local preset=$1
     local build_config=${preset##*-}  # Extract build type from preset name
     
+    # Samples and unit tests are built on every build by default. --no-tests
+    # opts out of both; --no-sample-tests / --no-unit-tests opt out of each
+    # one. Only the unit tests link mlss-tester, so the tester is built only
+    # when the unit tests are enabled.
+    local build_samples="true"
+    local build_unit_tests="true"
+    if [[ "$NO_TESTS" == "true" || "$NO_SAMPLE_TESTS" == "true" ]]; then
+        build_samples="false"
+    fi
+    if [[ "$NO_TESTS" == "true" || "$NO_UNIT_TESTS" == "true" ]]; then
+        build_unit_tests="false"
+    fi
+
     # Build mlss-tester BEFORE the main project so the correct config is installed
-    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+    if [[ "$build_unit_tests" == "true" ]]; then
         echo ""
         echo "Building amd-mlss-tester library..."
         local tester_src="${BASH_SOURCE[0]%/*}/3rdparty/amd-mlss-tester"
@@ -129,9 +147,15 @@ build_single() {
         esac
 
 
+        local dx12_include_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/include"
+        local dx12_source_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/src"
+
         local tester_config_args=(--preset "$tester_preset"
                                   -DCMAKE_INSTALL_PREFIX="$tester_install"
                                   -DMLSS_ENABLE_HIP=ON
+                                  -DMLSS_ENABLE_AOCL=ON
+                                  -DMLSS_DX12_INCLUDE_DIR="$dx12_include_dir"
+                                  -DMLSS_DX12_SOURCE_DIR="$dx12_source_dir"
                                   -DBUILD_APP=OFF
                                   -DBUILD_TESTING=OFF)
 
@@ -163,12 +187,25 @@ build_single() {
         echo "amd-mlss-tester built and installed successfully!"
     fi
 
-    # Configure with CMake preset
+    # Configure with CMake preset.
+    #
+    # BUILD_TESTS / BUILD_SAMPLES are driven explicitly by this script rather
+    # than relying on the CMake defaults. Both default to ON so every build
+    # produces the samples and unit tests (the latter linking mlss-tester,
+    # built and installed above). The opt-out flags turn each OFF; disabling
+    # the unit tests also skips the mlss-tester/AOCL dependency.
     echo ""
     echo "Configuring with CMake preset: $preset..."
     local config_args=(--preset "$preset")
-    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
+    if [[ "$build_unit_tests" == "true" ]]; then
+        config_args+=(-DBUILD_TESTS=ON)
+    else
+        config_args+=(-DBUILD_TESTS=OFF)
+    fi
+    if [[ "$build_samples" == "true" ]]; then
         config_args+=(-DBUILD_SAMPLES=ON)
+    else
+        config_args+=(-DBUILD_SAMPLES=OFF)
     fi
     cmake "${config_args[@]}"
 
@@ -188,33 +225,19 @@ build_single() {
 
     echo "$preset build completed successfully!"
 
-    if [[ "$BUILD_ALL_TESTS" == "true" ]]; then
-        echo "All tests built successfully!"
+    if [[ "$build_samples" == "true" ]]; then
+        echo "Samples built successfully!"
+    fi
+    if [[ "$build_unit_tests" == "true" ]]; then
+        echo "Unit tests built successfully!"
     fi
 
-    # Build sample tests if requested
-    if [[ "$BUILD_SAMPLE_TESTS" == "true" ]] || [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
-        echo ""
-        echo "Reconfiguring with BUILD_SAMPLES=ON for $preset..."
-        cmake --preset "$preset" -DBUILD_SAMPLES=ON
-        
-        if [ $? -ne 0 ]; then
-            echo "CMake reconfiguration failed for $preset!"
-            return 1
-        fi
-        
-        echo "Building sample tests for $preset..."
-        cmake --build "build/${preset}" --config "${build_config^}"
-        
-        if [ $? -ne 0 ]; then
-            echo "Sample tests build failed for $preset!"
-            return 1
-        fi
-        echo "Sample tests built successfully!"
-    fi
-    
-    # Run sample tests if requested
-    if [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
+    # Run sample tests if requested. The samples are already built as part of
+    # the main build above (unless the samples were disabled), so this only
+    # executes them.
+    if [[ "$RUN_SAMPLE_TESTS" == "true" && "$build_samples" != "true" ]]; then
+        echo "--run-sample-tests ignored because the samples were not built."
+    elif [[ "$RUN_SAMPLE_TESTS" == "true" ]]; then
         echo ""
         echo "Running sample tests for $preset..."
 
@@ -298,9 +321,10 @@ build_single() {
 ARGS_COUNT=$#
 BUILD_TYPE_SPECIFIED=false
 CLEAN_UP_REQUESTED=false
-BUILD_SAMPLE_TESTS=false
 RUN_SAMPLE_TESTS=false
-BUILD_ALL_TESTS=false
+NO_TESTS=false
+NO_SAMPLE_TESTS=false
+NO_UNIT_TESTS=false
 DEPLOY=false
 DEPLOY_PATH="./amdmlss_redist"
 
@@ -322,16 +346,20 @@ while [[ $# -gt 0 ]]; do
             CLEAN_UP_REQUESTED=true
             shift
             ;;
-        --build-sample-tests)
-            BUILD_SAMPLE_TESTS=true
-            shift
-            ;;
         --run-sample-tests)
             RUN_SAMPLE_TESTS=true
             shift
             ;;
-        --build-all-tests)
-            BUILD_ALL_TESTS=true
+        --no-tests)
+            NO_TESTS=true
+            shift
+            ;;
+        --no-sample-tests)
+            NO_SAMPLE_TESTS=true
+            shift
+            ;;
+        --no-unit-tests)
+            NO_UNIT_TESTS=true
             shift
             ;;
         -d|--deploy)
@@ -381,6 +409,19 @@ if [[ "$CLEAN_UP_REQUESTED" == "true" ]]; then
     echo "Clean-up completed!"
     echo ""
 fi
+
+# Initialise submodules to the SHAs pinned by this checkout. We deliberately
+# do NOT run "git submodule update --remote": pulling the tip of each tracked
+# remote branch mutates the working tree, requires network access, and makes
+# builds non-reproducible (and fails in offline/CI environments). Builds use
+# the pinned SHAs; bump them explicitly with a separate, intentional commit.
+echo "Initialising git submodules..."
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    echo "git submodule update --recursive failed!"
+    exit 1
+fi
+echo ""
 
 # Validate build type
 if [[ "$BUILD_TYPE" != "debug" && "$BUILD_TYPE" != "release" && "$BUILD_TYPE" != "all" ]]; then

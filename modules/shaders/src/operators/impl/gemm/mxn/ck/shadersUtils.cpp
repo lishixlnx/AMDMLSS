@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "../../utils.hpp"
+#include "shaders/src/operators/impl/gemm/utils.hpp"
 
 #include "gfx1201/fp32/shadersBin.hpp"
 #include "gfx1201/fp32/DecisionTree.hpp"

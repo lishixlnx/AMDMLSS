@@ -1,7 +1,7 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
-#include "../convMxN.hpp"
+#include "shaders/src/operators/impl/conv/mxn/convMxN.hpp"
 
 namespace mlss::conv::mxn::misa
 {

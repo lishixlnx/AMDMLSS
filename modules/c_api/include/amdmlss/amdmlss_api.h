@@ -183,6 +183,26 @@ extern "C"
      */
     MLSS_API MLSSstatus mlssGetBinaries(const MLSScontext context, MLSSbinary** const binaries, MLSSsize* const numBinaries);
 
+    /**
+     * @brief Get shader binaries filtered by ELF variant (relocatable or linked executable).
+     *
+     * Extended variant of mlssGetBinaries that lets the caller request only the
+     * binary kind it can consume:
+     *   - MLSS_BINARY_KIND_NON_RELOCATABLE — linked executable, loadable by
+     *     hipModuleLoadData / DX12 CreateComputePipelineCrossCompile (default).
+     *   - MLSS_BINARY_KIND_RELOCATABLE     — raw relocatable ELF for callers
+     *     that perform their own amd_comgr / lld linking step.
+     *   - MLSS_BINARY_KIND_ANY             — all blobs returned unfiltered regardless of type.
+     *
+     * @param context     The context to get binaries from
+     * @param binaries    Pointer to store the filtered binary array
+     * @param numBinaries Pointer to store the number of returned binaries
+     * @param kind        Which ELF variant to return (see MLSSbinaryKind)
+     * @return MLSSstatus MLSS_SUCCESS on success, error code otherwise
+     */
+    MLSS_API MLSSstatus mlssGetBinariesEx(const MLSScontext context, MLSSbinary** const binaries,
+                                          MLSSsize* const numBinaries, MLSSbinaryKind kind);
+
     // Operator management
 
     /**
