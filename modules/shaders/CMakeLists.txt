@@ -1,10 +1,12 @@
 add_project_module(shaders
     TYPE STATIC
-    SOURCES 
+    SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/operators/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/operators/*.hpp"
 
-    HEADERS 
+    HEADERS
         "${CMAKE_CURRENT_SOURCE_DIR}/include/shaders/*.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     DEPENDENCIES

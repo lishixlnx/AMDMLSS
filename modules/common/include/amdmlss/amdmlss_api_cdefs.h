@@ -32,6 +32,9 @@
 #define MLSS_CONV MLSS(CONV)
 #define MLSS_CONV_DILATED MLSS(CONV_DILATED)
 #define MLSS_CONV_DEPTHWISE MLSS(CONV_DEPTHWISE)
+#define MLSS_RMSNORM MLSS(RMSNORM)
+#define MLSS_SIGMOID_MUL MLSS(SIGMOID_MUL)
+#define MLSS_GEMMGEMM MLSS(GEMMGEMM)
 
 // GPU Architectures
 #define MLSS_GFX600 MLSS_GFX(600)
@@ -426,6 +429,30 @@ enum MLSSOPAttributesFlag
     MLSS_ATTR_CONV_DILATED_DATATYPE,
     MLSS_ATTR_CONV_DILATED_PRECISION,
     MLSS_ATTR_CONV_DILATED_ACTIVATION,
+
+    // RmsNorm attributes
+    MLSS_ATTR_RMSNORM_M,
+    MLSS_ATTR_RMSNORM_N,
+    MLSS_ATTR_RMSNORM_DATATYPE,
+    MLSS_ATTR_RMSNORM_EPSILON,
+
+    // SigmoidMul attributes
+    MLSS_ATTR_SIGMOID_MUL_N,
+    MLSS_ATTR_SIGMOID_MUL_C,
+    MLSS_ATTR_SIGMOID_MUL_H,
+    MLSS_ATTR_SIGMOID_MUL_W,
+    MLSS_ATTR_SIGMOID_MUL_DATATYPE,
+
+    // GemmGemm (batched double-GEMM) attributes
+    MLSS_ATTR_GEMMGEMM_M,
+    MLSS_ATTR_GEMMGEMM_N,
+    MLSS_ATTR_GEMMGEMM_K,
+    MLSS_ATTR_GEMMGEMM_L,
+    MLSS_ATTR_GEMMGEMM_BATCH,
+    MLSS_ATTR_GEMMGEMM_DATATYPE,
+    MLSS_ATTR_GEMMGEMM_QUANTDATATYPE,
+    MLSS_ATTR_GEMMGEMM_TRANSB0,
+    MLSS_ATTR_GEMMGEMM_TRANSB1,
 };
 
 enum MLSSPrecisionFlag
@@ -659,6 +686,18 @@ typedef struct
     MLSSbool m_isRelocatable;
 
 } MLSSbinary;
+
+// Filter passed to mlssGetBinariesEx to select which ELF variant is returned.
+// MLSS emits two blobs per kernel: a relocatable object (.o) from the shader
+// archive and a linked executable produced by amd_comgr.
+typedef enum
+{
+    MLSS_BINARY_KIND_NON_RELOCATABLE = 1 << 0, // Linked executable — loadable by hipModuleLoadData (default)
+    MLSS_BINARY_KIND_RELOCATABLE     = 1 << 1, // Raw relocatable ELF — for callers that link themselves
+    MLSS_BINARY_KIND_ANY             = (MLSS_BINARY_KIND_NON_RELOCATABLE | MLSS_BINARY_KIND_RELOCATABLE), // All valid blobs regardless of ELF type
+    MLSS_BINARY_KIND_SINGLE_POINTER  = 1 << 3, // Single pointer to the binary
+    MLSS_BINARY_KIND_DOUBLE_POINTER  = 1 << 4, // Double pointer to the binary
+} MLSSbinaryKind;
 
 typedef struct
 {

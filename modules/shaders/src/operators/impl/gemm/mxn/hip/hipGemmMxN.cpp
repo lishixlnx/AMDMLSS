@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "hipGemmMxN.hpp"
 #include "shadersUtils.hpp"
-#include "../../utils.hpp"
+#include "shaders/src/operators/impl/gemm/utils.hpp"
 
 namespace mlss::gemm::mxn::hip
 {

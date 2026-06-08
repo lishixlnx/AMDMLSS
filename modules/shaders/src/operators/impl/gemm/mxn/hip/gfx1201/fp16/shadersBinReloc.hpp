@@ -1,10 +1,10 @@
-/* Copyright (c) 2025-2026 Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
 #include <array>
 #include <cstdint>
 
-namespace mlss::gemm::mxn::hip::fp16::gfx1201
+namespace archive::gemm::mxn::hip::gfx1201::fp16
 {
 
 inline constexpr auto gemm_add_fp16_128x128x16_add_nn_gfx1201 = std::to_array<std::uint8_t>({
@@ -18401,7 +18401,7 @@ inline constexpr auto& gemm_add_fp16_64x128x32_add_nt_gfx1201 = gemm_add_fp16_64
 
 }
 
-namespace mlss::gemm::mxn::hip::fp16::gfx1201::noActivations
+namespace noActivations
 {
 
 inline constexpr auto gemm_add_fp16_128x128x16_add_nn_gfx1201 = std::to_array<std::uint8_t>({
@@ -25604,4 +25604,4 @@ inline constexpr auto gemm_add_fp16_64x128x32_add_2_4_nt_gfx1201 = std::to_array
     0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 });
 
-} // namespace mlss::gemm::mxn::hip::fp16::gfx1201::noActivations
+} // namespace archive::gemm::mxn::hip::gfx1201::fp16

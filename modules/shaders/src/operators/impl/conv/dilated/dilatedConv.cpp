@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "dilatedConv.hpp"
-#include "../utils.hpp"
+#include "shaders/src/operators/impl/conv/utils.hpp"
 #include "hip/hipShadersOp.hpp"
 
 template class mlss::BackendBase<mlss::conv::dilated::hip::HipDilatedConv, mlss::conv::dilated::DilatedConv>;

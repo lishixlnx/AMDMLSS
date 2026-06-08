@@ -5,9 +5,10 @@ setlocal enabledelayedexpansion
 set COMPILER=clang
 set BUILD_TYPE=release
 set CLEANUP=0
-set BUILD_SAMPLE_TESTS=0
 set RUN_SAMPLE_TESTS=0
-set BUILD_ALL_TESTS=0
+set NO_TESTS=0
+set NO_SAMPLE_TESTS=0
+set NO_UNIT_TESTS=0
 set DEPLOY=
 set DEPLOY_PATH=./amdmlss_redist
 
@@ -20,10 +21,15 @@ echo Usage: %0 [-c^|--compiler ^<compiler^>] [-b^|--build ^<build_type^>] [optio
 echo   -c, --compiler           Compiler: vs2022, vs2026, clang, all (default: clang)
 echo   -b, --build              Build type: debug, release, all (default: release)
 echo   --clean-up               Remove all build directories before building
-echo   --build-sample-tests     Build sample tests but don't run them
-echo   --run-sample-tests       Build and run sample tests (or just run if already built)
-echo   --build-all-tests        Build sample tests, mlss-tester and unit tests
+echo   --run-sample-tests       Run sample tests after building them
+echo   --no-tests               Library-only build: skip samples, unit tests and mlss-tester
+echo   --no-sample-tests        Skip building the samples
+echo   --no-unit-tests          Skip building the unit tests (and mlss-tester)
 echo   -d, --deploy [path]      Deploy amdmlss and cmake files (default: ./amdmlss_redist)
+echo.
+echo   By default every build also builds the samples and unit tests
+echo   (which pulls in mlss-tester). Use --no-tests for a library-only build,
+echo   or --no-sample-tests / --no-unit-tests to skip just one.
 echo.
 echo   When using -c all, builds with all supported compilers.
 echo   When using -b all, builds both debug and release configurations.
@@ -45,18 +51,23 @@ if /i "%~1"=="--clean-up" (
     shift
     goto :parse_args
 )
-if /i "%~1"=="--build-sample-tests" (
-    set BUILD_SAMPLE_TESTS=1
-    shift
-    goto :parse_args
-)
 if /i "%~1"=="--run-sample-tests" (
     set RUN_SAMPLE_TESTS=1
     shift
     goto :parse_args
 )
-if /i "%~1"=="--build-all-tests" (
-    set BUILD_ALL_TESTS=1
+if /i "%~1"=="--no-tests" (
+    set NO_TESTS=1
+    shift
+    goto :parse_args
+)
+if /i "%~1"=="--no-sample-tests" (
+    set NO_SAMPLE_TESTS=1
+    shift
+    goto :parse_args
+)
+if /i "%~1"=="--no-unit-tests" (
+    set NO_UNIT_TESTS=1
     shift
     goto :parse_args
 )
@@ -153,6 +164,19 @@ if %CLEANUP%==1 (
     echo Clean-up completed!
     echo.
 )
+
+:: Initialise submodules to the SHAs pinned by this checkout. We deliberately
+:: do NOT run "git submodule update --remote": pulling the tip of each tracked
+:: remote branch mutates the working tree, requires network access, and makes
+:: builds non-reproducible (and fails in offline/CI environments). Builds use
+:: the pinned SHAs; bump them explicitly with a separate, intentional commit.
+echo Initialising git submodules...
+git submodule update --init --recursive
+if %errorlevel% neq 0 (
+    echo git submodule update --recursive failed!
+    exit /b 1
+)
+echo.
 
 :: Validate build type
 if /i not "%BUILD_TYPE%"=="debug" if /i not "%BUILD_TYPE%"=="release" if /i not "%BUILD_TYPE%"=="all" (
@@ -338,9 +362,20 @@ for %%a in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
 )
 set BUILD_CONFIG_CAPITALIZED=%FIRST_LETTER%%REST%
 
+:: Samples and unit tests are built on every build by default. --no-tests opts
+:: out of both; --no-sample-tests / --no-unit-tests opt out of each one. Only
+:: the unit tests link mlss-tester, so the tester is built only when the unit
+:: tests are enabled. Resolve the two CMake flags here.
+set BUILD_SAMPLES_FLAG=ON
+set BUILD_UNIT_FLAG=ON
+if %NO_TESTS%==1 set BUILD_SAMPLES_FLAG=OFF
+if %NO_TESTS%==1 set BUILD_UNIT_FLAG=OFF
+if %NO_SAMPLE_TESTS%==1 set BUILD_SAMPLES_FLAG=OFF
+if %NO_UNIT_TESTS%==1 set BUILD_UNIT_FLAG=OFF
+
 :: Build mlss-tester BEFORE the main project so the correct config is installed
-if %BUILD_ALL_TESTS%==1 goto :build_tester
-goto :skip_tester
+if "%BUILD_UNIT_FLAG%"=="OFF" goto :skip_tester
+goto :build_tester
 
 :build_tester
 echo.
@@ -367,7 +402,12 @@ if "%TESTER_PRESET%"=="" (
     exit /b 1
 )
 
-set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DBUILD_APP=OFF -DBUILD_TESTING=OFF
+if "%HIP_PATH%"=="" set HIP_PATH=C:\opt\rocm
+
+set DX12_INCLUDE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\include
+set DX12_SOURCE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\src
+
+set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DMLSS_ENABLE_AOCL=ON -DMLSS_DX12_INCLUDE_DIR=%DX12_INCLUDE_DIR% -DMLSS_DX12_SOURCE_DIR=%DX12_SOURCE_DIR% -DBUILD_APP=OFF -DBUILD_TESTING=OFF
 
 if /i "%FIRST_TOKEN%"=="clang" (
     set TESTER_CONFIG_ARGS=%TESTER_CONFIG_ARGS% -DCMAKE_CXX_COMPILER=%HIP_PATH%/bin/clang++.exe "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
@@ -394,14 +434,16 @@ echo amd-mlss-tester built and installed successfully!
 
 :skip_tester
 
-:: Configure with CMake preset
+:: Configure with CMake preset.
+::
+:: BUILD_TESTS / BUILD_SAMPLES are driven explicitly by this script rather
+:: than relying on the CMake defaults. Both default to ON so every build
+:: produces the samples and unit tests (the latter linking mlss-tester,
+:: built and installed above). The opt-out flags turn each OFF; disabling the
+:: unit tests also skips the mlss-tester/AOCL dependency.
 echo.
 echo Configuring with CMake preset: %PRESET%...
-if %BUILD_ALL_TESTS%==1 (
-    cmake --preset %PRESET% -DBUILD_SAMPLES=ON
-) else (
-    cmake --preset %PRESET%
-)
+cmake --preset %PRESET% -DBUILD_TESTS=%BUILD_UNIT_FLAG% -DBUILD_SAMPLES=%BUILD_SAMPLES_FLAG%
 
 if %errorlevel% neq 0 (
     echo CMake configuration failed for %PRESET%!
@@ -419,38 +461,20 @@ if %errorlevel% neq 0 (
 
 echo %PRESET% build completed successfully!
 
-if %BUILD_ALL_TESTS%==1 (
-    echo All tests built successfully!
+if "%BUILD_SAMPLES_FLAG%"=="ON" (
+    echo Samples built successfully!
+)
+if "%BUILD_UNIT_FLAG%"=="ON" (
+    echo Unit tests built successfully!
 )
 
-:: Build sample tests if requested
-if %BUILD_SAMPLE_TESTS%==1 goto :build_samples
-if %RUN_SAMPLE_TESTS%==1 goto :build_samples
-goto :skip_samples
-
-:build_samples
-echo.
-echo Reconfiguring with BUILD_SAMPLES=ON for %PRESET%...
-cmake --preset %PRESET% -DBUILD_SAMPLES=ON
-
-if %errorlevel% neq 0 (
-    echo CMake reconfiguration failed for %PRESET%!
-    exit /b 1
+:: Run sample tests if requested. The samples are already built as part of the
+:: main build above (unless the samples were disabled), so this only executes
+:: them.
+if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="OFF" (
+    echo --run-sample-tests ignored because the samples were not built.
 )
-
-echo Building sample tests for %PRESET%...
-cmake --build "build\%PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
-
-if %errorlevel% neq 0 (
-    echo Sample tests build failed for %PRESET%!
-    exit /b 1
-)
-echo Sample tests built successfully!
-
-:skip_samples
-
-:: Run sample tests if requested
-if %RUN_SAMPLE_TESTS%==1 (
+if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="ON" (
     echo.
     echo Running sample tests for %PRESET%...
     

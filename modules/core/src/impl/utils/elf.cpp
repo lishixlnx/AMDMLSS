@@ -3,7 +3,6 @@
 #include "core/core.hpp"
 
 #include <amd_comgr/amd_comgr.h>
-#include <charconv>
 #include <cstring>
 
 namespace mlss
@@ -189,119 +188,117 @@ namespace mlss
             return result;
         }
 
+        // Parse a MsgPack uint value from buf at offset i. Returns false on failure.
+        bool parseMsgpackUint32(const std::uint8_t* buf, std::size_t size, std::size_t& i, std::uint32_t& out)
+        {
+            if (i >= size) return false;
+            std::uint8_t b = buf[i];
+            if (b <= 0x7fu)          { out = b; i += 1; return true; }
+            if (b == 0xccu && i + 1 < size) { out = buf[i+1]; i += 2; return true; }
+            if (b == 0xcdu && i + 2 < size) { out = (static_cast<std::uint32_t>(buf[i+1]) << 8u) | buf[i+2]; i += 3; return true; }
+            if (b == 0xceu && i + 4 < size) {
+                out = (static_cast<std::uint32_t>(buf[i+1]) << 24u)
+                    | (static_cast<std::uint32_t>(buf[i+2]) << 16u)
+                    | (static_cast<std::uint32_t>(buf[i+3]) <<  8u)
+                    |  static_cast<std::uint32_t>(buf[i+4]);
+                i += 5; return true;
+            }
+            return false;
+        }
+
+        // Extract workgroup size by parsing the AMDGPU ELF .note section directly.
+        // Reads .threadgroup_dimensions (PAL pipeline metadata) from SHT_NOTE sections.
+        // Avoids invoking comgr, which causes STATUS_STACK_BUFFER_OVERRUN on Windows
+        // when processing large Winograd relocatable ELFs.
         std::expected<MLSSdim3, std::error_code> extractWorkgroupSize(
             std::span<const std::uint8_t> binary)
         {
-            amd_comgr_data_t data{};
-            amd_comgr_metadata_node_t rootMeta{};
-            amd_comgr_metadata_node_t kernelsMeta{};
-            amd_comgr_metadata_node_t kernel0Meta{};
-            amd_comgr_metadata_node_t wgsMeta{};
-            amd_comgr_metadata_node_t dimMeta[0x03]{};
-            bool hasRoot    = false;
-            bool hasKernels = false;
-            bool hasKernel0 = false;
-            bool hasWgs     = false;
-            std::uint32_t dimCount = 0x00u;
+            constexpr std::size_t   kEhdrSize = 64u;
+            constexpr std::size_t   kShdrSize = 64u;
+            constexpr std::uint32_t SHT_NOTE  = 7u;
 
-            auto cleanup = [&]()
+            const auto* raw = binary.data();
+            const std::size_t sz = binary.size();
+
+            if (sz < kEhdrSize || raw[0] != 0x7fu || raw[1] != 'E' || raw[2] != 'L' || raw[3] != 'F')
             {
-                for (std::uint32_t i = 0x00u; i < dimCount; ++i)
-                {
-                    amd_comgr_destroy_metadata(dimMeta[i]);
-                }
-                if (hasWgs)     amd_comgr_destroy_metadata(wgsMeta);
-                if (hasKernel0) amd_comgr_destroy_metadata(kernel0Meta);
-                if (hasKernels) amd_comgr_destroy_metadata(kernelsMeta);
-                if (hasRoot)    amd_comgr_destroy_metadata(rootMeta);
-                amd_comgr_release_data(data);
-            };
+                return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+            }
 
-            CHECK_COMGR(amd_comgr_create_data(AMD_COMGR_DATA_KIND_RELOCATABLE, &data));
-            CHECK_COMGR(amd_comgr_set_data(data, binary.size(),
-                        reinterpret_cast<const char*>(binary.data())));
+            // Use memcpy for potentially unaligned ELF header fields
+            std::uint64_t shoff{}; std::memcpy(&shoff, raw + 40u, 8u);
+            std::uint16_t shentsize{}; std::memcpy(&shentsize, raw + 58u, 2u);
+            std::uint16_t shnum{};    std::memcpy(&shnum,    raw + 60u, 2u);
 
-            CHECK_COMGR(amd_comgr_get_data_metadata(data, &rootMeta));
-            hasRoot = true;
-
-            CHECK_COMGR(amd_comgr_metadata_lookup(rootMeta, "amdhsa.kernels", &kernelsMeta));
-            hasKernels = true;
-
-            CHECK_COMGR(amd_comgr_index_list_metadata(kernelsMeta, 0, &kernel0Meta));
-            hasKernel0 = true;
-
-            auto parseMetadataUint32 = [](amd_comgr_metadata_node_t node)
-                -> std::expected<std::uint32_t, std::error_code>
+            if (shoff == 0u || shentsize < kShdrSize || shoff + static_cast<std::uint64_t>(shnum) * shentsize > sz)
             {
-                std::size_t strSize = 0x00u;
-                if (amd_comgr_get_metadata_string(node, &strSize, nullptr) != AMD_COMGR_STATUS_SUCCESS)
-                {
-                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
-                }
+                return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+            }
 
-                std::string buf(strSize, '\0');
-                if (amd_comgr_get_metadata_string(node, &strSize, buf.data()) != AMD_COMGR_STATUS_SUCCESS)
-                {
-                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
-                }
+            static constexpr std::uint8_t kKey[] = ".threadgroup_dimensions";
+            constexpr std::size_t kKeyLen = sizeof(kKey) - 1u;
 
-                std::uint32_t val = 0x00u;
-                auto [ptr, ec] = std::from_chars(buf.data(), buf.data() + buf.size(), val);
-                if (ec != std::errc{})
-                {
-                    return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
-                }
-                return val;
-            };
-
-            amd_comgr_status_t wgsStatus = amd_comgr_metadata_lookup(
-                kernel0Meta, ".reqd_workgroup_size", &wgsMeta);
-
-            if (wgsStatus == AMD_COMGR_STATUS_SUCCESS)
+            for (std::uint16_t si = 0u; si < shnum; ++si)
             {
-                hasWgs = true;
-                MLSSdim3 result{ 0x01u, 0x01u, 0x01u };
+                const auto* shdr = raw + shoff + static_cast<std::uint64_t>(si) * shentsize;
+                std::uint32_t sh_type{};   std::memcpy(&sh_type,   shdr + 4u,  4u);
+                std::uint64_t sh_offset{}; std::memcpy(&sh_offset, shdr + 24u, 8u);
+                std::uint64_t sh_size{};   std::memcpy(&sh_size,   shdr + 32u, 8u);
 
-                for (std::uint32_t i = 0x00u; i < 0x03u; ++i)
+                if (sh_type != SHT_NOTE || sh_size == 0u || sh_offset + sh_size > sz)
                 {
-                    CHECK_COMGR(amd_comgr_index_list_metadata(wgsMeta, i, &dimMeta[i]));
-                    dimCount = i + 0x01u;
+                    continue;
+                }
 
-                    auto valResult = parseMetadataUint32(dimMeta[i]);
-                    if (!valResult.has_value())
+                const auto* note = raw + sh_offset;
+                std::size_t noff = 0u;
+
+                while (noff + 12u <= static_cast<std::size_t>(sh_size))
+                {
+                    std::uint32_t namesz{}; std::memcpy(&namesz, note + noff,      4u);
+                    std::uint32_t descsz{}; std::memcpy(&descsz, note + noff + 4u, 4u);
+                    noff += 12u;
+                    noff += (namesz + 3u) & ~3u;
+                    const auto* desc = note + noff;
+                    const std::size_t desc_end = noff + descsz;
+                    noff += (descsz + 3u) & ~3u;
+
+                    if (noff > static_cast<std::size_t>(sh_size) || desc_end > static_cast<std::size_t>(sh_size))
                     {
-                        cleanup();
-                        return std::unexpected(valResult.error());
+                        break;
                     }
 
-                    if (i == 0x00u) result.m_x = valResult.value();
-                    if (i == 0x01u) result.m_y = valResult.value();
-                    if (i == 0x02u) result.m_z = valResult.value();
-                }
+                    for (std::size_t ki = 0u; ki + kKeyLen <= descsz; ++ki)
+                    {
+                        if (std::memcmp(desc + ki, kKey, kKeyLen) != 0)
+                        {
+                            continue;
+                        }
 
-                cleanup();
-                return result;
+                        std::size_t vi = ki + kKeyLen;
+                        if (vi >= descsz) break;
+
+                        const std::uint8_t arrByte = desc[vi];
+                        if ((arrByte & 0xf0u) != 0x90u) break;
+                        if ((arrByte & 0x0fu) < 3u) break;
+                        vi += 1u;
+
+                        MLSSdim3 result{ 0x01u, 0x01u, 0x01u };
+                        std::uint32_t* dims[3] = { &result.m_x, &result.m_y, &result.m_z };
+                        bool ok = true;
+                        for (std::uint32_t d = 0u; d < 3u; ++d)
+                        {
+                            if (!parseMsgpackUint32(desc, descsz, vi, *dims[d]))
+                            {
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if (ok) return result;
+                    }
+                }
             }
 
-            wgsStatus = amd_comgr_metadata_lookup(
-                kernel0Meta, ".max_flat_workgroup_size", &wgsMeta);
-
-            if (wgsStatus == AMD_COMGR_STATUS_SUCCESS)
-            {
-                hasWgs = true;
-
-                auto valResult = parseMetadataUint32(wgsMeta);
-                if (!valResult.has_value())
-                {
-                    cleanup();
-                    return std::unexpected(valResult.error());
-                }
-
-                cleanup();
-                return MLSSdim3{ valResult.value(), 0x01u, 0x01u };
-            }
-
-            cleanup();
             return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
         }
 
@@ -415,9 +412,12 @@ namespace mlss
 
                 std::string name(strings + sym.st_name);
 
+                // Accept C++-mangled HIP kernels (_Z...) and
+                // AMDGPU compute-shader entry points (_amdgpu_cs_main).
                 if (ELF64_ST_TYPE(sym.st_info) == STT_FUNC &&
                     sym.st_shndx != 0 &&
-                    name.size() > 2 && name[0] == '_' && name[1] == 'Z')
+                    ((name.size() > 2 && name[0] == '_' && name[1] == 'Z') ||
+                     name == "_amdgpu_cs_main"))
                 {
                     kernelNames.push_back(name);
                 }

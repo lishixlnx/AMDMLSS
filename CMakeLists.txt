@@ -64,31 +64,15 @@ if(BUILD_TESTS)
     endif()
 endif()
 
-# Provide hip::host so mlss-tester (and unit-tests) can link HIP headers + runtime.
-#
-# Prefer ROCm's own hip-config.cmake when it is usable: on Linux it imports a
-# full export set (hip::host, hip::amdhip64, hip::device) and tripping the
-# export-set safety check by pre-creating only hip::host manually breaks the
-# downstream find_package(hip) call inside mlss-tester. We therefore try the
-# package first; only fall back to a manual imported target when ROCm's
-# CMake config is not available (typical on some Windows ROCm layouts).
-if(NOT TARGET hip::host)
+# Provide hip::host so the mlss-tester driver subdirectory and the unit-tests
+# subdirectory can link HIP headers + runtime. Both consumers are gated on
+# BUILD_TESTS below, so there is no point trying to import the target outside
+# that mode. We prefer ROCm's own hip-config.cmake (it imports the full export
+# set hip::host / hip::amdhip64 / hip::device); pre-creating only hip::host
+# manually trips the export-set safety check inside hip-targets.cmake and
+# breaks downstream find_package(hip), so we do not fall back to a manual stub.
+if(BUILD_TESTS AND NOT TARGET hip::host)
     find_package(hip QUIET)
-endif()
-
-if(NOT TARGET hip::host)
-    find_path(_MLSS_HIP_INC NAMES hip/hip_runtime.h
-        PATH_SUFFIXES include PATHS "$ENV{HIP_PATH}" "$ENV{ROCM_PATH}" NO_DEFAULT_PATH)
-    find_library(_MLSS_HIP_LIB NAMES amdhip64
-        PATH_SUFFIXES lib PATHS "$ENV{HIP_PATH}" "$ENV{ROCM_PATH}" NO_DEFAULT_PATH)
-    if(_MLSS_HIP_INC AND _MLSS_HIP_LIB)
-        add_library(hip::host IMPORTED SHARED GLOBAL)
-        set_target_properties(hip::host PROPERTIES
-            IMPORTED_LOCATION "${_MLSS_HIP_LIB}"
-            IMPORTED_IMPLIB "${_MLSS_HIP_LIB}"
-            INTERFACE_INCLUDE_DIRECTORIES "${_MLSS_HIP_INC}"
-            INTERFACE_COMPILE_DEFINITIONS __HIP_PLATFORM_AMD__)
-    endif()
 endif()
 
 # Build mlss-tester library from the submodule (same compiler and build options as the main project)

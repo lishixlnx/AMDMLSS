@@ -14,6 +14,10 @@
 #include <format>
 #include <ranges>
 #include <span>
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 // Core includes (which includes amdmlss_api_cdefs.h)
 #include "core/core.hpp"
@@ -24,9 +28,12 @@
 #include "shaders/operators/mha.hpp"
 #include "shaders/operators/conv.hpp"
 #include "shaders/operators/gemm.hpp"
+#include "shaders/operators/gemm_gemm.hpp"
 #include "shaders/operators/gqa.hpp"
 #include "shaders/operators/mvn.hpp"
 #include "shaders/operators/qgemm.hpp"
+#include "shaders/operators/rmsnorm.hpp"
+#include "shaders/operators/sigmoid_mul.hpp"
 
 namespace mlss
 {
@@ -109,6 +116,34 @@ namespace mlss
 
             deleter(static_cast<T*>(obj));
         }
+
+        // Invoke fn() and return its result.  On Windows, any structured exception
+        // (access violation, illegal instruction, …) raised inside an MLSS
+        // getCapsImpl or getBinaries call is caught here and converted to the
+        // fallback value so the caller never sees a process crash.
+#ifdef _WIN32
+        template <class Fn, class Ret = std::invoke_result_t<Fn>>
+        Ret seh_call(Fn&& fn, Ret fallback) noexcept
+        {
+            __try
+            {
+                return fn();
+            }
+            __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ||
+                     GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION ||
+                     GetExceptionCode() == EXCEPTION_STACK_OVERFLOW
+                     ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+            {
+                return fallback;
+            }
+        }
+#else
+        template <class Fn, class Ret = std::invoke_result_t<Fn>>
+        Ret seh_call(Fn&& fn, Ret /*fallback*/) noexcept
+        {
+            return fn();
+        }
+#endif
 
         //=====================================================================================================================
         template <class T>
@@ -761,6 +796,45 @@ namespace mlss
                 }
                 binaries = std::move(result.value());
             }
+            else if (op.m_op == "MLSS_RMSNORM")
+            {
+                op::OperatorRmsNorm rmsnorm_operator;
+                rmsnorm_operator.setAttributes(op.m_params);
+                rmsnorm_operator.setGfxIpTriple(gfxArch);
+
+                auto result = rmsnorm_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
+            else if (op.m_op == "MLSS_SIGMOID_MUL")
+            {
+                op::OperatorSigmoidMul sigmoid_mul_operator;
+                sigmoid_mul_operator.setAttributes(op.m_params);
+                sigmoid_mul_operator.setGfxIpTriple(gfxArch);
+
+                auto result = sigmoid_mul_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
+            else if (op.m_op == "MLSS_GEMMGEMM")
+            {
+                op::OperatorGemmGemm gemm_gemm_operator;
+                gemm_gemm_operator.setAttributes(op.m_params);
+                gemm_gemm_operator.setGfxIpTriple(gfxArch);
+
+                auto result = gemm_gemm_operator.getBinaries();
+                if (!result.has_value())
+                {
+                    return std::unexpected<MLSSenum>(MLSS_ERROR_OPERATOR_NOT_SUPPORTED);
+                }
+                binaries = std::move(result.value());
+            }
             else
             {
                 // Unknown operator
@@ -863,18 +937,6 @@ namespace mlss
         {
             auto& stored_collection = anyCast<BinaryInfoCollection_t&>(*new_any);
             bin = stored_collection.binary_infos.data();
-
-            // Debug: Print addresses to verify they're valid
-            debug_log << "Collection stored at: " << &stored_collection << std::endl;
-            debug_log << "String storage size: " << stored_collection.string_storage.size() << std::endl;
-            debug_log << "Binary infos size: " << stored_collection.binary_infos.size() << std::endl;
-
-            if (!stored_collection.binary_infos.empty())
-            {
-                debug_log << "First binary operator name: " << (stored_collection.binary_infos[0].m_pOperatorName ? stored_collection.binary_infos[0].m_pOperatorName : "NULL") << std::endl;
-                debug_log << "First binary ASIC: " << (stored_collection.binary_infos[0].m_ASIC ? stored_collection.binary_infos[0].m_ASIC : "NULL") << std::endl;
-                debug_log << "First binary args count: " << stored_collection.binary_infos[0].m_argList.m_size << std::endl;
-            }
         }
         else
         {
@@ -891,11 +953,64 @@ namespace mlss
     }
 
     //=====================================================================================================================
-    MLSSbool createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n)
+    MLSSenum createBinaries(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n)
     {
         return createObj<createBinaries_t>(binaries, context, n);
+    }
 
-        return true;
+    //=====================================================================================================================
+    // Filtered variant: collects all blobs via createBinaries, then compacts the array
+    // in-place to keep only entries matching `kind`.
+    MLSSenum createBinariesEx(MLSSbinary*& binaries, const MLSScontext context, MLSSsize* const n, MLSSbinaryKind kind)
+    {
+        // Reject unknown / not-yet-supported kinds up-front instead of silently
+        // treating them as "relocatable". Only the ELF-type filters are
+        // implemented; SINGLE_POINTER / DOUBLE_POINTER are not handled here yet.
+        switch (kind)
+        {
+            case MLSS_BINARY_KIND_ANY:
+            case MLSS_BINARY_KIND_NON_RELOCATABLE:
+            case MLSS_BINARY_KIND_RELOCATABLE:
+                break;
+            default:
+                return MLSS_ERROR_INVALID_PARAMETER;
+        }
+
+        MLSSenum status = createBinaries(binaries, context, n);
+        if (status != MLSS_SUCCESS)
+            return status;
+        if (!n || *n == 0 || !binaries)
+            return MLSS_SUCCESS;
+
+        if (kind == MLSS_BINARY_KIND_ANY)
+            return MLSS_SUCCESS;
+        if (kind != MLSS_BINARY_KIND_NON_RELOCATABLE && kind != MLSS_BINARY_KIND_RELOCATABLE)
+            return MLSS_ERROR_INVALID_PARAMETER;
+        const MLSSsize total = *n;
+
+        // Compact matching binaries into the front of the array so the
+        // returned [binaries, binaries + *n) range contains only matches
+        // even when matching entries are not contiguous in the original data.
+        MLSSsize writeIndex = 0;
+        for (MLSSsize i = 0; i < total; ++i)
+        {
+            if (!binaries[i].m_binaries || binaries[i].m_binarySize == 0)
+                continue;
+
+            bool match = (kind == MLSS_BINARY_KIND_NON_RELOCATABLE) ? !binaries[i].m_isRelocatable
+                                                                     :  binaries[i].m_isRelocatable;
+            if (!match)
+                continue;
+
+            if (writeIndex != i)
+                binaries[writeIndex] = binaries[i];
+            ++writeIndex;
+        }
+
+        // If no binaries matched the requested kind, return an empty result
+        // set rather than silently exposing the unfiltered binaries.
+        *n = writeIndex;
+        return MLSS_SUCCESS;
     }
 
     //=====================================================================================================================
@@ -1301,7 +1416,7 @@ namespace mlss
                     // Check if architecture is GFX11+ for MHA
                     if (isGfx11Plus(gfxArch))
                     {
-                        supported = op::OperatorMHA::getCaps(op.m_params, gfxArch);
+                        supported = seh_call([&]{ return op::OperatorMHA::getCaps(op.m_params, gfxArch); }, false);
 
                         if (supported)
                         {
@@ -1322,7 +1437,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_CONV")
                 {
-                    supported = op::OperatorConv::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorConv::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1336,7 +1451,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GEMM")
                 {
-                    supported = op::OperatorGEMM::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorGEMM::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1350,7 +1465,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_GQA")
                 {
-                    supported = op::OperatorGQA::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorGQA::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1364,7 +1479,7 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_MVN")
                 {
-                    supported = op::OperatorMVN::getCaps(op.m_params, gfxArch);
+                    supported = seh_call([&]{ return op::OperatorMVN::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1378,7 +1493,49 @@ namespace mlss
                 }
                 else if (op.m_op == "MLSS_QGEMM")
                 {
-                    supported = op::OperatorQGEMM::getCaps(op.m_params);
+                    supported = seh_call([&]{ return op::OperatorQGEMM::getCaps(op.m_params); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_RMSNORM")
+                {
+                    supported = seh_call([&]{ return op::OperatorRmsNorm::getCaps(op.m_params, gfxArch); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_SIGMOID_MUL")
+                {
+                    supported = seh_call([&]{ return op::OperatorSigmoidMul::getCaps(op.m_params, gfxArch); }, false);
+
+                    if (supported)
+                    {
+                        error_msg = "Operation " + op.m_op + " is supported on " + ctx->m_asic;
+                    }
+                    else
+                    {
+                        op_status = MLSS_ERROR_INVALID_PARAMETER;
+                        error_msg = "Operation " + op.m_op + " has invalid parameters for " + ctx->m_asic;
+                    }
+                }
+                else if (op.m_op == "MLSS_GEMMGEMM")
+                {
+                    supported = seh_call([&]{ return op::OperatorGemmGemm::getCaps(op.m_params, gfxArch); }, false);
 
                     if (supported)
                     {
@@ -1440,14 +1597,6 @@ namespace mlss
         {
             auto& stored_collection = anyCast<CapabilityCollection_t&>(*new_any);
             *pStatuses = stored_collection.statuses.data();
-
-            // Debug output (can be removed in production)
-            debug_log << "Capability check completed for " << stored_collection.statuses.size() << " operations:" << std::endl;
-            for (size_t i = 0; i < stored_collection.statuses.size(); ++i)
-            {
-                debug_log << "  [" << i << "] " << stored_collection.error_messages[i]
-                          << " (Status: " << stored_collection.statuses[i] << ")" << std::endl;
-            }
         }
         else
         {

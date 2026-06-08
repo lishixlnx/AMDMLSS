@@ -1,17 +1,17 @@
 /* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
-#include "../../utils.hpp"
-#include "../../../conv/1x1/hip/wmma/shadersConstants.hpp"
+#include "shaders/src/operators/impl/gemm/utils.hpp"
+#include "shaders/src/operators/impl/conv/1x1/hip/wmma/shadersConstants.hpp"
 
-#include "gfx1100/fp16/shadersBin.hpp"
-#include "gfx1150/fp16/shadersBin.hpp"
-#include "gfx1201/fp16/shadersBin.hpp"
+#include "gfx1100/fp16/shadersBinReloc.hpp"
+#include "gfx1150/fp16/shadersBinReloc.hpp"
+#include "gfx1201/fp16/shadersBinReloc.hpp"
 
-namespace gfx1100        = mlss::gemm::mxn::hip::fp16::gfx1100;
-namespace gfx1150        = mlss::gemm::mxn::hip::fp16::gfx1150;
-namespace gfx1201        = mlss::gemm::mxn::hip::fp16::gfx1201;
-namespace gfx1201_noact  = mlss::gemm::mxn::hip::fp16::gfx1201::noActivations;
+namespace gfx1100        = archive::gemm::mxn::hip::gfx1100::fp16;
+namespace gfx1150        = archive::gemm::mxn::hip::gfx1150::fp16;
+namespace gfx1201        = archive::gemm::mxn::hip::gfx1201::fp16;
+namespace gfx1201_noact  = noActivations;
 namespace conv_trees     = mlss::conv::one_by_one::hip::wmma::fp16;
 
 using mlss::gemm::utils::GenericGemmParams;
@@ -174,7 +174,7 @@ namespace mlss::gemm::mxn::hip
             return shader;
         }
 
-        // Map runtime target IP to the GFX target the archived ELF was
+        // Map runtime target IP to the GFX target the in-module ELF was
         // compiled for. Mirrors conv1x1/hip/wmma::sourceArchForTarget.
         GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
         {
@@ -204,7 +204,7 @@ namespace mlss::gemm::mxn::hip
 
             Binaries binaries;
 
-            // 1) Relocatable variant: the original ELF blob from the archive.
+            // 1) Relocatable variant: the in-module ELF blob.
             auto relocDescriptor = make_shader_descriptor(
                 std::span<const std::uint8_t>(data), "", "", 0, true, ShaderTypesFlags::UNKNOWN);
             auto relocBlob = make_binary_blob(relocDescriptor);

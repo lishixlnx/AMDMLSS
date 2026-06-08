@@ -17,13 +17,19 @@ param(
     [switch]$CleanUp,
 
     [Parameter()]
-    [switch]$BuildSampleTests,
-
-    [Parameter()]
     [switch]$RunSampleTests,
 
+    # Samples and unit tests (and therefore mlss-tester) are built on every
+    # build by default. -NoTests opts out of both (library-only build);
+    # -NoSampleTests and -NoUnitTests opt out of each individually.
     [Parameter()]
-    [switch]$BuildAllTests,
+    [switch]$NoTests,
+
+    [Parameter()]
+    [switch]$NoSampleTests,
+
+    [Parameter()]
+    [switch]$NoUnitTests,
 
     # PowerShell cannot bind a string parameter that was passed without a value
     # (e.g. '-d'), so deployment is split into a switch (enable) and a separate
@@ -52,9 +58,14 @@ if ($Help) {
     Write-Host "  -c, -Compiler           Compiler: vs2022, vs2026, clang, all (default: clang)"
     Write-Host "  -b, -Build              Build type: debug, release, all (default: release)"
     Write-Host "  -CleanUp                Remove all build directories before building"
-    Write-Host "  -BuildSampleTests       Build sample tests but don't run them"
-    Write-Host "  -RunSampleTests         Build and run sample tests (or just run if already built)"
-    Write-Host "  -BuildAllTests          Build sample tests, mlss-tester and unit tests"
+    Write-Host "  -RunSampleTests         Run sample tests after building them"
+    Write-Host "  -NoTests                Library-only build: skip samples, unit tests and mlss-tester"
+    Write-Host "  -NoSampleTests          Skip building the samples"
+    Write-Host "  -NoUnitTests            Skip building the unit tests (and mlss-tester)"
+    Write-Host ""
+    Write-Host "  By default every build also builds the samples and unit tests"
+    Write-Host "  (which pulls in mlss-tester). Use -NoTests for a library-only build,"
+    Write-Host "  or -NoSampleTests / -NoUnitTests to skip just one."
     Write-Host "  -d, -Deploy             Deploy amdmlss and cmake files after building"
     Write-Host "  -DeployPath <path>      Override the deployment directory (default: ./amdmlss_redist)"
     Write-Host "  -Help, -h               Show this help message"
@@ -105,6 +116,19 @@ if ($CleanUp) {
     Write-Host ""
 }
 
+# Initialise submodules to the SHAs pinned by this checkout. We deliberately
+# do NOT run "git submodule update --remote": pulling the tip of each tracked
+# remote branch mutates the working tree, requires network access, and makes
+# builds non-reproducible (and fails in offline/CI environments). Builds use
+# the pinned SHAs; bump them explicitly with a separate, intentional commit.
+Write-Host "Initialising git submodules..."
+git submodule update --init --recursive | Out-Host
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "git submodule update --recursive failed!"
+    exit 1
+}
+Write-Host ""
+
 # Function to deploy amdmlss
 function Deploy-Amdmlss {
     param(
@@ -144,9 +168,16 @@ function Build-Single {
     # Extract build type from preset name
     $buildConfig = $Preset.Split('-')[-1]
     $buildConfigCapitalized = (Get-Culture).TextInfo.ToTitleCase($buildConfig)
-    
+
+    # Samples and unit tests are built on every build by default. -NoTests
+    # opts out of both; -NoSampleTests / -NoUnitTests opt out of each one.
+    # Only the unit tests link mlss-tester, so the tester is built only when
+    # the unit tests are enabled.
+    $buildSamples = -not ($NoTests -or $NoSampleTests)
+    $buildUnitTests = -not ($NoTests -or $NoUnitTests)
+
     # Build mlss-tester BEFORE the main project so the correct config is installed
-    if ($BuildAllTests) {
+    if ($buildUnitTests) {
         Write-Host ""
         Write-Host "Building amd-mlss-tester library..."
 
@@ -167,10 +198,18 @@ function Build-Single {
             return $false
         }
 
+        if (-not $env:HIP_PATH) { $env:HIP_PATH = 'C:/opt/rocm' }
+
+        $dx12IncludeDir = Join-Path $PSScriptRoot '3rdparty/amd-mlss-tester/3rdparty/amd-cross-compiler-tester/lib/include'
+        $dx12SourceDir  = Join-Path $PSScriptRoot '3rdparty/amd-mlss-tester/3rdparty/amd-cross-compiler-tester/lib/src'
+
         $testerConfigArgs = @(
             "--preset", $testerPreset,
             "-DCMAKE_INSTALL_PREFIX=$testerInstall",
             "-DMLSS_ENABLE_HIP=ON",
+            "-DMLSS_ENABLE_AOCL=ON",
+            "-DMLSS_DX12_INCLUDE_DIR=$dx12IncludeDir",
+            "-DMLSS_DX12_SOURCE_DIR=$dx12SourceDir",
             "-DBUILD_APP=OFF",
             "-DBUILD_TESTING=OFF"
         )
@@ -202,11 +241,26 @@ function Build-Single {
         Write-Host "amd-mlss-tester built and installed successfully!"
     }
 
-    # Configure with CMake preset
+    # Configure with CMake preset.
+    #
+    # BUILD_TESTS / BUILD_SAMPLES are driven explicitly by this script rather
+    # than relying on the CMake defaults. Both default to ON so every build
+    # produces the samples and unit tests (the latter linking mlss-tester,
+    # built and installed above). The opt-out flags turn each OFF; disabling
+    # the unit tests also skips the mlss-tester/AOCL dependency.
     Write-Host ""
     Write-Host "Configuring with CMake preset: $Preset..."
     $configArgs = @("--preset", $Preset)
-    if ($BuildAllTests) { $configArgs += "-DBUILD_SAMPLES=ON" }
+    if ($buildUnitTests) {
+        $configArgs += "-DBUILD_TESTS=ON"
+    } else {
+        $configArgs += "-DBUILD_TESTS=OFF"
+    }
+    if ($buildSamples) {
+        $configArgs += "-DBUILD_SAMPLES=ON"
+    } else {
+        $configArgs += "-DBUILD_SAMPLES=OFF"
+    }
     cmake @configArgs | Out-Host
     
     if ($LASTEXITCODE -ne 0) {
@@ -225,33 +279,20 @@ function Build-Single {
     
     Write-Host "$Preset build completed successfully!"
 
-    if ($BuildAllTests) {
-        Write-Host "All tests built successfully!"
+    if ($buildSamples) {
+        Write-Host "Samples built successfully!"
+    }
+    if ($buildUnitTests) {
+        Write-Host "Unit tests built successfully!"
     }
 
-    # Build sample tests if requested
-    if ($BuildSampleTests -or $RunSampleTests) {
-        Write-Host ""
-        Write-Host "Reconfiguring with BUILD_SAMPLES=ON for $Preset..."
-        cmake --preset $Preset -DBUILD_SAMPLES=ON | Out-Host
-        
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "CMake reconfiguration failed for $Preset!"
-            return $false
-        }
-        
-        Write-Host "Building sample tests for $Preset..."
-        cmake --build "build/$Preset" --config $buildConfigCapitalized | Out-Host
-        
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "Sample tests build failed for $Preset!"
-            return $false
-        }
-        Write-Host "Sample tests built successfully!"
+    # Run sample tests if requested. The samples are already built as part of
+    # the main build above (unless the samples were disabled), so this only
+    # executes them.
+    if ($RunSampleTests -and (-not $buildSamples)) {
+        Write-Host "-RunSampleTests ignored because the samples were not built."
     }
-    
-    # Run sample tests if requested
-    if ($RunSampleTests) {
+    elseif ($RunSampleTests) {
         Write-Host ""
         Write-Host "Running sample tests for $Preset..."
         

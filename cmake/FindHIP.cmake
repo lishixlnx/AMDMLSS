@@ -36,10 +36,24 @@ if(HIP_FOUND)
 endif()
 
 if(HIP_FOUND AND NOT TARGET HIP::Runtime)
-    add_library(HIP::Runtime IMPORTED STATIC)
-    set_target_properties(HIP::Runtime PROPERTIES
-        IMPORTED_LOCATION "${HIP_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${HIP_INCLUDE_DIR}"
-        INTERFACE_COMPILE_DEFINITIONS "__HIP_PLATFORM_AMD__"
-    )
+    # If the ROCm config-file package was already loaded (hip::amdhip64 exists),
+    # create HIP::Runtime as a thin wrapper that exposes __HIP_PLATFORM_AMD__
+    # and delegates linking to hip::amdhip64, avoiding the ninja "no rule to
+    # make hip::host;hip::device" error from the SHARED imported targets.
+    if(TARGET hip::amdhip64)
+        add_library(HIP::Runtime INTERFACE IMPORTED GLOBAL)
+        set_target_properties(HIP::Runtime PROPERTIES
+            INTERFACE_LINK_LIBRARIES "hip::amdhip64"
+            INTERFACE_INCLUDE_DIRECTORIES "${HIP_INCLUDE_DIR}"
+            INTERFACE_COMPILE_DEFINITIONS "__HIP_PLATFORM_AMD__"
+        )
+    else()
+        add_library(HIP::Runtime IMPORTED SHARED)
+        set_target_properties(HIP::Runtime PROPERTIES
+            IMPORTED_LOCATION "${HIP_LIBRARY}"
+            IMPORTED_IMPLIB "${HIP_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${HIP_INCLUDE_DIR}"
+            INTERFACE_COMPILE_DEFINITIONS "__HIP_PLATFORM_AMD__"
+        )
+    endif()
 endif()

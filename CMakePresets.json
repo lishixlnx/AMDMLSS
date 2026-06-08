@@ -93,7 +93,7 @@
                 "CMAKE_C_COMPILER": "$env{HIP_PATH}/bin/clang.exe",
                 "CMAKE_CXX_COMPILER": "$env{HIP_PATH}/bin/clang++.exe",
                 "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS": "${sourceDir}/tools/clang-scan-deps-wrapper.cmd",
-                "CMAKE_CXX_FLAGS": "-Wno-unused-command-line-argument",
+                "CMAKE_CXX_FLAGS": "-Wno-unused-command-line-argument -fasync-exceptions",
                 "CMAKE_C_FLAGS": "-Wno-unused-command-line-argument"
             }
         },
