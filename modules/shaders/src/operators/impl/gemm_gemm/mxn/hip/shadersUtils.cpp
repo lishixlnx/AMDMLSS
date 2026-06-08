@@ -125,7 +125,8 @@ namespace mlss::gemm_gemm::mxn::hip
 
         GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
         {
-            if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x00u};
+            if (gfxip.major == 0x0Cu && gfxip.minor == 0x00u) return {0x0Cu, 0x00u, 0x00u};
+            if (gfxip.major == 0x0Cu)                         return {0x0Cu, 0x00u, 0x01u};
             return IP_GFX_UNKNOWN;
         }
 
