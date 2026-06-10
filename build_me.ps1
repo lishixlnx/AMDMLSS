@@ -92,6 +92,24 @@ if (-not $env:HIP_PATH -and -not $env:ROCM_PATH) {
 if (-not $env:HIP_PATH)  { $env:HIP_PATH  = $env:ROCM_PATH }
 if (-not $env:ROCM_PATH) { $env:ROCM_PATH = $env:HIP_PATH }
 
+# Update submodules to the latest tracked branch tip. The build requires the
+# submodules to be at their latest tracked tip, so a failure here is fatal.
+#
+# git writes its progress and errors to stderr; redirect it into the success
+# stream so PowerShell does not promote it to a terminating NativeCommandError
+# (under $ErrorActionPreference='Stop') before we can report a clear message.
+Write-Host "Updating submodules..."
+try {
+    git submodule update --remote 2>&1 | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: git submodule update --remote failed!" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "ERROR: git submodule update --remote failed ($($_.Exception.Message))!" -ForegroundColor Red
+    exit 1
+}
+
 # Handle clean-up if requested
 if ($CleanUp) {
     Write-Host "Cleaning up build directories..."

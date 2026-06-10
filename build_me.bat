@@ -127,6 +127,15 @@ if "%HIP_PATH%"=="" if "%ROCM_PATH%"=="" (
 if "%HIP_PATH%"==""  set HIP_PATH=%ROCM_PATH%
 if "%ROCM_PATH%"=="" set ROCM_PATH=%HIP_PATH%
 
+:: Update submodules to the latest tracked branch tip. The build requires the
+:: submodules to be at their latest tracked tip, so a failure here is fatal.
+echo Updating submodules...
+git submodule update --remote
+if %errorlevel% neq 0 (
+    echo ERROR: git submodule update --remote failed!
+    exit /b 1
+)
+
 :: Perform cleanup if requested
 if %CLEANUP%==1 (
     echo Cleaning up build directories...

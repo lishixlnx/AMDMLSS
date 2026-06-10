@@ -42,6 +42,14 @@ require_rocm_env() {
 
 require_rocm_env || exit 1
 
+# Update submodules to the latest tracked branch tip. The build requires the
+# submodules to be at their latest tracked tip, so a failure here is fatal.
+echo "Updating submodules..."
+if ! git submodule update --remote; then
+    echo "ERROR: git submodule update --remote failed!" >&2
+    exit 1
+fi
+
 # Function to display usage
 usage() {
     echo "Usage: $0 [-c|--compiler <compiler>] [-b|--build <build_type>] [options]"
