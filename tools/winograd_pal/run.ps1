@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 <#
 .SYNOPSIS
     End-to-end orchestrator: extract -> link -> reemit.

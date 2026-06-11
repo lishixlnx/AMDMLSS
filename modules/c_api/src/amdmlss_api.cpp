@@ -1,3 +1,4 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "api_backend.hpp"
 #include "amdmlss/amdmlss_api.h"
 #include "core/core.hpp"

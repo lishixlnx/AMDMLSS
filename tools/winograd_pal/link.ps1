@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 <#
 .SYNOPSIS
     Drive ld.lld to link every Winograd PAL relocatable extracted by
