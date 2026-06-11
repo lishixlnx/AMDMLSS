@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # End-to-end orchestrator: extract -> link -> reemit.
 #
 # Runs:

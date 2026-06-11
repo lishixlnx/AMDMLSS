@@ -1,3 +1,4 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 // Verify that the converted archive headers are stdlib-only and compile in
 // isolation. Build with:
 //   clang++ -std=c++23 -I .. -c verify_compile.cpp

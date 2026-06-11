@@ -1,3 +1,4 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 #include "core/core.hpp"
 // Binary shader payloads use mlss::StaticShaderType, ShaderDescriptor, and make_binary_blob (see shaders/shaders.hpp).

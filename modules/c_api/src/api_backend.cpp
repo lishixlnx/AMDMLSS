@@ -1,3 +1,4 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #include "api_backend.hpp"
 
 // Standard library includes

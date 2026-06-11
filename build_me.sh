@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 # Detect host OS so the same script works on Windows (Git Bash / MSYS) and on
 # Linux (native or WSL). On Linux we use a different set of CMake presets and

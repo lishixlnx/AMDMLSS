@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # Drive ld.lld to link every Winograd PAL relocatable extracted by
 # extract.py into a shared (ET_DYN) AMDPAL ELF. Mirror of link.ps1; same
 # logic, different shell.

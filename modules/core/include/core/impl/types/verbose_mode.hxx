@@ -1,3 +1,4 @@
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 #pragma once
 
 // Windows headers define ERROR as a macro; undefine it before our enum.
