@@ -78,9 +78,11 @@ endif()
 # Build mlss-tester library from the submodule (same compiler and build options as the main project)
 if(NOT BUILD_TESTS)
     message(STATUS "BUILD_TESTS=OFF — skipping amd-mlss-tester")
+else()
+    set(_MLSS_TESTER_SUBMODULE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester")
+    ensure_git_submodule("3rdparty/amd-mlss-tester" "lib/CMakeLists.txt")
 endif()
-set(_MLSS_TESTER_SUBMODULE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester")
-ensure_git_submodule("3rdparty/amd-mlss-tester" "lib/CMakeLists.txt")
+
 if(BUILD_TESTS AND EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
     list(APPEND CMAKE_MODULE_PATH "${_MLSS_TESTER_SUBMODULE}/cmake/Modules")
 
