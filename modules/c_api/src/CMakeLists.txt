@@ -1,4 +1,5 @@
-﻿include(GenerateExportHeader)
+﻿# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+include(GenerateExportHeader)
 
 # Collect all source files from src folder only
 file(GLOB_RECURSE LIB_SOURCES

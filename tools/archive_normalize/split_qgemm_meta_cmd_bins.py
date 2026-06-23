@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Move archive/qgemm metaCmdBin headers into the mxn/hlsl/wmma tree.
 
 Each legacy metaCmdBin*.h file contains one or more DXIL UINT32 arrays. The

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # Get all test files
 file(GLOB TEST_SOURCES "*.c")
 

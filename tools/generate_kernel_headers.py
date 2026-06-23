@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """
 Generate MLSS precompiled kernel headers (shadersBin.hpp / shadersBinReloc.hpp)
 from HIP (.hip), HLSL (.hlsl), and pre-assembled AMDGCN (.s) kernel sources.

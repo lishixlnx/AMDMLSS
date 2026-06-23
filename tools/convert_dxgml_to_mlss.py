@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """
 Convert dxGml precompiled shader headers (const unsigned char Name[N] = {...})
 to MLSS shadersBin.hpp format (inline constexpr auto name = std::to_array<std::uint8_t>({...})).

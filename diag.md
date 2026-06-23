@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. -->
+
 # AMDMLSS Operator Class Hierarchy
 
 ## UML Class Diagram

@@ -128,14 +128,8 @@ if "%HIP_PATH%"=="" if "%ROCM_PATH%"=="" (
 if "%HIP_PATH%"==""  set HIP_PATH=%ROCM_PATH%
 if "%ROCM_PATH%"=="" set ROCM_PATH=%HIP_PATH%
 
-:: Update submodules to the latest tracked branch tip. The build requires the
-:: submodules to be at their latest tracked tip, so a failure here is fatal.
-echo Updating submodules...
-git submodule update --remote
-if %errorlevel% neq 0 (
-    echo ERROR: git submodule update --remote failed!
-    exit /b 1
-)
+:: The test dependencies (Catch2, amd-mlss-tester) are no longer git submodules;
+:: CMake fetches them with FetchContent, and only when the unit tests are built.
 
 :: Perform cleanup if requested
 if %CLEANUP%==1 (
@@ -167,19 +161,6 @@ if %CLEANUP%==1 (
     echo Clean-up completed!
     echo.
 )
-
-:: Initialise submodules to the SHAs pinned by this checkout. We deliberately
-:: do NOT run "git submodule update --remote": pulling the tip of each tracked
-:: remote branch mutates the working tree, requires network access, and makes
-:: builds non-reproducible (and fails in offline/CI environments). Builds use
-:: the pinned SHAs; bump them explicitly with a separate, intentional commit.
-echo Initialising git submodules...
-git submodule update --init --recursive
-if %errorlevel% neq 0 (
-    echo git submodule update --recursive failed!
-    exit /b 1
-)
-echo.
 
 :: Validate build type
 if /i not "%BUILD_TYPE%"=="debug" if /i not "%BUILD_TYPE%"=="release" if /i not "%BUILD_TYPE%"=="all" (
@@ -231,7 +212,6 @@ if /i "%COMPILER%"=="all" (
         echo Building with clang-%%t
         echo ========================================
         set PRESET=clang-%%t
-        set LAST_PRESET=clang-%%t
         call :build_single
         if !errorlevel! neq 0 (
             echo clang-%%t build failed!
@@ -248,7 +228,7 @@ if /i "%COMPILER%"=="all" (
         echo ========================================
         echo Deploying amdmlss
         echo ========================================
-        call :deploy_amdmlss !LAST_PRESET! "%DEPLOY_PATH%"
+        call :deploy_amdmlss !LAST_BUILT_PRESET! "%DEPLOY_PATH%"
         if !errorlevel! neq 0 (
             echo Deployment failed!
             exit /b 1
@@ -273,7 +253,6 @@ if %BUILD_TYPE_COUNT% gtr 1 (
     echo.
 )
 
-set LAST_PRESET=
 for %%t in (%BUILD_TYPES%) do (
     set PRESET=%COMPILER%-%%t
     
@@ -291,8 +270,6 @@ for %%t in (%BUILD_TYPES%) do (
         exit /b 1
     )
     
-    set LAST_PRESET=!PRESET!
-    
     if %BUILD_TYPE_COUNT% gtr 1 (
         echo.
     )
@@ -306,7 +283,7 @@ if "%DEPLOY%"=="1" (
     echo ========================================
     echo Deploying amdmlss
     echo ========================================
-    call :deploy_amdmlss %LAST_PRESET% "%DEPLOY_PATH%"
+    call :deploy_amdmlss %LAST_BUILT_PRESET% "%DEPLOY_PATH%"
     if %errorlevel% neq 0 (
         echo Deployment failed!
         exit /b 1
@@ -367,8 +344,8 @@ set BUILD_CONFIG_CAPITALIZED=%FIRST_LETTER%%REST%
 
 :: Samples and unit tests are built on every build by default. --no-tests opts
 :: out of both; --no-sample-tests / --no-unit-tests opt out of each one. Only
-:: the unit tests link mlss-tester, so the tester is built only when the unit
-:: tests are enabled. Resolve the two CMake flags here.
+:: the unit tests pull in Catch2 + mlss-tester (fetched by CMake). Resolve the
+:: two flags here.
 set BUILD_SAMPLES_FLAG=ON
 set BUILD_UNIT_FLAG=ON
 if %NO_TESTS%==1 set BUILD_SAMPLES_FLAG=OFF
@@ -376,93 +353,33 @@ if %NO_TESTS%==1 set BUILD_UNIT_FLAG=OFF
 if %NO_SAMPLE_TESTS%==1 set BUILD_SAMPLES_FLAG=OFF
 if %NO_UNIT_TESTS%==1 set BUILD_UNIT_FLAG=OFF
 
-:: Build mlss-tester BEFORE the main project so the correct config is installed
-if "%BUILD_UNIT_FLAG%"=="OFF" goto :skip_tester
-goto :build_tester
+:: The test/sample combination is expressed entirely through the preset variant;
+:: CMake fetches the test dependencies only for unit-test builds.
+set PRESET_VARIANT=%PRESET%
+if "%BUILD_UNIT_FLAG%"=="ON"  if "%BUILD_SAMPLES_FLAG%"=="OFF" set PRESET_VARIANT=%PRESET%-unit
+if "%BUILD_UNIT_FLAG%"=="OFF" if "%BUILD_SAMPLES_FLAG%"=="ON"  set PRESET_VARIANT=%PRESET%-samples
+if "%BUILD_UNIT_FLAG%"=="OFF" if "%BUILD_SAMPLES_FLAG%"=="OFF" set PRESET_VARIANT=%PRESET%-none
+set LAST_BUILT_PRESET=%PRESET_VARIANT%
 
-:build_tester
 echo.
-echo Building amd-mlss-tester library...
-
-set TESTER_SRC=3rdparty\amd-mlss-tester
-set TESTER_INSTALL=%TESTER_SRC%\install
-
-:: Map main-project preset to the matching mlss-tester preset
-set FIRST_TOKEN=%PRESET:~0,5%
-set TESTER_PRESET=
-if /i "%FIRST_TOKEN%"=="clang" (
-    if /i "%BUILD_CONFIG%"=="debug" (
-        set TESTER_PRESET=clang-lib-static-debug
-    ) else (
-        set TESTER_PRESET=clang-lib-static-release
-    )
-)
-if /i "%PRESET:~0,6%"=="vs2022" set TESTER_PRESET=vs2022-lib-static
-if /i "%PRESET:~0,6%"=="vs2026" set TESTER_PRESET=vs2026-lib-static
-
-if "%TESTER_PRESET%"=="" (
-    echo No matching mlss-tester preset for '%PRESET%'!
-    exit /b 1
-)
-
-if "%HIP_PATH%"=="" set HIP_PATH=C:\opt\rocm
-
-set DX12_INCLUDE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\include
-set DX12_SOURCE_DIR=%TESTER_SRC%\3rdparty\amd-cross-compiler-tester\lib\src
-
-set TESTER_CONFIG_ARGS=--preset %TESTER_PRESET% -DCMAKE_INSTALL_PREFIX=%TESTER_INSTALL% -DMLSS_ENABLE_HIP=ON -DMLSS_ENABLE_AOCL=ON -DMLSS_DX12_INCLUDE_DIR=%DX12_INCLUDE_DIR% -DMLSS_DX12_SOURCE_DIR=%DX12_SOURCE_DIR% -DBUILD_APP=OFF -DBUILD_TESTING=OFF
-
-if /i "%FIRST_TOKEN%"=="clang" (
-    set TESTER_CONFIG_ARGS=%TESTER_CONFIG_ARGS% -DCMAKE_CXX_COMPILER=%HIP_PATH%/bin/clang++.exe "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument"
-)
-
-cmake %TESTER_CONFIG_ARGS% -S %TESTER_SRC%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester configuration failed!
-    exit /b 1
-)
-
-cmake --build "%TESTER_SRC%\build\%TESTER_PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester build failed!
-    exit /b 1
-)
-
-cmake --install "%TESTER_SRC%\build\%TESTER_PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
-if %errorlevel% neq 0 (
-    echo amd-mlss-tester install failed!
-    exit /b 1
-)
-echo amd-mlss-tester built and installed successfully!
-
-:skip_tester
-
-:: Configure with CMake preset.
-::
-:: BUILD_TESTS / BUILD_SAMPLES are driven explicitly by this script rather
-:: than relying on the CMake defaults. Both default to ON so every build
-:: produces the samples and unit tests (the latter linking mlss-tester,
-:: built and installed above). The opt-out flags turn each OFF; disabling the
-:: unit tests also skips the mlss-tester/AOCL dependency.
-echo.
-echo Configuring with CMake preset: %PRESET%...
-cmake --preset %PRESET% -DBUILD_TESTS=%BUILD_UNIT_FLAG% -DBUILD_SAMPLES=%BUILD_SAMPLES_FLAG%
+echo Configuring with CMake preset: %PRESET_VARIANT%...
+cmake --preset %PRESET_VARIANT%
 
 if %errorlevel% neq 0 (
-    echo CMake configuration failed for %PRESET%!
+    echo CMake configuration failed for %PRESET_VARIANT%!
     exit /b 1
 )
 
-:: Build the project (including unit tests when mlss-tester is available)
+:: Build the project (including unit tests when enabled)
 echo Building project...
-cmake --build "build\%PRESET%" --config %BUILD_CONFIG_CAPITALIZED%
+cmake --build "build\%PRESET_VARIANT%" --config %BUILD_CONFIG_CAPITALIZED%
 
 if %errorlevel% neq 0 (
-    echo Build failed for %PRESET%!
+    echo Build failed for %PRESET_VARIANT%!
     exit /b 1
 )
 
-echo %PRESET% build completed successfully!
+echo %PRESET_VARIANT% build completed successfully!
 
 if "%BUILD_SAMPLES_FLAG%"=="ON" (
     echo Samples built successfully!
@@ -479,10 +396,10 @@ if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="OFF" (
 )
 if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="ON" (
     echo.
-    echo Running sample tests for %PRESET%...
+    echo Running sample tests for !PRESET_VARIANT!...
     
     :: First try the base samples directory (for Ninja builds)
-    set TEST_DIR=build\%PRESET%\samples
+    set TEST_DIR=build\!PRESET_VARIANT!\samples
     set HAS_EXE_FILES=0
     
     if exist "!TEST_DIR!" (
@@ -493,12 +410,12 @@ if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="ON" (
     
     :: If not found, try with build configuration subdirectory (for MSBuild)
     if !HAS_EXE_FILES!==0 (
-        set TEST_DIR=build\%PRESET%\samples\%BUILD_CONFIG_CAPITALIZED%
+        set TEST_DIR=build\!PRESET_VARIANT!\samples\%BUILD_CONFIG_CAPITALIZED%
         if not exist "!TEST_DIR!" (
-            set TEST_DIR=build\%PRESET%\samples\Debug
+            set TEST_DIR=build\!PRESET_VARIANT!\samples\Debug
         )
         if not exist "!TEST_DIR!" (
-            set TEST_DIR=build\%PRESET%\samples\Release
+            set TEST_DIR=build\!PRESET_VARIANT!\samples\Release
         )
     )
     
@@ -516,13 +433,13 @@ if %RUN_SAMPLE_TESTS%==1 if "%BUILD_SAMPLES_FLAG%"=="ON" (
             echo.
         )
         if !TEST_FAILED! neq 0 (
-            echo Some tests failed for %PRESET%!
+            echo Some tests failed for !PRESET_VARIANT!!
             exit /b 1
         )
-        echo All sample tests passed for %PRESET%!
+        echo All sample tests passed for !PRESET_VARIANT!!
     ) else (
         echo No test directory found at !TEST_DIR!
-        echo Skipping sample tests for %PRESET%
+        echo Skipping sample tests for !PRESET_VARIANT!
     )
 )
 

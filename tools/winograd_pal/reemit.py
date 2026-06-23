@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Re-emit each Winograd `shadersBinReloc.hpp` as a sibling
 `shadersBinNonReloc.hpp` whose kernel bodies are the linked (`ET_DYN`,
 OS/ABI=AMDGPU_PAL) outputs produced by `link.{ps1,sh}`.

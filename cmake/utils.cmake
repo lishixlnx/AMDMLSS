@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # cmake/project_functions.cmake
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -333,7 +334,17 @@ function(add_project_test TEST_NAME)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/samples
         FOLDER "Samples"
     )
-    
+
+    # Register the sample as a CTest test. Use the target's own file/location so
+    # the test resolves correctly for both single- and multi-config generators
+    # (multi-config places the binary under a per-config subdirectory). The
+    # working directory matches that location so the co-located runtime
+    # dependency (e.g. the c_api DLL copied alongside on Windows) is found.
+    add_test(NAME ${TEST_NAME} COMMAND $<TARGET_FILE:${TEST_NAME}>)
+    set_tests_properties(${TEST_NAME} PROPERTIES
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${TEST_NAME}>
+    )
+
     # Create Visual Studio folder structure for test files
     create_vs_folder_structure(${TEST_NAME})
 endfunction()
@@ -435,59 +446,6 @@ function(organize_project_files)
             FOLDER "Scripts"
             FILES ${BUILD_SCRIPTS}
         )
-    endif()
-endfunction()
-
-# Ensure a git submodule is checked out, initialising it on demand when the
-# enclosing project is itself a git working tree. Fails fast when the submodule
-# is required but cannot be fetched (no git, no network, source distribution
-# without a .git directory, etc.) so that the build does not silently skip
-# critical dependencies.
-function(ensure_git_submodule SUBMODULE_PATH SENTINEL_FILE)
-    # Use CMAKE_CURRENT_SOURCE_DIR so the function works correctly when this
-    # project is consumed as a subdirectory (add_subdirectory).
-    set(_abs_path "${CMAKE_CURRENT_SOURCE_DIR}/${SUBMODULE_PATH}")
-    set(_sentinel "${_abs_path}/${SENTINEL_FILE}")
-
-    if(EXISTS "${_sentinel}")
-        return()
-    endif()
-
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-        message(FATAL_ERROR
-            "Submodule '${SUBMODULE_PATH}' is missing and the project is not a "
-            "git working tree (no .git directory at ${CMAKE_CURRENT_SOURCE_DIR}). "
-            "Re-clone the project with --recurse-submodules or fetch the "
-            "submodule contents manually before configuring.")
-    endif()
-
-    find_package(Git QUIET)
-    if(NOT GIT_FOUND)
-        message(FATAL_ERROR
-            "Submodule '${SUBMODULE_PATH}' is missing and git was not found on "
-            "PATH; cannot initialise it automatically.")
-    endif()
-
-    message(STATUS "Initialising git submodule '${SUBMODULE_PATH}'...")
-    execute_process(
-        COMMAND "${GIT_EXECUTABLE}" submodule update --init --recursive -- "${SUBMODULE_PATH}"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        RESULT_VARIABLE _git_rc
-        OUTPUT_VARIABLE _git_stdout
-        ERROR_VARIABLE  _git_stderr)
-
-    if(NOT _git_rc EQUAL 0)
-        message(FATAL_ERROR
-            "Failed to initialise git submodule '${SUBMODULE_PATH}' "
-            "(git exit code ${_git_rc}).\n"
-            "stdout:\n${_git_stdout}\n"
-            "stderr:\n${_git_stderr}")
-    endif()
-
-    if(NOT EXISTS "${_sentinel}")
-        message(FATAL_ERROR
-            "Submodule '${SUBMODULE_PATH}' was initialised but expected file "
-            "'${SENTINEL_FILE}' is still missing.")
     endif()
 endfunction()
 

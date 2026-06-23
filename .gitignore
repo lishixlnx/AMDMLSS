@@ -1,4 +1,14 @@
-3rdparty/
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# In 3rdparty/, the ONLY files that may be tracked are the per-dependency fetch
+# modules at 3rdparty/<dep>/<dep>.cmake — nothing else (no fetched sources, build
+# outputs, deployed artifacts, or .cmake files at any other location/depth).
+# Ignore the top level, re-include dependency directories so Git can descend,
+# ignore their contents, then re-include only the .cmake fetch module in each.
+3rdparty/*
+!3rdparty/*/
+3rdparty/*/*
+!3rdparty/*/*.cmake
 build/
 .cline_storage/
 

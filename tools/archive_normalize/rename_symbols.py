@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Rename C++ shader variables under ``archive/`` to the AMD GPU spec form
 ``<operation>_<dtype>_<variant>_<arch>``.
 

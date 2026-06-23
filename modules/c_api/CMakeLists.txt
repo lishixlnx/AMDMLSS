@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 add_project_module(c_api
     TYPE SHARED
     SOURCES 

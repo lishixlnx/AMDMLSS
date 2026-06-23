@@ -1,5 +1,0 @@
-[submodule "3rdparty/amd-mlss-tester"]
-	path = 3rdparty/amd-mlss-tester
-	url = https://github.com/AMD-Radeon-ML/amd-mlss-tester.git
-	branch = main
-	update = merge

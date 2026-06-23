@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Convert legacy MVN2 archive shader binaries to the modern StaticShaderType format."""
 
 import re

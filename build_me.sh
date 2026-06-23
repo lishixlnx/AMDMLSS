@@ -43,13 +43,8 @@ require_rocm_env() {
 
 require_rocm_env || exit 1
 
-# Update submodules to the latest tracked branch tip. The build requires the
-# submodules to be at their latest tracked tip, so a failure here is fatal.
-echo "Updating submodules..."
-if ! git submodule update --remote; then
-    echo "ERROR: git submodule update --remote failed!" >&2
-    exit 1
-fi
+# The test dependencies (Catch2, amd-mlss-tester) are no longer git submodules;
+# CMake fetches them with FetchContent, and only when the unit tests are built.
 
 # Function to display usage
 usage() {
@@ -90,11 +85,45 @@ resolve_preset() {
     fi
 }
 
+# Map a preset name to its build configuration (Debug/Release). The name may
+# carry a test-mode suffix (-none/-unit/-samples), so match the build type
+# substring rather than the trailing token.
+preset_build_config() {
+    case "$1" in
+        *debug*) echo "Debug" ;;
+        *)       echo "Release" ;;
+    esac
+}
+
+# Select the preset variant matching the requested unit/sample combination.
+# The base preset builds both; the suffixed variants restrict the matrix.
+preset_variant() {
+    local base=$1
+    local unit="true"
+    local samples="true"
+    if [[ "$NO_TESTS" == "true" || "$NO_UNIT_TESTS" == "true" ]]; then
+        unit="false"
+    fi
+    if [[ "$NO_TESTS" == "true" || "$NO_SAMPLE_TESTS" == "true" ]]; then
+        samples="false"
+    fi
+    if [[ "$unit" == "true" && "$samples" == "true" ]]; then
+        echo "$base"
+    elif [[ "$unit" == "true" ]]; then
+        echo "${base}-unit"
+    elif [[ "$samples" == "true" ]]; then
+        echo "${base}-samples"
+    else
+        echo "${base}-none"
+    fi
+}
+
 # Function to deploy amdmlss
 deploy_amdmlss() {
     local preset=$1
     local deploy_path=$2
-    local build_config=${preset##*-}  # Extract build type from preset name
+    local build_config
+    build_config=$(preset_build_config "$preset")
     
     echo "Deploying amdmlss to: $deploy_path"
     
@@ -102,7 +131,7 @@ deploy_amdmlss() {
     mkdir -p "$deploy_path"
     
     # Install using CMake with the correct configuration
-    cmake --install "build/${preset}" --config "${build_config^}" --prefix "$deploy_path"
+    cmake --install "build/${preset}" --config "${build_config}" --prefix "$deploy_path"
     
     if [ $? -ne 0 ]; then
         echo "Deployment failed for $preset!"
@@ -113,15 +142,16 @@ deploy_amdmlss() {
     return 0
 }
 
-# Function to build with a single preset
+# Function to build with a single preset (base preset, e.g. linux-clang-release;
+# the matching test-mode variant is selected from the --no-* flags).
 build_single() {
-    local preset=$1
-    local build_config=${preset##*-}  # Extract build type from preset name
+    local base_preset=$1
+    local build_config
+    build_config=$(preset_build_config "$base_preset")
     
     # Samples and unit tests are built on every build by default. --no-tests
     # opts out of both; --no-sample-tests / --no-unit-tests opt out of each
-    # one. Only the unit tests link mlss-tester, so the tester is built only
-    # when the unit tests are enabled.
+    # one. Only the unit tests pull in Catch2 + mlss-tester (fetched by CMake).
     local build_samples="true"
     local build_unit_tests="true"
     if [[ "$NO_TESTS" == "true" || "$NO_SAMPLE_TESTS" == "true" ]]; then
@@ -131,101 +161,24 @@ build_single() {
         build_unit_tests="false"
     fi
 
-    # Build mlss-tester BEFORE the main project so the correct config is installed
-    if [[ "$build_unit_tests" == "true" ]]; then
-        echo ""
-        echo "Building amd-mlss-tester library..."
-        local tester_src="${BASH_SOURCE[0]%/*}/3rdparty/amd-mlss-tester"
-        local tester_install="${tester_src}/install"
+    # The test/sample combination is expressed entirely through the preset
+    # variant; CMake fetches the test dependencies only for unit-test builds.
+    local preset
+    preset=$(preset_variant "$base_preset")
+    LAST_BUILT_PRESET="$preset"
 
-        # Map main-project preset to the matching mlss-tester preset
-        local tester_preset=""
-        case "$preset" in
-            clang-debug)            tester_preset="clang-lib-static-debug"   ;;
-            clang-release)          tester_preset="clang-lib-static-release" ;;
-            vs2022-*)               tester_preset="vs2022-lib-static"        ;;
-            vs2026-*)               tester_preset="vs2026-lib-static"        ;;
-            linux-clang-debug)      tester_preset="clang-lib-static-debug"   ;;
-            linux-clang-release)    tester_preset="clang-lib-static-release" ;;
-            linux-gcc-debug)        tester_preset="gcc-lib-static-debug"     ;;
-            linux-gcc-release)      tester_preset="gcc-lib-static-release"   ;;
-            *)
-                echo "No matching mlss-tester preset for '$preset'!"
-                return 1
-                ;;
-        esac
-
-
-        local dx12_include_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/include"
-        local dx12_source_dir="${tester_src}/3rdparty/amd-cross-compiler-tester/lib/src"
-
-        local tester_config_args=(--preset "$tester_preset"
-                                  -DCMAKE_INSTALL_PREFIX="$tester_install"
-                                  -DMLSS_ENABLE_HIP=ON
-                                  -DMLSS_ENABLE_AOCL=ON
-                                  -DMLSS_DX12_INCLUDE_DIR="$dx12_include_dir"
-                                  -DMLSS_DX12_SOURCE_DIR="$dx12_source_dir"
-                                  -DBUILD_APP=OFF
-                                  -DBUILD_TESTING=OFF)
-
-        # On Windows the project must use the ROCm clang++ for HIP source.
-        # On Linux the tester's clang-base preset already uses system clang/clang++,
-        # which is what we want, so we skip the explicit override there.
-        if [[ "$HOST_OS" != "linux" && "$preset" == clang-* ]]; then
-            tester_config_args+=("-DCMAKE_CXX_COMPILER=${HIP_PATH}/bin/clang++.exe"
-                                 "-DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument")
-        fi
-
-        cmake "${tester_config_args[@]}" -S "$tester_src"
-        if [ $? -ne 0 ]; then
-            echo "amd-mlss-tester configuration failed!"
-            return 1
-        fi
-
-        cmake --build "${tester_src}/build/${tester_preset}" --config "${build_config^}"
-        if [ $? -ne 0 ]; then
-            echo "amd-mlss-tester build failed!"
-            return 1
-        fi
-
-        cmake --install "${tester_src}/build/${tester_preset}" --config "${build_config^}"
-        if [ $? -ne 0 ]; then
-            echo "amd-mlss-tester install failed!"
-            return 1
-        fi
-        echo "amd-mlss-tester built and installed successfully!"
-    fi
-
-    # Configure with CMake preset.
-    #
-    # BUILD_TESTS / BUILD_SAMPLES are driven explicitly by this script rather
-    # than relying on the CMake defaults. Both default to ON so every build
-    # produces the samples and unit tests (the latter linking mlss-tester,
-    # built and installed above). The opt-out flags turn each OFF; disabling
-    # the unit tests also skips the mlss-tester/AOCL dependency.
     echo ""
     echo "Configuring with CMake preset: $preset..."
-    local config_args=(--preset "$preset")
-    if [[ "$build_unit_tests" == "true" ]]; then
-        config_args+=(-DBUILD_TESTS=ON)
-    else
-        config_args+=(-DBUILD_TESTS=OFF)
-    fi
-    if [[ "$build_samples" == "true" ]]; then
-        config_args+=(-DBUILD_SAMPLES=ON)
-    else
-        config_args+=(-DBUILD_SAMPLES=OFF)
-    fi
-    cmake "${config_args[@]}"
+    cmake --preset "$preset"
 
     if [ $? -ne 0 ]; then
         echo "CMake configuration failed for $preset!"
         return 1
     fi
 
-    # Build the project (including unit tests when mlss-tester is available)
+    # Build the project (including unit tests when enabled)
     echo "Building project..."
-    cmake --build "build/${preset}" --config "${build_config^}"
+    cmake --build "build/${preset}" --config "${build_config}"
 
     if [ $? -ne 0 ]; then
         echo "Build failed for $preset!"
@@ -419,19 +372,6 @@ if [[ "$CLEAN_UP_REQUESTED" == "true" ]]; then
     echo ""
 fi
 
-# Initialise submodules to the SHAs pinned by this checkout. We deliberately
-# do NOT run "git submodule update --remote": pulling the tip of each tracked
-# remote branch mutates the working tree, requires network access, and makes
-# builds non-reproducible (and fails in offline/CI environments). Builds use
-# the pinned SHAs; bump them explicitly with a separate, intentional commit.
-echo "Initialising git submodules..."
-git submodule update --init --recursive
-if [ $? -ne 0 ]; then
-    echo "git submodule update --recursive failed!"
-    exit 1
-fi
-echo ""
-
 # Validate build type
 if [[ "$BUILD_TYPE" != "debug" && "$BUILD_TYPE" != "release" && "$BUILD_TYPE" != "all" ]]; then
     echo "Invalid build type: $BUILD_TYPE"
@@ -481,9 +421,7 @@ if [[ "$COMPILER" == "all" ]]; then
         echo "========================================"
         echo "Deploying amdmlss"
         echo "========================================"
-        last_compiler="${SUPPORTED_COMPILERS[-1]}"
-        last_preset=$(resolve_preset "$last_compiler" "${BUILD_TYPES[-1]}")
-        deploy_amdmlss "$last_preset" "$DEPLOY_PATH"
+        deploy_amdmlss "$LAST_BUILT_PRESET" "$DEPLOY_PATH"
         if [ $? -ne 0 ]; then
             echo "Deployment failed!"
             exit 1
@@ -513,7 +451,6 @@ if [[ ${#BUILD_TYPES[@]} -gt 1 ]]; then
     echo ""
 fi
 
-LAST_PRESET=""
 for build_type in "${BUILD_TYPES[@]}"; do
     PRESET=$(resolve_preset "$COMPILER" "$build_type")
 
@@ -531,8 +468,6 @@ for build_type in "${BUILD_TYPES[@]}"; do
         exit 1
     fi
 
-    LAST_PRESET="$PRESET"
-
     if [[ ${#BUILD_TYPES[@]} -gt 1 ]]; then
         echo ""
     fi
@@ -546,7 +481,7 @@ if [[ "$DEPLOY" == "true" ]]; then
     echo "========================================"
     echo "Deploying amdmlss"
     echo "========================================"
-    deploy_amdmlss "$LAST_PRESET" "$DEPLOY_PATH"
+    deploy_amdmlss "$LAST_BUILT_PRESET" "$DEPLOY_PATH"
     if [ $? -ne 0 ]; then
         echo "Deployment failed!"
         exit 1

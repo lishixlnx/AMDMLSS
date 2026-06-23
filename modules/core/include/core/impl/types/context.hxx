@@ -13,7 +13,11 @@ namespace mlss
         struct Op;
 
         //---------------------------------------------------------------------
-        constexpr Context() = default;
+        // Not constexpr: std::error_code's default constructor is not constexpr
+        // in libstdc++ (it references system_category()), and Context holds
+        // std::string/std::vector members, so it can never be a constant
+        // expression regardless.
+        Context() = default;
 
         //---------------------------------------------------------------------
         Context(std::string_view asic, std::vector<Op>&& ops);

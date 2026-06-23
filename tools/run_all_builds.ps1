@@ -69,9 +69,9 @@ foreach ($preset in $Presets) {
     # parallel targets fire CMake re-runs simultaneously. Safe here because
     # this script always reconfigures before building.
     $configRc = Invoke-CmakeStep `
-        "[$preset] CONFIGURE (-DBUILD_SAMPLES=ON -DBUILD_TESTS=ON)" `
+        "[$preset] CONFIGURE (-DBUILD_SAMPLE_TESTS=ON -DBUILD_UNIT_TESTS=ON)" `
         $configLog `
-        @('--preset', $preset, '-DBUILD_SAMPLES=ON', '-DBUILD_TESTS=ON',
+        @('--preset', $preset, '-DBUILD_SAMPLE_TESTS=ON', '-DBUILD_UNIT_TESTS=ON',
           '-DCMAKE_SUPPRESS_REGENERATION=ON')
 
     $buildRc = -1

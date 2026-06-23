@@ -1,0 +1,55 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+name: No stray binaries
+
+# Enforce that binary files are only added under archive/ or shaders_drop/.
+# This is the authoritative gate (the local pre-commit hook is best-effort and
+# can be bypassed). Only files introduced by the PR/push are inspected, so
+# pre-existing binaries elsewhere do not fail the check.
+on:
+  pull_request:
+  push:
+    branches: ['**']
+
+jobs:
+  check:
+    # Self-hosted runners in the radeonml-ci group: GitHub-hosted runners are
+    # blocked by the organization IP allow list. The group provisions ephemeral
+    # Windows builders, selected by group name only (the ARC runners do not
+    # carry the standard self-hosted/OS auto-labels). git-bash is installed so
+    # the shared POSIX checker runs as the single source of truth.
+    runs-on:
+      group: radeonml-ci
+    steps:
+      - name: Checkout (full history for diffing)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup git-bash
+        uses: ./.github/actions/setup-git-bash
+
+      - name: Determine diff range
+        id: range
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+            echo "args=${base}...${head}" >> "$GITHUB_OUTPUT"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+            # First push to a new branch reports an all-zero "before"; fall back
+            # to the empty tree so every file is treated as newly added.
+            if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+              base="$(git hash-object -t tree /dev/null)"
+              echo "args=${base} ${head}" >> "$GITHUB_OUTPUT"
+            else
+              echo "args=${base}...${head}" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Check for binaries outside archive/ and shaders_drop/
+        shell: bash
+        run: sh tools/check_binaries.sh --diff ${{ steps.range.outputs.args }}

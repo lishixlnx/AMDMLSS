@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Extract every Winograd PAL relocatable ELF embedded in a `shadersBinReloc.hpp`
 into a raw `.o` file under `build/winograd_pal/<Family>/<arch>/<prec>/`.
 

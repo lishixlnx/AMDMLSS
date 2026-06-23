@@ -1,4 +1,4 @@
-/* Copyright (c) Advanced Micro Devices, Inc. All rights reserved. */
+/* Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. */
 // Auto-generated from dxGml precompiled shader binaries.
 #pragma once
 

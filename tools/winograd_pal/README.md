@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved. -->
+
 # `tools/winograd_pal/`
 
 Offline tooling that converts the relocatable AMDPAL ELFs embedded in every

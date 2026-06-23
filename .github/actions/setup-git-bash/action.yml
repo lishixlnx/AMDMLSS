@@ -1,0 +1,52 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Ensure a POSIX bash (Git for Windows) is available on the runner PATH. The
+# ephemeral radeonml-ci Windows builders ship git.exe but not always a bash on
+# PATH, so the shared tools/*.sh checks (single source of truth with the local
+# pre-commit hook) cannot run. This action locates git-bash next to the
+# existing git install, installs Git for Windows if necessary, and exposes the
+# bash directory to subsequent steps via $GITHUB_PATH.
+name: Setup git-bash
+description: Ensure Git for Windows (git-bash) is available on PATH.
+runs:
+  using: composite
+  steps:
+    - name: Ensure git-bash is available
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+
+        function Find-Bash {
+            $onPath = (Get-Command bash -ErrorAction SilentlyContinue).Source
+            if ($onPath) { return $onPath }
+            $git = (Get-Command git -ErrorAction SilentlyContinue).Source
+            if ($git) {
+                # <root>\cmd\git.exe -> <root>\bin\bash.exe
+                $root = Split-Path (Split-Path $git -Parent) -Parent
+                $candidate = Join-Path $root 'bin\bash.exe'
+                if (Test-Path $candidate) { return $candidate }
+            }
+            return $null
+        }
+
+        $bash = Find-Bash
+        if (-not $bash) {
+            Write-Host 'git-bash not found; installing Git for Windows...'
+            if (Get-Command choco -ErrorAction SilentlyContinue) {
+                choco install git -y --no-progress
+            }
+            elseif (Get-Command winget -ErrorAction SilentlyContinue) {
+                winget install --id Git.Git -e --source winget `
+                    --accept-package-agreements --accept-source-agreements
+            }
+            else {
+                throw 'Neither choco nor winget is available to install Git for Windows.'
+            }
+            $bash = Find-Bash
+        }
+
+        if (-not $bash) { throw 'Unable to locate git-bash after installation.' }
+
+        $bashDir = Split-Path $bash -Parent
+        $bashDir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding ascii
+        Write-Host "Using git-bash: $bash"

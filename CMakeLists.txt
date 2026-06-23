@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 cmake_minimum_required(VERSION 3.25)
 project(amdmlss VERSION 1.0.0 LANGUAGES C CXX)  # Added C language
 
@@ -45,26 +46,27 @@ add_standalone_headers(common_headers
 )
 
 # Options
-option(BUILD_SAMPLES "Build sample/test programs" OFF)
-option(BUILD_TESTS "Build Catch2 unit tests" ON)
+option(BUILD_UNIT_TESTS   "Build Catch2 GPU-kernel unit tests" ON)
+option(BUILD_SAMPLE_TESTS "Build sample/test programs"         ON)
 
-# Use a vendored Catch2 checkout when available; otherwise unit-tests/CMakeLists.txt
-# falls back to FetchContent. This keeps builds working both offline (with the
-# submodule populated) and on fresh clones (network fetch).
-if(BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Catch2/CMakeLists.txt")
-    add_subdirectory(3rdparty/Catch2)
-endif()
+# The test dependencies (Catch2, amd-mlss-tester) are consumed only by the unit
+# tests, so their fetch toggles default to the unit-tests flag. Set either to
+# OFF to build the unit tests against a local/vendored copy without network
+# access (supply the location via FETCHCONTENT_SOURCE_DIR_<NAME>).
+option(FETCH_CATCH2 "Download Catch2 via FetchContent"          ${BUILD_UNIT_TESTS})
+option(FETCH_TESTER "Download amd-mlss-tester via FetchContent" ${BUILD_UNIT_TESTS})
 
 # Add modules directory
 add_subdirectory(modules)
 
 # Add samples/tests directory if enabled
-if(BUILD_SAMPLES)
+if(BUILD_SAMPLE_TESTS)
+    enable_testing()
     add_subdirectory(samples)
 endif()
 
 # Add tests directory if enabled
-if(BUILD_TESTS)
+if(BUILD_UNIT_TESTS)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
         enable_testing()
         add_subdirectory(tests)
@@ -75,83 +77,33 @@ endif()
 
 # Provide hip::host so the mlss-tester driver subdirectory and the unit-tests
 # subdirectory can link HIP headers + runtime. Both consumers are gated on
-# BUILD_TESTS below, so there is no point trying to import the target outside
-# that mode. We prefer ROCm's own hip-config.cmake (it imports the full export
-# set hip::host / hip::amdhip64 / hip::device); pre-creating only hip::host
-# manually trips the export-set safety check inside hip-targets.cmake and
-# breaks downstream find_package(hip), so we do not fall back to a manual stub.
-if(BUILD_TESTS AND NOT TARGET hip::host)
-    find_package(hip QUIET)
+# BUILD_UNIT_TESTS below, so there is no point trying to import the target
+# outside that mode. We prefer ROCm's own hip-config.cmake (it imports the full
+# export set hip::host / hip::amdhip64 / hip::device); pre-creating only
+# hip::host manually trips the export-set safety check inside hip-targets.cmake
+# and breaks downstream find_package(hip), so we do not fall back to a manual stub.
+if(BUILD_UNIT_TESTS AND NOT TARGET hip::host)
+    # Force CONFIG mode: ROCm ships a module-mode Findhip.cmake on
+    # CMAKE_MODULE_PATH (C:/opt/rocm/cmake) that only sets HIP_* variables and
+    # never creates the hip::host imported target. The hip::host / hip::device
+    # export set lives exclusively in the config package (hip-config.cmake), so
+    # config mode is required for the mlss-tester and unit-test consumers.
+    find_package(hip CONFIG QUIET)
 endif()
 
-# Build mlss-tester library from the submodule (same compiler and build options as the main project)
-if(NOT BUILD_TESTS)
-    message(STATUS "BUILD_TESTS=OFF — skipping amd-mlss-tester")
+# Test dependencies are consumed only by the unit tests. Each is encapsulated in
+# a self-contained fetch module under 3rdparty/<dep>/<dep>.cmake (OpenCV style)
+# and pulled in only when the unit tests are built, so library-only and
+# samples-only builds never trigger a fetch.
+if(BUILD_UNIT_TESTS)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Catch2/Catch2.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester/amd-mlss-tester.cmake)
 else()
-    set(_MLSS_TESTER_SUBMODULE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/amd-mlss-tester")
-    ensure_git_submodule("3rdparty/amd-mlss-tester" "lib/CMakeLists.txt")
-endif()
-
-if(BUILD_TESTS AND EXISTS "${_MLSS_TESTER_SUBMODULE}/lib/CMakeLists.txt")
-    list(APPEND CMAKE_MODULE_PATH "${_MLSS_TESTER_SUBMODULE}/cmake/Modules")
-
-    set(MLSS_ENABLE_HIP ON CACHE BOOL "Enable HIP backend in mlss-tester" FORCE)
-
-    # D3D12 — Windows-only API. The backend additionally requires the
-    # amd-cross-compiler-tester helper sources (whose submodule path moved
-    # between mlss-tester revisions; check both legacy and current layouts).
-    if(WIN32)
-        set(_DX12_SRC "")
-        foreach(_candidate
-                "${_MLSS_TESTER_SUBMODULE}/3rdparty/amd-cross-compiler-tester/src"
-                "${_MLSS_TESTER_SUBMODULE}/amd-cross-compiler-tester/src")
-            if(EXISTS "${_candidate}/dx12")
-                set(_DX12_SRC "${_candidate}")
-                break()
-            endif()
-        endforeach()
-        if(_DX12_SRC)
-            set(MLSS_ENABLE_D3D ON CACHE BOOL "Enable D3D backend in mlss-tester" FORCE)
-            set(MLSS_DX12_INCLUDE_DIR "${_DX12_SRC}"
-                CACHE PATH "Path to the dx12 helper headers" FORCE)
-        else()
-            set(MLSS_ENABLE_D3D OFF CACHE BOOL "D3D disabled (amd-cross-compiler-tester not available)" FORCE)
-            message(STATUS "mlss-tester: D3D disabled (amd-cross-compiler-tester submodule not initialised)")
-        endif()
-    else()
-        set(MLSS_ENABLE_D3D OFF CACHE BOOL "D3D disabled (Windows-only backend)" FORCE)
-        message(STATUS "mlss-tester: D3D disabled (Windows-only backend)")
-    endif()
-
-    # OpenCL — requires OpenCL SDK headers and library. If a system-wide
-    # SDK is not available, fall back to the tester's FetchOpenCLSDK helper
-    # which downloads the Khronos pre-built SDK (Windows) or builds it from
-    # source (Linux). This guarantees the OpenCL backend is always compiled.
-    find_package(OpenCL QUIET)
-    if(NOT OpenCL_FOUND)
-        include(FetchOpenCLSDK)
-        fetch_opencl_sdk()
-        find_package(OpenCL QUIET)
-    endif()
-    if(OpenCL_FOUND)
-        set(MLSS_ENABLE_CL ON CACHE BOOL "Enable CL backend in mlss-tester" FORCE)
-    else()
-        set(MLSS_ENABLE_CL OFF CACHE BOOL "CL disabled (OpenCL SDK not found)" FORCE)
-        message(STATUS "mlss-tester: OpenCL disabled (SDK fetch failed)")
-    endif()
-
-    # AOCL — probed quietly inside the lib, safe to always request
-    set(MLSS_ENABLE_AOCL ON CACHE BOOL "Enable AOCL in mlss-tester" FORCE)
-
-    set(_SAVE_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
-    set(BUILD_SHARED_LIBS ON)
-    add_subdirectory("${_MLSS_TESTER_SUBMODULE}/lib"
-                     "${CMAKE_BINARY_DIR}/3rdparty/mlss-tester")
-    set(BUILD_SHARED_LIBS "${_SAVE_BUILD_SHARED_LIBS}")
+    message(STATUS "BUILD_UNIT_TESTS=OFF — skipping Catch2 / amd-mlss-tester")
 endif()
 
 # Add GPU kernel unit tests
-if(BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/unit-tests/CMakeLists.txt")
+if(BUILD_UNIT_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/unit-tests/CMakeLists.txt")
     enable_testing()
     add_subdirectory(unit-tests)
 endif()

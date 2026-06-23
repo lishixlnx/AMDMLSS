@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # GPU kernel integration tests for MLSS operators.
 # Requires the mlss-tester library target and the amdmlss C API.
 
@@ -12,41 +13,38 @@ if(NOT TARGET c_api)
 endif()
 
 # ── Required mlss-tester backends ────────────────────────────────────────────
-# The unit tests exercise every backend the tester supports. HIP and OpenCL
-# are required on every platform; D3D12 is Windows-only and therefore only
-# required when building for Windows. The Host tensor library (used for
-# reference computation) is always compiled into mlss-tester.
+# HIP, OpenCL and the always-compiled Host tensor library are required on every
+# platform — they back the reference comparisons the tests rely on.
+#
+# D3D12 is optional: its backend depends on the external dx12 helper sources
+# (amd-cross-compiler-tester), which are not part of the fetched tester. Every
+# D3D12 test case is already guarded with `if constexpr (hasD3D12())` and falls
+# back to SKIP() when the backend is absent, so a missing D3D12 backend only
+# skips those cases rather than failing the build.
 set(_MLSS_REQUIRED_BACKENDS HIP CL)
-if(WIN32)
-    list(APPEND _MLSS_REQUIRED_BACKENDS D3D)
-endif()
 foreach(_backend IN LISTS _MLSS_REQUIRED_BACKENDS)
     if(NOT MLSS_ENABLE_${_backend})
         message(FATAL_ERROR
             "unit-tests: mlss-tester backend ${_backend} is not enabled "
             "(MLSS_ENABLE_${_backend}=OFF). The unit tests require HIP and "
-            "OpenCL on every platform (plus D3D12 on Windows), and the "
-            "always-compiled Host tensor library.")
+            "OpenCL on every platform, plus the always-compiled Host tensor "
+            "library.")
     endif()
 endforeach()
-if(WIN32)
-    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, D3D, OpenCL, Host")
+if(MLSS_ENABLE_D3D)
+    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, OpenCL, Host, D3D12")
 else()
-    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, OpenCL, Host (D3D is Windows-only)")
+    message(STATUS "unit-tests: mlss-tester backends enabled — HIP, OpenCL, Host (D3D12 backend absent; its test cases will SKIP)")
 endif()
 
 include(CTest)
 
-# Fetch Catch2 if not already available
+# Catch2 is provided by the top-level 3rdparty/Catch2/Catch2.cmake fetch module,
+# included before this subdirectory is added.
 if(NOT TARGET Catch2::Catch2WithMain)
-    include(FetchContent)
-    FetchContent_Declare(Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.8.0
-        GIT_SHALLOW    TRUE
-    )
-    FetchContent_MakeAvailable(Catch2)
-    list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
+    message(FATAL_ERROR
+        "Catch2::Catch2WithMain target is missing; the Catch2 fetch module must "
+        "run before add_subdirectory(unit-tests).")
 endif()
 
 # Locate the ROCm HIP runtime DLL so the test can find hipLibrary* symbols
@@ -111,14 +109,19 @@ function(add_gpu_kernel_test TARGET_NAME SOURCE_FILE)
         )
     endforeach()
 
-    # Copy the mlss-tester DLL next to the test executable
+    # Copy the mlss-tester DLL next to the test executable only when the tester
+    # is a shared library. It is built as a static library (folded into each
+    # test executable at link time), so normally there is no DLL to copy.
     if(TARGET mlss-tester AND WIN32)
-        add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "$<TARGET_FILE:mlss-tester>"
-                "$<TARGET_FILE_DIR:${TARGET_NAME}>"
-            COMMENT "Copying mlss-tester DLL for ${TARGET_NAME}"
-        )
+        get_target_property(_mlss_tester_type mlss-tester TYPE)
+        if(_mlss_tester_type STREQUAL "SHARED_LIBRARY")
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<TARGET_FILE:mlss-tester>"
+                    "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+                COMMENT "Copying mlss-tester DLL for ${TARGET_NAME}"
+            )
+        endif()
     endif()
 
     set_target_properties(${TARGET_NAME} PROPERTIES
@@ -132,8 +135,15 @@ add_gpu_kernel_test(mlss-mha-test "${CMAKE_CURRENT_LIST_DIR}/mha_test.cpp")
 # GQA kernel test
 add_gpu_kernel_test(mlss-gqa-test "${CMAKE_CURRENT_LIST_DIR}/gqa_test.cpp")
 
-# Conv 1x1 kernel test
-add_gpu_kernel_test(mlss-convmxn-test "${CMAKE_CURRENT_LIST_DIR}/convmxn_test.cpp")
+# Conv 1x1 kernel test. Unlike the other suites, convmxn_test.cpp hard-requires
+# the D3D12 backend (static_assert(hasD3D12())) — its kernels are validated only
+# against the D3D12 reference path — so it can only be built when D3D12 is
+# compiled into mlss-tester.
+if(MLSS_ENABLE_D3D)
+    add_gpu_kernel_test(mlss-convmxn-test "${CMAKE_CURRENT_LIST_DIR}/convmxn_test.cpp")
+else()
+    message(STATUS "unit-tests: skipping mlss-convmxn-test (requires the D3D12 backend)")
+endif()
 
 # MVN2 (InstaNorm) kernel test
 add_gpu_kernel_test(mlss-mvn2-test "${CMAKE_CURRENT_LIST_DIR}/mvn2_test.cpp")

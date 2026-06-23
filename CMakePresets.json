@@ -28,62 +28,6 @@
             }
         },
         {
-            "name": "vs2026-debug",
-            "displayName": "Visual Studio 2026 Debug",
-            "description": "Configure with Visual Studio 2026 (Debug)",
-            "inherits": "windows-base",
-            "generator": "Visual Studio 18 2026",
-            "architecture": {
-                "value": "x64",
-                "strategy": "set"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "vs2026-release",
-            "displayName": "Visual Studio 2026 Release",
-            "description": "Configure with Visual Studio 2026 (Release)",
-            "inherits": "windows-base",
-            "generator": "Visual Studio 18 2026",
-            "architecture": {
-                "value": "x64",
-                "strategy": "set"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "vs2022-debug",
-            "displayName": "Visual Studio 2022 Debug",
-            "description": "Configure with Visual Studio 2022 (Debug)",
-            "inherits": "windows-base",
-            "generator": "Visual Studio 17 2022",
-            "architecture": {
-                "value": "x64",
-                "strategy": "set"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "vs2022-release",
-            "displayName": "Visual Studio 2022 Release",
-            "description": "Configure with Visual Studio 2022 (Release)",
-            "inherits": "windows-base",
-            "generator": "Visual Studio 17 2022",
-            "architecture": {
-                "value": "x64",
-                "strategy": "set"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
             "name": "windows-clang-base",
             "hidden": true,
             "description": "Base settings for Clang builds on Windows",
@@ -98,27 +42,9 @@
             }
         },
         {
-            "name": "clang-debug",
-            "displayName": "Clang Debug",
-            "description": "Configure with ROCm Clang (Debug)",
-            "inherits": "windows-clang-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "clang-release",
-            "displayName": "Clang Release",
-            "description": "Configure with ROCm Clang (Release)",
-            "inherits": "windows-clang-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
             "name": "linux-base",
             "hidden": true,
-            "description": "Base settings for Linux builds (WSL or native)",
+            "description": "Base settings for Linux builds (Ubuntu/RHEL, WSL or native)",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "installDir": "${sourceDir}/install/${presetName}",
             "generator": "Ninja",
@@ -160,85 +86,424 @@
             }
         },
         {
-            "name": "linux-clang-debug",
-            "displayName": "Linux Clang Debug",
-            "description": "Configure with system Clang on Linux (Debug)",
-            "inherits": "linux-clang-base",
+            "name": "mode-none",
+            "hidden": true,
+            "description": "Library only: no unit tests, no sample tests (no test dependencies fetched)",
+            "cacheVariables": {
+                "BUILD_UNIT_TESTS": "OFF",
+                "BUILD_SAMPLE_TESTS": "OFF"
+            }
+        },
+        {
+            "name": "mode-unit",
+            "hidden": true,
+            "description": "Unit tests only (fetches Catch2 + amd-mlss-tester)",
+            "cacheVariables": {
+                "BUILD_UNIT_TESTS": "ON",
+                "BUILD_SAMPLE_TESTS": "OFF"
+            }
+        },
+        {
+            "name": "mode-samples",
+            "hidden": true,
+            "description": "Sample tests only (no test dependencies fetched)",
+            "cacheVariables": {
+                "BUILD_UNIT_TESTS": "OFF",
+                "BUILD_SAMPLE_TESTS": "ON"
+            }
+        },
+        {
+            "name": "vs2026-debug",
+            "displayName": "Visual Studio 2026 Debug",
+            "description": "Configure with Visual Studio 2026 (Debug); unit + sample tests",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "linux-clang-release",
-            "displayName": "Linux Clang Release",
-            "description": "Configure with system Clang on Linux (Release)",
-            "inherits": "linux-clang-base",
+            "name": "vs2026-debug-none",
+            "displayName": "Visual Studio 2026 Debug (no tests)",
+            "inherits": [
+                "vs2026-debug",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "vs2026-debug-unit",
+            "displayName": "Visual Studio 2026 Debug (unit tests)",
+            "inherits": [
+                "vs2026-debug",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "vs2026-debug-samples",
+            "displayName": "Visual Studio 2026 Debug (sample tests)",
+            "inherits": [
+                "vs2026-debug",
+                "mode-samples"
+            ]
+        },
+        {
+            "name": "vs2026-release",
+            "displayName": "Visual Studio 2026 Release",
+            "description": "Configure with Visual Studio 2026 (Release); unit + sample tests",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "linux-gcc-debug",
-            "displayName": "Linux GCC Debug",
-            "description": "Configure with system GCC on Linux (Debug)",
-            "inherits": "linux-gcc-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+            "name": "vs2026-release-none",
+            "displayName": "Visual Studio 2026 Release (no tests)",
+            "inherits": [
+                "vs2026-release",
+                "mode-none"
+            ]
         },
         {
-            "name": "linux-gcc-release",
-            "displayName": "Linux GCC Release",
-            "description": "Configure with system GCC on Linux (Release)",
-            "inherits": "linux-gcc-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        }
-    ],
-    "buildPresets": [
+            "name": "vs2026-release-unit",
+            "displayName": "Visual Studio 2026 Release (unit tests)",
+            "inherits": [
+                "vs2026-release",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "vs2026-release-samples",
+            "displayName": "Visual Studio 2026 Release (sample tests)",
+            "inherits": [
+                "vs2026-release",
+                "mode-samples"
+            ]
+        },
         {
             "name": "vs2022-debug",
             "displayName": "Visual Studio 2022 Debug",
-            "configurePreset": "vs2022-debug",
-            "configuration": "Debug"
+            "description": "Configure with Visual Studio 2022 (Debug); unit + sample tests",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "vs2022-debug-none",
+            "displayName": "Visual Studio 2022 Debug (no tests)",
+            "inherits": [
+                "vs2022-debug",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "vs2022-debug-unit",
+            "displayName": "Visual Studio 2022 Debug (unit tests)",
+            "inherits": [
+                "vs2022-debug",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "vs2022-debug-samples",
+            "displayName": "Visual Studio 2022 Debug (sample tests)",
+            "inherits": [
+                "vs2022-debug",
+                "mode-samples"
+            ]
         },
         {
             "name": "vs2022-release",
             "displayName": "Visual Studio 2022 Release",
-            "configurePreset": "vs2022-release",
-            "configuration": "Release"
+            "description": "Configure with Visual Studio 2022 (Release); unit + sample tests",
+            "inherits": "windows-base",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "vs2022-release-none",
+            "displayName": "Visual Studio 2022 Release (no tests)",
+            "inherits": [
+                "vs2022-release",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "vs2022-release-unit",
+            "displayName": "Visual Studio 2022 Release (unit tests)",
+            "inherits": [
+                "vs2022-release",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "vs2022-release-samples",
+            "displayName": "Visual Studio 2022 Release (sample tests)",
+            "inherits": [
+                "vs2022-release",
+                "mode-samples"
+            ]
         },
         {
             "name": "clang-debug",
             "displayName": "Clang Debug",
-            "configurePreset": "clang-debug"
+            "description": "Configure with ROCm Clang (Debug); unit + sample tests",
+            "inherits": "windows-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "clang-debug-none",
+            "displayName": "Clang Debug (no tests)",
+            "inherits": [
+                "clang-debug",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "clang-debug-unit",
+            "displayName": "Clang Debug (unit tests)",
+            "inherits": [
+                "clang-debug",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "clang-debug-samples",
+            "displayName": "Clang Debug (sample tests)",
+            "inherits": [
+                "clang-debug",
+                "mode-samples"
+            ]
         },
         {
             "name": "clang-release",
             "displayName": "Clang Release",
-            "configurePreset": "clang-release"
+            "description": "Configure with ROCm Clang (Release); unit + sample tests",
+            "inherits": "windows-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "clang-release-none",
+            "displayName": "Clang Release (no tests)",
+            "inherits": [
+                "clang-release",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "clang-release-unit",
+            "displayName": "Clang Release (unit tests)",
+            "inherits": [
+                "clang-release",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "clang-release-samples",
+            "displayName": "Clang Release (sample tests)",
+            "inherits": [
+                "clang-release",
+                "mode-samples"
+            ]
         },
         {
             "name": "linux-clang-debug",
             "displayName": "Linux Clang Debug",
-            "configurePreset": "linux-clang-debug"
+            "description": "Configure with system Clang on Linux (Debug); unit + sample tests",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-clang-debug-none",
+            "displayName": "Linux Clang Debug (no tests)",
+            "inherits": [
+                "linux-clang-debug",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "linux-clang-debug-unit",
+            "displayName": "Linux Clang Debug (unit tests)",
+            "inherits": [
+                "linux-clang-debug",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "linux-clang-debug-samples",
+            "displayName": "Linux Clang Debug (sample tests)",
+            "inherits": [
+                "linux-clang-debug",
+                "mode-samples"
+            ]
         },
         {
             "name": "linux-clang-release",
             "displayName": "Linux Clang Release",
-            "configurePreset": "linux-clang-release"
+            "description": "Configure with system Clang on Linux (Release); unit + sample tests",
+            "inherits": "linux-clang-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-clang-release-none",
+            "displayName": "Linux Clang Release (no tests)",
+            "inherits": [
+                "linux-clang-release",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "linux-clang-release-unit",
+            "displayName": "Linux Clang Release (unit tests)",
+            "inherits": [
+                "linux-clang-release",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "linux-clang-release-samples",
+            "displayName": "Linux Clang Release (sample tests)",
+            "inherits": [
+                "linux-clang-release",
+                "mode-samples"
+            ]
         },
         {
             "name": "linux-gcc-debug",
             "displayName": "Linux GCC Debug",
-            "configurePreset": "linux-gcc-debug"
+            "description": "Configure with system GCC on Linux (Debug); unit + sample tests",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-gcc-debug-none",
+            "displayName": "Linux GCC Debug (no tests)",
+            "inherits": [
+                "linux-gcc-debug",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "linux-gcc-debug-unit",
+            "displayName": "Linux GCC Debug (unit tests)",
+            "inherits": [
+                "linux-gcc-debug",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "linux-gcc-debug-samples",
+            "displayName": "Linux GCC Debug (sample tests)",
+            "inherits": [
+                "linux-gcc-debug",
+                "mode-samples"
+            ]
         },
         {
             "name": "linux-gcc-release",
             "displayName": "Linux GCC Release",
-            "configurePreset": "linux-gcc-release"
+            "description": "Configure with system GCC on Linux (Release); unit + sample tests",
+            "inherits": "linux-gcc-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-gcc-release-none",
+            "displayName": "Linux GCC Release (no tests)",
+            "inherits": [
+                "linux-gcc-release",
+                "mode-none"
+            ]
+        },
+        {
+            "name": "linux-gcc-release-unit",
+            "displayName": "Linux GCC Release (unit tests)",
+            "inherits": [
+                "linux-gcc-release",
+                "mode-unit"
+            ]
+        },
+        {
+            "name": "linux-gcc-release-samples",
+            "displayName": "Linux GCC Release (sample tests)",
+            "inherits": [
+                "linux-gcc-release",
+                "mode-samples"
+            ]
         }
+    ],
+    "buildPresets": [
+        { "name": "vs2026-debug",            "displayName": "Visual Studio 2026 Debug",                 "configurePreset": "vs2026-debug",            "configuration": "Debug"   },
+        { "name": "vs2026-debug-none",       "displayName": "Visual Studio 2026 Debug (no tests)",      "configurePreset": "vs2026-debug-none",       "configuration": "Debug"   },
+        { "name": "vs2026-debug-unit",       "displayName": "Visual Studio 2026 Debug (unit tests)",    "configurePreset": "vs2026-debug-unit",       "configuration": "Debug"   },
+        { "name": "vs2026-debug-samples",    "displayName": "Visual Studio 2026 Debug (sample tests)",  "configurePreset": "vs2026-debug-samples",    "configuration": "Debug"   },
+        { "name": "vs2026-release",          "displayName": "Visual Studio 2026 Release",               "configurePreset": "vs2026-release",          "configuration": "Release" },
+        { "name": "vs2026-release-none",     "displayName": "Visual Studio 2026 Release (no tests)",    "configurePreset": "vs2026-release-none",     "configuration": "Release" },
+        { "name": "vs2026-release-unit",     "displayName": "Visual Studio 2026 Release (unit tests)",  "configurePreset": "vs2026-release-unit",     "configuration": "Release" },
+        { "name": "vs2026-release-samples",  "displayName": "Visual Studio 2026 Release (sample tests)","configurePreset": "vs2026-release-samples",  "configuration": "Release" },
+        { "name": "vs2022-debug",            "displayName": "Visual Studio 2022 Debug",                 "configurePreset": "vs2022-debug",            "configuration": "Debug"   },
+        { "name": "vs2022-debug-none",       "displayName": "Visual Studio 2022 Debug (no tests)",      "configurePreset": "vs2022-debug-none",       "configuration": "Debug"   },
+        { "name": "vs2022-debug-unit",       "displayName": "Visual Studio 2022 Debug (unit tests)",    "configurePreset": "vs2022-debug-unit",       "configuration": "Debug"   },
+        { "name": "vs2022-debug-samples",    "displayName": "Visual Studio 2022 Debug (sample tests)",  "configurePreset": "vs2022-debug-samples",    "configuration": "Debug"   },
+        { "name": "vs2022-release",          "displayName": "Visual Studio 2022 Release",               "configurePreset": "vs2022-release",          "configuration": "Release" },
+        { "name": "vs2022-release-none",     "displayName": "Visual Studio 2022 Release (no tests)",    "configurePreset": "vs2022-release-none",     "configuration": "Release" },
+        { "name": "vs2022-release-unit",     "displayName": "Visual Studio 2022 Release (unit tests)",  "configurePreset": "vs2022-release-unit",     "configuration": "Release" },
+        { "name": "vs2022-release-samples",  "displayName": "Visual Studio 2022 Release (sample tests)","configurePreset": "vs2022-release-samples",  "configuration": "Release" },
+        { "name": "clang-debug",             "displayName": "Clang Debug",                              "configurePreset": "clang-debug"            },
+        { "name": "clang-debug-none",        "displayName": "Clang Debug (no tests)",                   "configurePreset": "clang-debug-none"       },
+        { "name": "clang-debug-unit",        "displayName": "Clang Debug (unit tests)",                 "configurePreset": "clang-debug-unit"       },
+        { "name": "clang-debug-samples",     "displayName": "Clang Debug (sample tests)",               "configurePreset": "clang-debug-samples"    },
+        { "name": "clang-release",           "displayName": "Clang Release",                            "configurePreset": "clang-release"          },
+        { "name": "clang-release-none",      "displayName": "Clang Release (no tests)",                 "configurePreset": "clang-release-none"     },
+        { "name": "clang-release-unit",      "displayName": "Clang Release (unit tests)",               "configurePreset": "clang-release-unit"     },
+        { "name": "clang-release-samples",   "displayName": "Clang Release (sample tests)",             "configurePreset": "clang-release-samples"  },
+        { "name": "linux-clang-debug",           "displayName": "Linux Clang Debug",                        "configurePreset": "linux-clang-debug"          },
+        { "name": "linux-clang-debug-none",      "displayName": "Linux Clang Debug (no tests)",             "configurePreset": "linux-clang-debug-none"     },
+        { "name": "linux-clang-debug-unit",      "displayName": "Linux Clang Debug (unit tests)",           "configurePreset": "linux-clang-debug-unit"     },
+        { "name": "linux-clang-debug-samples",   "displayName": "Linux Clang Debug (sample tests)",         "configurePreset": "linux-clang-debug-samples"  },
+        { "name": "linux-clang-release",         "displayName": "Linux Clang Release",                      "configurePreset": "linux-clang-release"        },
+        { "name": "linux-clang-release-none",    "displayName": "Linux Clang Release (no tests)",           "configurePreset": "linux-clang-release-none"   },
+        { "name": "linux-clang-release-unit",    "displayName": "Linux Clang Release (unit tests)",         "configurePreset": "linux-clang-release-unit"   },
+        { "name": "linux-clang-release-samples", "displayName": "Linux Clang Release (sample tests)",       "configurePreset": "linux-clang-release-samples"},
+        { "name": "linux-gcc-debug",             "displayName": "Linux GCC Debug",                          "configurePreset": "linux-gcc-debug"            },
+        { "name": "linux-gcc-debug-none",        "displayName": "Linux GCC Debug (no tests)",               "configurePreset": "linux-gcc-debug-none"       },
+        { "name": "linux-gcc-debug-unit",        "displayName": "Linux GCC Debug (unit tests)",             "configurePreset": "linux-gcc-debug-unit"       },
+        { "name": "linux-gcc-debug-samples",     "displayName": "Linux GCC Debug (sample tests)",           "configurePreset": "linux-gcc-debug-samples"    },
+        { "name": "linux-gcc-release",           "displayName": "Linux GCC Release",                        "configurePreset": "linux-gcc-release"          },
+        { "name": "linux-gcc-release-none",      "displayName": "Linux GCC Release (no tests)",             "configurePreset": "linux-gcc-release-none"     },
+        { "name": "linux-gcc-release-unit",      "displayName": "Linux GCC Release (unit tests)",           "configurePreset": "linux-gcc-release-unit"     },
+        { "name": "linux-gcc-release-samples",   "displayName": "Linux GCC Release (sample tests)",         "configurePreset": "linux-gcc-release-samples"  }
     ],
     "testPresets": [
         {
@@ -252,55 +517,35 @@
                 "stopOnFailure": true
             }
         },
-        {
-            "name": "vs2022-debug",
-            "displayName": "Visual Studio 2022 Debug Tests",
-            "inherits": "test-base",
-            "configurePreset": "vs2022-debug",
-            "configuration": "Debug"
-        },
-        {
-            "name": "vs2022-release",
-            "displayName": "Visual Studio 2022 Release Tests",
-            "inherits": "test-base",
-            "configurePreset": "vs2022-release",
-            "configuration": "Release"
-        },
-        {
-            "name": "clang-debug",
-            "displayName": "Clang Debug Tests",
-            "inherits": "test-base",
-            "configurePreset": "clang-debug"
-        },
-        {
-            "name": "clang-release",
-            "displayName": "Clang Release Tests",
-            "inherits": "test-base",
-            "configurePreset": "clang-release"
-        },
-        {
-            "name": "linux-clang-debug",
-            "displayName": "Linux Clang Debug Tests",
-            "inherits": "test-base",
-            "configurePreset": "linux-clang-debug"
-        },
-        {
-            "name": "linux-clang-release",
-            "displayName": "Linux Clang Release Tests",
-            "inherits": "test-base",
-            "configurePreset": "linux-clang-release"
-        },
-        {
-            "name": "linux-gcc-debug",
-            "displayName": "Linux GCC Debug Tests",
-            "inherits": "test-base",
-            "configurePreset": "linux-gcc-debug"
-        },
-        {
-            "name": "linux-gcc-release",
-            "displayName": "Linux GCC Release Tests",
-            "inherits": "test-base",
-            "configurePreset": "linux-gcc-release"
-        }
+        { "name": "vs2026-debug",           "displayName": "Visual Studio 2026 Debug Tests",                "inherits": "test-base", "configurePreset": "vs2026-debug",           "configuration": "Debug"   },
+        { "name": "vs2026-debug-unit",      "displayName": "Visual Studio 2026 Debug Unit Tests",           "inherits": "test-base", "configurePreset": "vs2026-debug-unit",      "configuration": "Debug"   },
+        { "name": "vs2026-debug-samples",   "displayName": "Visual Studio 2026 Debug Sample Tests",         "inherits": "test-base", "configurePreset": "vs2026-debug-samples",   "configuration": "Debug"   },
+        { "name": "vs2026-release",         "displayName": "Visual Studio 2026 Release Tests",              "inherits": "test-base", "configurePreset": "vs2026-release",         "configuration": "Release" },
+        { "name": "vs2026-release-unit",    "displayName": "Visual Studio 2026 Release Unit Tests",         "inherits": "test-base", "configurePreset": "vs2026-release-unit",    "configuration": "Release" },
+        { "name": "vs2026-release-samples", "displayName": "Visual Studio 2026 Release Sample Tests",       "inherits": "test-base", "configurePreset": "vs2026-release-samples", "configuration": "Release" },
+        { "name": "vs2022-debug",           "displayName": "Visual Studio 2022 Debug Tests",                "inherits": "test-base", "configurePreset": "vs2022-debug",           "configuration": "Debug"   },
+        { "name": "vs2022-debug-unit",      "displayName": "Visual Studio 2022 Debug Unit Tests",           "inherits": "test-base", "configurePreset": "vs2022-debug-unit",      "configuration": "Debug"   },
+        { "name": "vs2022-debug-samples",   "displayName": "Visual Studio 2022 Debug Sample Tests",         "inherits": "test-base", "configurePreset": "vs2022-debug-samples",   "configuration": "Debug"   },
+        { "name": "vs2022-release",         "displayName": "Visual Studio 2022 Release Tests",              "inherits": "test-base", "configurePreset": "vs2022-release",         "configuration": "Release" },
+        { "name": "vs2022-release-unit",    "displayName": "Visual Studio 2022 Release Unit Tests",         "inherits": "test-base", "configurePreset": "vs2022-release-unit",    "configuration": "Release" },
+        { "name": "vs2022-release-samples", "displayName": "Visual Studio 2022 Release Sample Tests",       "inherits": "test-base", "configurePreset": "vs2022-release-samples", "configuration": "Release" },
+        { "name": "clang-debug",            "displayName": "Clang Debug Tests",                             "inherits": "test-base", "configurePreset": "clang-debug"            },
+        { "name": "clang-debug-unit",       "displayName": "Clang Debug Unit Tests",                        "inherits": "test-base", "configurePreset": "clang-debug-unit"       },
+        { "name": "clang-debug-samples",    "displayName": "Clang Debug Sample Tests",                      "inherits": "test-base", "configurePreset": "clang-debug-samples"    },
+        { "name": "clang-release",          "displayName": "Clang Release Tests",                           "inherits": "test-base", "configurePreset": "clang-release"          },
+        { "name": "clang-release-unit",     "displayName": "Clang Release Unit Tests",                      "inherits": "test-base", "configurePreset": "clang-release-unit"     },
+        { "name": "clang-release-samples",  "displayName": "Clang Release Sample Tests",                    "inherits": "test-base", "configurePreset": "clang-release-samples"  },
+        { "name": "linux-clang-debug",           "displayName": "Linux Clang Debug Tests",                  "inherits": "test-base", "configurePreset": "linux-clang-debug"          },
+        { "name": "linux-clang-debug-unit",      "displayName": "Linux Clang Debug Unit Tests",             "inherits": "test-base", "configurePreset": "linux-clang-debug-unit"     },
+        { "name": "linux-clang-debug-samples",   "displayName": "Linux Clang Debug Sample Tests",           "inherits": "test-base", "configurePreset": "linux-clang-debug-samples"  },
+        { "name": "linux-clang-release",         "displayName": "Linux Clang Release Tests",                "inherits": "test-base", "configurePreset": "linux-clang-release"        },
+        { "name": "linux-clang-release-unit",    "displayName": "Linux Clang Release Unit Tests",           "inherits": "test-base", "configurePreset": "linux-clang-release-unit"   },
+        { "name": "linux-clang-release-samples", "displayName": "Linux Clang Release Sample Tests",         "inherits": "test-base", "configurePreset": "linux-clang-release-samples"},
+        { "name": "linux-gcc-debug",             "displayName": "Linux GCC Debug Tests",                    "inherits": "test-base", "configurePreset": "linux-gcc-debug"            },
+        { "name": "linux-gcc-debug-unit",        "displayName": "Linux GCC Debug Unit Tests",               "inherits": "test-base", "configurePreset": "linux-gcc-debug-unit"       },
+        { "name": "linux-gcc-debug-samples",     "displayName": "Linux GCC Debug Sample Tests",             "inherits": "test-base", "configurePreset": "linux-gcc-debug-samples"    },
+        { "name": "linux-gcc-release",           "displayName": "Linux GCC Release Tests",                  "inherits": "test-base", "configurePreset": "linux-gcc-release"          },
+        { "name": "linux-gcc-release-unit",      "displayName": "Linux GCC Release Unit Tests",             "inherits": "test-base", "configurePreset": "linux-gcc-release-unit"     },
+        { "name": "linux-gcc-release-samples",   "displayName": "Linux GCC Release Sample Tests",           "inherits": "test-base", "configurePreset": "linux-gcc-release-samples"  }
     ]
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """Rewrite the standalone-data .hpp files under ``archive/`` so that they
 depend only on the C++ standard library.
 

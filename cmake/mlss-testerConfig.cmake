@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
 # find_package(mlss-tester CONFIG).
 # Same-build: the `mlss-tester` target already exists (add_subdirectory(lib) ran first).
 # Installed layout: load exported targets from install(EXPORT) (not export(TARGETS)).

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# Reject commits that add binary files outside archive/ or shaders_drop/.
+#
+# Enable once per clone (hooks are not installed automatically):
+#   git config core.hooksPath .githooks
+#
+# Bypass intentionally (not recommended) with: git commit --no-verify
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+exec sh "$repo_root/tools/check_binaries.sh" --staged

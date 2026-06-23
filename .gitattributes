@@ -1,7 +1,80 @@
+# Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved.
+
+# Default behaviour for every file. This must come first: .gitattributes is
+# last-match-wins per attribute, so the more specific rules below override it.
+*           text=auto whitespace=trailing-space,space-before-tab,-indent-with-non-tab,tab-in-indent,tabwidth=4
+
+# LFS-backed directories. Keep -text so Git never applies EOL normalization to
+# the binary blobs stored in LFS (overriding the `* text=auto` default above).
 archive/** filter=lfs diff=lfs merge=lfs -text
-archive/gqa filter=lfs diff=lfs merge=lfs -text
-archive/mha filter=lfs diff=lfs merge=lfs -text
+shaders_drop/** filter=lfs diff=lfs merge=lfs -text
 
 # Shell scripts must keep LF line endings so they remain executable under
 # Linux/WSL even when checked out on Windows with core.autocrlf=true.
 *.sh text eol=lf
+
+.git*       text export-ignore
+
+# C / C++
+*.c            text
+*.h            text
+*.cpp          text
+*.cxx          text
+*.hpp          text
+*.hxx          text
+*.tcc          text
+*.tpp          text
+*.txx          text
+*.i            text
+*.ii           text
+
+# GPU / compute source languages
+*.cl           text
+*.cu           text
+*.hip          text
+*.hlsl         text
+
+# Assembly
+*.S            text
+*.s            text
+
+# LaTeX
+*.bib          text
+*.sty          text
+*.tex          text
+
+# Windows batch / PowerShell scripts keep CRLF
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.cmd.tmpl  text eol=crlf
+*.ps1       text eol=crlf
+*.ps1.in    text eol=crlf
+
+# Images (binary)
+*.bmp       binary
+*.exr       binary
+*.ico       binary
+*.jpeg      binary
+*.jpg       binary
+*.png       binary
+
+# archive/ and shaders_drop/ are LFS-backed by default (top of this file) so any
+# arbitrary binaries land in Git LFS. Their text source files must NOT go through
+# LFS: force normal text handling and unspecify the lfs filter/diff/merge so they
+# get real diffs and merges. ('/**/' matches the directory itself and any depth.)
+archive/**/*.hlsl       text !filter !diff !merge
+archive/**/*.cpp        text !filter !diff !merge
+archive/**/*.cxx        text !filter !diff !merge
+archive/**/*.h          text !filter !diff !merge
+archive/**/*.hpp        text !filter !diff !merge
+archive/**/*.hxx        text !filter !diff !merge
+archive/**/*.hip        text !filter !diff !merge
+archive/**/*.cu         text !filter !diff !merge
+archive/**/*.s          text !filter !diff !merge
+archive/**/*.S          text !filter !diff !merge
+shaders_drop/**/*.hlsl  text !filter !diff !merge
+shaders_drop/**/*.cpp   text !filter !diff !merge
+shaders_drop/**/*.hip   text !filter !diff !merge
+shaders_drop/**/*.cu    text !filter !diff !merge
+shaders_drop/**/*.s     text !filter !diff !merge
+shaders_drop/**/*.S     text !filter !diff !merge
