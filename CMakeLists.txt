@@ -26,6 +26,15 @@ set(CMAKE_C_EXTENSIONS OFF)
 # this flag, so Windows builds are unaffected.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Enable Control Flow Guard (CFG) on MSVC. BinSkim's BA2008 requires /guard:cf
+# on both the compiler and linker; /DYNAMICBASE (on by default for MSVC) is also
+# required for the mitigation to take effect. Applied globally so every binary
+# the project produces (amdmlss.dll, tests, samples) carries the mitigation.
+if(MSVC)
+    add_compile_options(/guard:cf)
+    add_link_options(/guard:cf /DYNAMICBASE)
+endif()
+
 # Enable comprehensive Visual Studio project structure
 setup_vs_project_structure()
 
