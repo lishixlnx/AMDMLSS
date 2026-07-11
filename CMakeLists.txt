@@ -27,13 +27,36 @@ set(CMAKE_C_EXTENSIONS OFF)
 # this flag, so Windows builds are unaffected.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Enable Control Flow Guard (CFG) on MSVC. BinSkim's BA2008 requires /guard:cf
-# on both the compiler and linker; /DYNAMICBASE (on by default for MSVC) is also
-# required for the mitigation to take effect. Applied globally so every binary
-# the project produces (amdmlss.dll, tests, samples) carries the mitigation.
-if(MSVC)
-    add_compile_options(/guard:cf)
-    add_link_options(/guard:cf /DYNAMICBASE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    option(USE_BINSKIM_COMPLIANT_COMPILE_FLAGS "Prepare AMDMLSS for BinSkim Binary Analyzer" OFF)
+    option(USE_SPECTRE_MITIGATED_LIBRARIES "Use Spectre-mitigated libraries" OFF)
+    if(MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
+        if(USE_BINSKIM_COMPLIANT_COMPILE_FLAGS)
+            message(STATUS "Control Flow Guard enabled")
+            add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/guard:cf>)
+            add_link_options(/guard:cf /DYNAMICBASE)
+        endif()
+        if(USE_SPECTRE_MITIGATED_LIBRARIES)
+            message(STATUS "Using Spectre-mitigated libraries")
+            add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/Qspectre>)
+        endif()
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        if(USE_BINSKIM_COMPLIANT_COMPILE_FLAGS)
+            message(STATUS "Control Flow Guard enabled (Clang)")
+            add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:SHELL:-Xclang -cfguard>")
+            add_link_options(-Wl,-guard:cf)
+        endif()
+        if(USE_SPECTRE_MITIGATED_LIBRARIES)
+            message(WARNING "Spectre-mitigated libraries are not yet available for Clang in this project.")
+        endif()
+    endif()
+    option(USE_MSVC_STATIC_RUNTIME "Link MSVC runtime library statically instead of dynamically" OFF)
+    if(NOT USE_MSVC_STATIC_RUNTIME)
+        set(MSVC_RUNTIME_SUFFIX "DLL")
+    endif()
+    if(NOT CMAKE_MSVC_RUNTIME_LIBRARY)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
+    endif()
 endif()
 
 # Enable comprehensive Visual Studio project structure
