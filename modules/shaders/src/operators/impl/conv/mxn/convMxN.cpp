@@ -17,6 +17,17 @@ using mlss::op::utils::MetaCmdCaps;
 namespace mlss::conv::mxn
 {
 
+    namespace
+    {
+        // Winograd Fury non-reloc ELFs expose _amdgpu_cs_main, not the offline-linked
+        // "main" entry that MIGraphX and hipModuleLoadData consumers require.
+        // Prefer Winograd Base for fp16 so mlssGetBinaries returns loadable bins.
+        [[nodiscard]] bool preferWinogradBaseForFp16(const GenericConvParams& params)
+        {
+            return params.dataType == DataTypeFlags::FLOAT16;
+        }
+    }
+
     ConvMxN::ConvMxN(const std::vector<Attribute>& attributes, const GfxIpTriple& gfxip)
         : base(attributes, gfxip)
     {
@@ -30,6 +41,9 @@ namespace mlss::conv::mxn
 
     std::expected<Binaries, std::error_code> ConvMxN::getBinaries() const
     {
+        const GenericConvParams params = buildConvParams(m_attributes);
+        const bool preferBase          = preferWinogradBaseForFp16(params);
+
         if (auto* misaEntry = BackendRegistry<ConvMxN>::get<misa::MisaConvMxN>(); misaEntry != nullptr)
         {
             auto result = misaEntry->getBinaries(m_attributes, m_gfxIpTriple);
@@ -50,23 +64,51 @@ namespace mlss::conv::mxn
             }
         }
 
-        if (auto* furyEntry = BackendRegistry<ConvMxN>::get<winograd::fury::WinogradFuryConvMxN>(); furyEntry != nullptr)
+        auto* baseEntry = BackendRegistry<ConvMxN>::get<winograd::base::WinogradBaseConvMxN>();
+        auto* furyEntry = BackendRegistry<ConvMxN>::get<winograd::fury::WinogradFuryConvMxN>();
+
+        if (preferBase)
         {
-            auto result = furyEntry->getBinaries(m_attributes, m_gfxIpTriple);
-            if (result.has_value())
+            if (baseEntry != nullptr)
             {
-                m_implName = furyEntry->name;
-                return result;
+                auto result = baseEntry->getBinaries(m_attributes, m_gfxIpTriple);
+                if (result.has_value())
+                {
+                    m_implName = baseEntry->name;
+                    return result;
+                }
+            }
+
+            if (furyEntry != nullptr)
+            {
+                auto result = furyEntry->getBinaries(m_attributes, m_gfxIpTriple);
+                if (result.has_value())
+                {
+                    m_implName = furyEntry->name;
+                    return result;
+                }
             }
         }
-
-        if (auto* baseEntry = BackendRegistry<ConvMxN>::get<winograd::base::WinogradBaseConvMxN>(); baseEntry != nullptr)
+        else
         {
-            auto result = baseEntry->getBinaries(m_attributes, m_gfxIpTriple);
-            if (result.has_value())
+            if (furyEntry != nullptr)
             {
-                m_implName = baseEntry->name;
-                return result;
+                auto result = furyEntry->getBinaries(m_attributes, m_gfxIpTriple);
+                if (result.has_value())
+                {
+                    m_implName = furyEntry->name;
+                    return result;
+                }
+            }
+
+            if (baseEntry != nullptr)
+            {
+                auto result = baseEntry->getBinaries(m_attributes, m_gfxIpTriple);
+                if (result.has_value())
+                {
+                    m_implName = baseEntry->name;
+                    return result;
+                }
             }
         }
 
@@ -101,17 +143,29 @@ namespace mlss::conv::mxn
             caps.values = rageEntry->getCaps(attributes, gfxip, &params);
         }
 
-        if (caps.values == 0x00000000u)
+        auto* baseEntry = BackendRegistry<ConvMxN>::get<winograd::base::WinogradBaseConvMxN>();
+        auto* furyEntry = BackendRegistry<ConvMxN>::get<winograd::fury::WinogradFuryConvMxN>();
+
+        if (preferWinogradBaseForFp16(params))
         {
-            if (auto* furyEntry = BackendRegistry<ConvMxN>::get<winograd::fury::WinogradFuryConvMxN>(); furyEntry != nullptr)
+            if (caps.values == 0x00000000u && baseEntry != nullptr)
+            {
+                caps.values = baseEntry->getCaps(attributes, gfxip, &params);
+            }
+
+            if (caps.values == 0x00000000u && furyEntry != nullptr)
             {
                 caps.values = furyEntry->getCaps(attributes, gfxip, &params);
             }
         }
-
-        if (caps.values == 0x00000000u)
+        else
         {
-            if (auto* baseEntry = BackendRegistry<ConvMxN>::get<winograd::base::WinogradBaseConvMxN>(); baseEntry != nullptr)
+            if (caps.values == 0x00000000u && furyEntry != nullptr)
+            {
+                caps.values = furyEntry->getCaps(attributes, gfxip, &params);
+            }
+
+            if (caps.values == 0x00000000u && baseEntry != nullptr)
             {
                 caps.values = baseEntry->getCaps(attributes, gfxip, &params);
             }

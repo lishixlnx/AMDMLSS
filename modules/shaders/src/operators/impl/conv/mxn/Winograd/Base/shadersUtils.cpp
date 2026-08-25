@@ -1,4 +1,8 @@
 /* Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved. */
+#include <cctype>
+#include <cstring>
+#include <span>
+
 #include "shadersUtils.hpp"
 #include "shadersConstants.hpp"
 #include "gfx1100/fp16/shadersBinReloc.hpp"
@@ -198,7 +202,7 @@ namespace mlss::conv::mxn::winograd::base
             StrideMode strideMode,
             bool isF3x2)
         {
-            if (isGfx110x(gfxip))
+            if (isGfx110x(gfxip) || isGfx115x(gfxip))
             {
                 if (isFp32)
                 {
@@ -288,13 +292,103 @@ namespace mlss::conv::mxn::winograd::base
         // archive can be loaded on gfx1200, gfx1102 from gfx1100, etc.
         // We deliberately do NOT call getNonRelocatable() here: its second
         // step (comgr LINK_RELOCATABLE_TO_EXECUTABLE) silently fails on
-        // PAL OS/ABI inputs, which every Winograd ELF is. Only the
-        // patchGfxInElf() half of getNonRelocatable() is applicable.
+        // PAL OS/ABI inputs, which every Winograd ELF is. Only the gfx-version
+        // relabel is applicable, which patchGfxForBase() performs below.
         GfxIpTriple sourceArchForTarget(const GfxIpTriple& gfxip)
         {
             if (gfxip.major == 0x0Bu) return {0x0Bu, 0x00u, 0x00u};
             if (gfxip.major == 0x0Cu) return {0x0Cu, 0x00u, 0x01u};
             return IP_GFX_UNKNOWN;
+        }
+
+        constexpr std::size_t kElfEFlagsOffset = 0x30u;
+        constexpr std::uint8_t kElfAmdgpuMachMask = 0xFFu;
+
+        std::expected<std::string, std::error_code> gfxIpToIsaString(const GfxIpTriple& gfxIp)
+        {
+            auto archNameResult = gfxIpTripleToString(gfxIp);
+            if (!archNameResult.has_value())
+            {
+                return std::unexpected(archNameResult.error());
+            }
+
+            std::string_view archName = archNameResult.value();
+            constexpr std::string_view mlssPrefix = "MLSS_";
+            if (archName.starts_with(mlssPrefix))
+            {
+                archName.remove_prefix(mlssPrefix.size());
+            }
+
+            std::string result;
+            result.reserve(archName.size());
+            for (char c : archName)
+            {
+                result.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+            }
+
+            return result;
+        }
+
+        // Relabels a baked Winograd ELF from sourceArch to targetArch without the
+        // strict areGfxIpsCompatible() gate so gfx1100 family archives can load on gfx115x.
+        std::expected<std::vector<std::uint8_t>, std::error_code> patchGfxForBase(
+            std::span<const std::uint8_t> input,
+            const GfxIpTriple& sourceArch,
+            const GfxIpTriple& targetArch)
+        {
+            auto machFromResult = gfxIpTripleToElfMatch(sourceArch);
+            if (!machFromResult.has_value())
+            {
+                return std::unexpected(machFromResult.error());
+            }
+
+            auto machToResult = gfxIpTripleToElfMatch(targetArch);
+            if (!machToResult.has_value())
+            {
+                return std::unexpected(machToResult.error());
+            }
+
+            auto fromIsaResult = gfxIpToIsaString(sourceArch);
+            if (!fromIsaResult.has_value())
+            {
+                return std::unexpected(fromIsaResult.error());
+            }
+
+            auto toIsaResult = gfxIpToIsaString(targetArch);
+            if (!toIsaResult.has_value())
+            {
+                return std::unexpected(toIsaResult.error());
+            }
+
+            const std::string& from = fromIsaResult.value();
+            const std::string& to   = toIsaResult.value();
+
+            if (from.size() != to.size())
+            {
+                return std::unexpected(make_error_code(MLSSErrorCode::ShaderInvalidParameters));
+            }
+
+            const std::uint8_t machFrom = machFromResult.value();
+            const std::uint8_t machTo   = machToResult.value();
+
+            std::vector<std::uint8_t> patched(input.begin(), input.end());
+
+            if (patched.size() > kElfEFlagsOffset &&
+                (patched[kElfEFlagsOffset] & kElfAmdgpuMachMask) == machFrom)
+            {
+                patched[kElfEFlagsOffset] = static_cast<std::uint8_t>(
+                    (patched[kElfEFlagsOffset] & ~kElfAmdgpuMachMask) | machTo);
+            }
+
+            for (std::size_t i = 0; i + from.size() <= patched.size(); ++i)
+            {
+                if (std::memcmp(&patched[i], from.data(), from.size()) == 0)
+                {
+                    std::memcpy(&patched[i], to.data(), to.size());
+                }
+            }
+
+            return patched;
         }
 
         //=============================================================================================================
@@ -319,7 +413,7 @@ namespace mlss::conv::mxn::winograd::base
             ? *static_cast<const GenericConvParams*>(cstmStruct)
             : mlss::conv::utils::buildConvParams(attr);
 
-        bool isArchSupported = isGfx110x(gfxip) || isGfx120x(gfxip);
+        bool isArchSupported = isGfx110x(gfxip) || isGfx115x(gfxip) || isGfx120x(gfxip);
         bool isFp16 = params.dataType == DataTypeFlags::FLOAT16;
         bool isFp32 = params.dataType == DataTypeFlags::FLOAT32;
         bool isPrecisionFp16 = params.precision == PrecisionFlags::FLOAT16;
@@ -452,7 +546,7 @@ namespace mlss::conv::mxn::winograd::base
 
             if (!isSdOverride)
             {
-                const auto& hyperSet = (gfxip == IP_GFX1100) ? HyperSetNavi31
+                const auto& hyperSet = (gfxip == IP_GFX1100 || isGfx115x(gfxip)) ? HyperSetNavi31
                                      : (gfxip == IP_GFX1101) ? HyperSetNavi32
                                      :                         HyperSetNavi33;
 
@@ -511,12 +605,15 @@ namespace mlss::conv::mxn::winograd::base
         Blob nonRelocBlob = std::move(*make_binary_blob(shaderPair.nonReloc));
 
         /* Patch the gfx version on the shipped non-reloc ELF so it matches
-        the runtime target (e.g. gfx1201 archive -> gfx1200 device).
-        patchGfxInElf() is a no-op copy when source == target, so this is
-        always safe. We use setOwnedBinary() so the patched buffer
+        the runtime target (e.g. gfx1100 archive -> gfx1151 device).
+        patchGfxForBase() is a no-op copy when source == target, so this is
+        always safe. Unlike core's patchGfxInElf() it skips the strict
+        areGfxIpsCompatible() gate, allowing the gfx1100 family archive to be
+        relabelled onto gfx115x. We use setOwnedBinary() so the patched buffer
         outlives this function*/
-        const auto sourceArch = sourceArchForTarget(gfxip);
-        auto patchedNonReloc  = patchGfxInElf(shaderPair.nonReloc.m_binary, sourceArch, gfxip);
+        const auto sourceArch  = sourceArchForTarget(gfxip);
+        const auto patchTarget = resolveElfPatchTarget(gfxip);
+        auto patchedNonReloc   = patchGfxForBase(shaderPair.nonReloc.m_binary, sourceArch, patchTarget);
         if (!patchedNonReloc.has_value())
         {
             return std::unexpected(patchedNonReloc.error());

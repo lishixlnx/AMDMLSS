@@ -70,4 +70,11 @@ namespace mlss
     /// @brief Check if the GFX architecture is compatible with the target GFX architecture
     [[nodiscard]] bool areGfxIpsCompatible(const GfxIpTriple& gfxIpHighEnd, const GfxIpTriple& gfxIpTarget);
 
+    /// @brief Resolve the ELF metadata patch target for a context GFX IP.
+    ///
+    /// Winograd archives ship as gfx1100/gfx1201 ELFs. When the context ASIC is
+    /// gfx110x but the runtime GPU is gfx115x, patch to the runtime IP so
+    /// hipModuleLoadData succeeds on Strix Halo-class hardware.
+    [[nodiscard]] GfxIpTriple resolveElfPatchTarget(const GfxIpTriple& contextGfxip);
+
 } // namespace mlss

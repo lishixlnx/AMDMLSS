@@ -18,7 +18,7 @@
                 "rhs": "Windows"
             },
             "environment": {
-                "HIP_PATH": "C:/opt/rocm",
+                "HIP_PATH": "D:/a-2/rocm/ws1/therock",
                 "HIP_PLATFORM": "amd",
                 "HIP_USE_PERL_SCRIPTS": "0"
             },

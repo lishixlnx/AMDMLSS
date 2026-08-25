@@ -86,3 +86,12 @@ if(EXISTS "${_WINOGRAD_FP16_ANALYZE_SOURCE}")
         message(STATUS "samples: skipping winograd_fp16_gfx1100_bin_analyze (hip::host not found)")
     endif()
 endif()
+
+# API routing check: fp16 conv should return Winograd Base non-reloc / main.
+set(_CONVMXN_FP16_ROUTE_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/convmxn_fp16_base_route_verify.cpp")
+if(EXISTS "${_CONVMXN_FP16_ROUTE_SOURCE}")
+    add_project_test(convmxn_fp16_base_route_verify
+        ${_CONVMXN_FP16_ROUTE_SOURCE}
+        DEPENDENCIES c_api
+    )
+endif()

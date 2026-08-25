@@ -314,4 +314,31 @@ namespace mlss
         return (gfxIpHighEnd.major == gfxIpTarget.major) &&
                (gfxIpHighEnd.minor == gfxIpTarget.minor);
     }
+
+    GfxIpTriple resolveElfPatchTarget(const GfxIpTriple& contextGfxip)
+    {
+        if (!isGfx110x(contextGfxip))
+        {
+            return contextGfxip;
+        }
+
+        const auto optimalDevice = getOptimalDeviceFeatures();
+        if (!optimalDevice.has_value())
+        {
+            return contextGfxip;
+        }
+
+        const auto runtimeGfxip = architectureStringToGfxIpTriple(optimalDevice->m_gfx);
+        if (!runtimeGfxip.has_value())
+        {
+            return contextGfxip;
+        }
+
+        if (isGfx115x(*runtimeGfxip))
+        {
+            return *runtimeGfxip;
+        }
+
+        return contextGfxip;
+    }
 } // namespace mlss
